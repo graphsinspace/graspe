@@ -1,4 +1,7 @@
-class Graph:
+from abc import ABC
+
+
+class Graph(ABC):
     """
     A model class for graph.
 
@@ -15,7 +18,7 @@ class Graph:
         """
         self.__graph = {}
 
-    def add_node(self, id, label=''):
+    def add_node(self, id, label=""):
         """
         Adds a new node into the graph.
 
@@ -26,7 +29,7 @@ class Graph:
         label : ?
             The node's label (class).
         """
-    
+
     def add_edge(self, node1, node2, weight=0):
         """
         Adds a new edge into the graph.
@@ -40,7 +43,7 @@ class Graph:
         weight: numeric
             Weight of the edge.
         """
-    
+
     def induce_by_random_nodes(self, p):
         """
         Generates a graph induced by p*|N| randomly selected nodes.
@@ -52,7 +55,7 @@ class Graph:
             The resulting graph's nodes set will have p*|N| randomly selected nodes.
         """
         return Graph()
-    
+
     def induce_by_random_edges(self, p):
         """
         Generates a graph induced by p*|E| randomly selected edges.
@@ -87,3 +90,15 @@ class Graph:
             A graph object.
         """
         return 0
+
+    def nodes(self):
+        """
+        Returns all nodes of a graph, return type depends on the implementation.
+        """
+        pass
+
+    def edges(self):
+        """
+        Returns all nodes of a graph, return type depends on the implementation.
+        """
+        pass

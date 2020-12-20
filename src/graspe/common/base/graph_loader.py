@@ -1,4 +1,7 @@
-from common.graph import Graph
+# TODO: remove this, only use Dataset as one dataset can have many graphs?
+
+from common.base.graph import Graph
+
 
 def load_csv(path):
     """

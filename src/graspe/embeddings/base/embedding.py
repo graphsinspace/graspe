@@ -1,5 +1,8 @@
 from abc import ABC, abstractmethod
 
+from common.base.graph import Graph
+
+
 class Embedding(ABC):
     """
     A model-class for graph embedding.
@@ -19,12 +22,13 @@ class Embedding(ABC):
         d : int
             Dimensionality of the embedding.
         """
-        self._embed(g, d)
+        self.g = g
+        self.d = d
 
     def __getitem__(self, node):
         """
         Returns the embedding of the given node.
-        
+
         Parameters
         ----------
         node : ?
@@ -43,25 +47,21 @@ class Embedding(ABC):
         Parameters
         ----------
         k : int
-            The number of the links in the resulting graph reconstruction. 
+            The number of the links in the resulting graph reconstruction.
 
         Returns
         ----------
         - common.graph.Graph - Graph reconstruction.
         """
         return Graph()
-    
+
     @abstractmethod
-    def _embed(self, g, d, args={}):
+    def embed(self, args={}):
         """
         Embedding algorithm that must be implemented in subclasses.
 
         Parameters
         ----------
-        g : common.graph.Graph
-            The original graph.
-        d : int
-            Dimensionality of the embedding.
         args : dict
             Additional arguments for the specific algorithms.
         """

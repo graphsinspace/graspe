@@ -1,5 +1,6 @@
 from embeddings.embedding import Embedding
 
+
 class EmbeddingExample(Embedding):
     """
     Implementation of a concrete embedding algorithm.
@@ -24,5 +25,5 @@ class EmbeddingExample(Embedding):
             Additional arguments for the specific algorithms.
         """
         super()._embed(g, d, args)
-        
+
         # Perform embedding.

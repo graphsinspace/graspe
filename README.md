@@ -3,7 +3,7 @@ Graphs in Space: Graph Embeddings for Machine Learning on Complex Data
 
 This repository contains code for Graph Embedding evaluation for the GRASP project.
 
-# Structure
+## Structure
 
     graspe
     ├── conda-env.yml       -> conda package manager environment definition
@@ -14,16 +14,20 @@ This repository contains code for Graph Embedding evaluation for the GRASP proje
     ├── README.md           -> project readme
     ├── reports             -> documentation, instructions, manuals, reports, plots, etc.
     ├── requirements.txt    -> pip package manager environment definition
-    └── src                 -> source code files
+    └── src/{graspe,tests}  -> source code files, and test files
 
-# Requirements
+## Requirements
 
-# Installation
+## Installation
 
-# Examples
+## Examples
 
-# Authors
+Running tests
+
+    cd src/graspe && pytest -rP
+
+## Authors
 
 (c) 2020 UNSPMF
 
-# License and Acknowledgements
+## License and Acknowledgements
