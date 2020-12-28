@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from common.base.graph import Graph
+from common.graph import Graph
 
 
 class Embedding(ABC):
@@ -22,8 +22,8 @@ class Embedding(ABC):
         d : int
             Dimensionality of the embedding.
         """
-        self.g = g
-        self.d = d
+        self._g = g
+        self._d = d
 
     def __getitem__(self, node):
         """
@@ -39,6 +39,13 @@ class Embedding(ABC):
         - ? - Embedding of the node.
         """
         return self._embedding[node]
+    
+    @abstractmethod
+    def embed(self):
+        """
+        Embedding algorithm that must be implemented in subclasses.
+        """
+        pass
 
     def reconstruct(self, k):
         """
@@ -55,14 +62,13 @@ class Embedding(ABC):
         """
         return Graph()
 
-    @abstractmethod
-    def embed(self, args={}):
-        """
-        Embedding algorithm that must be implemented in subclasses.
-
-        Parameters
-        ----------
-        args : dict
-            Additional arguments for the specific algorithms.
-        """
-        self._embedding = {}
+    def to_file(self, path):
+        if not self._embedding:
+            raise Exception('method embed has not been called yet')
+        
+        out = ''
+        for node_id in self._embedding:
+            out += str(node_id) + ':' + ','.join([str(x) for x in self._embedding[node_id]]) + '\n'
+        f = open(path, "w")
+        f.write(out)
+        f.close()
