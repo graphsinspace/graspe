@@ -52,7 +52,7 @@ class Graph:
 
     def labels(self):
         """
-        Returns all node labels.
+        Returns set of all node labels.
         """
         l = set()
         for node in self.nodes():
@@ -86,7 +86,7 @@ class Graph:
         weight: numeric
             Weight of the edge.
         """
-        self.__graph.add_edge(node1, node2)
+        self.__graph.add_edge(node1, node2, w=weight)
 
     def induce_by_random_nodes(self, p):
         """

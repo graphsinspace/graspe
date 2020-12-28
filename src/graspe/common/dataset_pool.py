@@ -25,12 +25,15 @@ class DatasetPool:
         DatasetPool.__pool = {}        
         
         # Init from "data" directory.
+        file_dataset_labels = {
+            'cora_ml': 'labels'
+        }
         base_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', '..', '..', 'data')
         for f in os.listdir(base_path):
             path = os.path.join(base_path, f)
             if os.path.isfile(path) and f[0] != '.':
                 name, ext = os.path.splitext(f)
-                DatasetPool.__pool[name] = (load_from_file, path)
+                DatasetPool.__pool[name] = (lambda x : load_from_file(x, file_dataset_labels.get(os.path.splitext(os.path.basename(x))[0])), path)
 
         # Init form networkx
         nx_dataset_labels = {

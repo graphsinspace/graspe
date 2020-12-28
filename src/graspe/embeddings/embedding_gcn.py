@@ -59,7 +59,6 @@ class GCNEmbedding(Embedding):
 
         dgl_g = self._g.to_dgl()
         e = nn.Embedding(num_nodes, self._d)
-        print(e.weight)
         dgl_g.ndata['feat'] = e.weight
         net = GCN(self._d, self._d, len(labels))
 
@@ -82,7 +81,7 @@ class GCNEmbedding(Embedding):
             optimizer.step()
             print('Epoch %d | Loss: %.4f' % (epoch, loss.item()))
         print("completed training")
-        
+
         self._embedding = {}
         for i in range(len(nodes)):
             self._embedding[nodes[i][0]] = [x.item() for x in dgl_g.ndata['feat'][i]]

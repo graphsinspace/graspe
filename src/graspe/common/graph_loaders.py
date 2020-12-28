@@ -1,13 +1,14 @@
+import os
 from common.graph import Graph
 
-def load_from_file(path):
+def load_from_file(path, label):
     name, ext = os.path.splitext(path)
     f = globals().get("load_"+ext[1:])
     if f == None:
         raise Exception('loader for the extension {} is not implemented'.format(ext[1:]))
-    return f(path)
+    return f(path, label)
 
-def load_csv(path):
+def load_csv(path, label):
     """
     Loads a graph from a CSV file.
 
@@ -20,9 +21,10 @@ def load_csv(path):
     ----------
     - common.graph.Graph: A loaded graph.
     """
+    raise Exception('Not implemented')
     return Graph()
 
-def load_npz(path):
+def load_npz(path, label):
     """
     Loads a graph from a npz file.
 
@@ -35,4 +37,5 @@ def load_npz(path):
     ----------
     - common.graph.Graph: A loaded graph.
     """
+    raise Exception('Not implemented')
     return Graph()
