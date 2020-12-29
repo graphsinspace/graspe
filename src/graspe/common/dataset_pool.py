@@ -4,10 +4,23 @@ from common.graph_loaders import load_from_file
 from common.graph import Graph
 
 class DatasetPool:
+    """
+    Class that enables loading of various graph-based datasets.
+    """
     __pool = None
 
     @staticmethod
     def load(name):
+        """
+        Loads the graph-based dataset of the given name.
+
+        Parameters
+        ----------
+        name : string
+            Name of the dataset.
+
+        Returns the loaded graph.
+        """
         DatasetPool.__init_pool()
         if name in DatasetPool.__pool:
             method, parameter = DatasetPool.__pool[name]
@@ -15,11 +28,17 @@ class DatasetPool:
         return None
 
     def get_datasets():
+        """
+        Returns names of the available datasets.
+        """
         DatasetPool.__init_pool()
         return DatasetPool.__pool.keys()
 
     @staticmethod
     def __init_pool():
+        """
+        Initializes dataset pool.
+        """
         if DatasetPool.__pool != None:
             return
         DatasetPool.__pool = {}        

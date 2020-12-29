@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import itertools
+import numpy as np
 
 from common.graph import Graph
 from embeddings.base.embedding import Embedding
@@ -48,8 +49,10 @@ class GCNEmbedding(Embedding):
             The original graph.
         d : int
             Dimensionality of the embedding.
+        epochs : int
+            Number of epochs.
         """
-        super(GCNEmbedding, self).__init__(g, d)
+        super().__init__(g, d)
         self._epochs = epochs
 
     def embed(self):
@@ -84,4 +87,4 @@ class GCNEmbedding(Embedding):
 
         self._embedding = {}
         for i in range(len(nodes)):
-            self._embedding[nodes[i][0]] = [x.item() for x in dgl_g.ndata['feat'][i]]
+            self._embedding[nodes[i][0]] = np.array([x.item() for x in dgl_g.ndata['feat'][i]])

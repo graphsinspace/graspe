@@ -17,7 +17,9 @@ class Graph:
         Parameters
         data: ?
             Data to initialize graph. If None (default) an empty graph is created. 
-            Can be an edge list, NumPy matrix, 2D array, SciPy sparse matrix, GRASPE graph, NetworkX graph, PyGraphviz graph, DGL graph. 
+            Can be an edge list, NumPy matrix, 2D array, SciPy sparse matrix, GRASPE graph, NetworkX graph, PyGraphviz graph, DGL graph.
+        label: string
+            Name of node label.
         ----------
         """
         if (isinstance(data, Graph)):
@@ -50,9 +52,27 @@ class Graph:
         """
         return list(self.__graph.edges)
 
+    def get_label(self, node):
+        """
+        Returns label for the given node
+        
+        Parameters
+        ----------
+        node : int
+            Id of a node.
+
+        If a node with the given id exists, and if that node has a label, the method returns the node's label.
+        Otherwise the method returns None.
+        """
+        if not node in self.__graph:
+            return None
+        if not 'label' in self.__graph[node]:
+            return None
+        return self.__graph[node]['label']
+
     def labels(self):
         """
-        Returns set of all node labels.
+        Returns set of all possible node labels.
         """
         l = set()
         for node in self.nodes():
@@ -66,9 +86,9 @@ class Graph:
 
         Parameters
         ----------
-        id : ?
+        id : int
             The node's identifier.
-        label : ?
+        label : int
             The node's label (class).
         """
         self.__graph.add_node(id, label=label)
@@ -79,9 +99,9 @@ class Graph:
 
         Parameters
         ----------
-        node1 : ?
+        node1 : int
             Identifier of the edge's starting node.
-        node2 : ?
+        node2 : int
             Identifier of the edge's ending node.
         weight: numeric
             Weight of the edge.
@@ -136,7 +156,12 @@ class Graph:
         g : common.graph.Graph
             A graph object.
         """
-        return 0
+        cnt = 0
+        for edge in g.__graph.edges:
+            if self.__graph.has_edge(*edge):
+                cnt += 1
+
+        return cnt / len(g.__graph.edges)
 
     def map(self, g):
         """
@@ -147,12 +172,31 @@ class Graph:
         g : common.graph.Graph
             A graph object.
         """
-        return 0
+        s = 0
+        nodes_cnt = 0
+        for node in g.__graph.nodes:
+            predicted_edges = g.__graph.edges(node)
+            if len(predicted_edges) == 0:
+                continue
+            nodes_cnt += 1
+            real_edges = self.__graph.edges(node)
+            node_s = 0
+            for p_edge in predicted_edges:
+                if p_edge in real_edges:
+                    node_s += 1
+            s += node_s / len(predicted_edges)
+        return s / nodes_cnt
 
     def to_networkx(self):
+        """
+        Returns a networkx representation of the graph.
+        """
         return self.__graph
 
     def to_dgl(self):
+        """
+        Returns a DGL representation of the graph.
+        """
         nodes = self.nodes()
         if len(nodes) == 0:
             return dgl.DGLGraph()

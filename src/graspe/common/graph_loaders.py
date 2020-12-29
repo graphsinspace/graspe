@@ -2,6 +2,20 @@ import os
 from common.graph import Graph
 
 def load_from_file(path, label):
+    """
+    Loads a graph from a file.
+
+    Parameters
+    ----------
+    path : string
+        Path to the file.
+    label: string
+        Name of node label.
+
+    Returns
+    ----------
+    - common.graph.Graph: A loaded graph.
+    """
     name, ext = os.path.splitext(path)
     f = globals().get("load_"+ext[1:])
     if f == None:
@@ -16,6 +30,8 @@ def load_csv(path, label):
     ----------
     path : string
         Path to the CSV file.
+    label: string
+        Name of node label.
 
     Returns
     ----------
@@ -32,6 +48,8 @@ def load_npz(path, label):
     ----------
     path : string
         Path to the npz file.
+    label: string
+        Name of node label.
 
     Returns
     ----------

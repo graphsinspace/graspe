@@ -1,7 +1,7 @@
+import numpy as np
 from abc import ABC, abstractmethod
-
 from common.graph import Graph
-
+import heapq
 
 class Embedding(ABC):
     """
@@ -9,8 +9,13 @@ class Embedding(ABC):
 
     Attributes
     ----------
-    _embedding: ?
-        Graph embedding.
+    _embedding : dict
+        Graph embedding. Keys of the dict are ids of the nodes,
+        while the values are numpy arrays that holds the nodes' embeddings.
+    _g : common.graph.Graph
+        The original graph.
+    _d : int
+        Dimensionality of the embedding.
     """
 
     def __init__(self, g, d):
@@ -24,6 +29,7 @@ class Embedding(ABC):
         """
         self._g = g
         self._d = d
+        self._embedding = None
 
     def __getitem__(self, node):
         """
@@ -31,12 +37,12 @@ class Embedding(ABC):
 
         Parameters
         ----------
-        node : ?
+        node : int
             Identifier of the node.
 
         Returns
         ----------
-        - ? - Embedding of the node.
+        - numpy.array - Embedding of the node.
         """
         return self._embedding[node]
     
@@ -60,9 +66,31 @@ class Embedding(ABC):
         ----------
         - common.graph.Graph - Graph reconstruction.
         """
-        return Graph()
+        nodes = list(self._embedding.keys())
+        dists = []
+        for i in range(len(nodes)):
+            node1 = nodes[i]
+            for j in range(i+1, len(nodes)):
+                node2 = nodes[j]
+                dists.append((np.linalg.norm(self._embedding[node1] - self._embedding[node2]), node1, node2))
+        heapq.heapify(dists)
+
+        g = Graph()
+        for node in nodes:
+            g.add_node(node, self._g.get_label(node))
+        for edge in heapq.nsmallest(k, dists):
+            g.add_edge(edge[1], edge[2])
+        return g
 
     def to_file(self, path):
+        """
+        Outputs the embedding into a file
+
+        Parameters
+        ----------
+        path : string
+            The output path.
+        """
         if not self._embedding:
             raise Exception('method embed has not been called yet')
         

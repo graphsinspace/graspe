@@ -3,7 +3,6 @@ import torch
 
 from common.dataset_pool import DatasetPool
 from common.graph_loaders import load_from_file
-from embeddings.embedding_gcn import GCNEmbedding
 
 def load_graph(g):
     graph = DatasetPool.load(g)
@@ -23,10 +22,15 @@ def embed(args):
     embedding = None
     if args.algorithm == 'gcn':
         e = int(args.epochs)
+        from embeddings.embedding_gcn import GCNEmbedding
         embedding = GCNEmbedding(g, d, e)
+        
     if embedding:
         embedding.embed()
         embedding.to_file(o)
+        reconstruction = embedding.reconstruct(len(g.edges()))
+        print('precission@k: ' + str(g.link_precision(reconstruction)))
+        print('map: ' + str(g.map(reconstruction)))
 
 if __name__ == "__main__":
     # Parsing arguments.
@@ -51,6 +55,17 @@ if __name__ == "__main__":
     # --- Embedding algorithms:
     
     # --- GCN
+    parser_embed_gcn = subparsers_embed.add_parser('gcn', help='GCN embedding')    
+    # --- GCN arguments:
+    # ------ Mutual arguments:
+    parser_embed_gcn.add_argument('-g', '--graph', help='Path to the graph, or name of the dataset from the dataset pool (e.g. '
+                                              'karate_club_graph).', required=True)
+    parser_embed_gcn.add_argument('-d', '--dimensions', help='Dimensions of the embedding.', required=True)
+    parser_embed_gcn.add_argument('-o', '--out', help='Output file.', default='out.embedding')
+    # ------ GCN-specific arguments:
+    parser_embed_gcn.add_argument("-e", "--epochs", help="Number of epochs.", default=50)
+
+    # --- 
     parser_embed_gcn = subparsers_embed.add_parser('gcn', help='GCN embedding')    
     # --- GCN arguments:
     # ------ Mutual arguments:
