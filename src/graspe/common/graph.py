@@ -22,10 +22,10 @@ class Graph:
             Name of node label.
         ----------
         """
-        if (isinstance(data, Graph)):
+        if isinstance(data, Graph):
             self.__graph = nx.DiGraph(data.__graph)
         else:
-            if (isinstance(data, dgl.DGLGraph)):
+            if isinstance(data, dgl.DGLGraph):
                 self.__graph = data.to_networkx()
             else:
                 self.__graph = nx.DiGraph(data)

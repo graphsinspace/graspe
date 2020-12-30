@@ -1,0 +1,147 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module graph</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>graph</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/nmilosev/Projects/graspe/src/graspe/common/graph.py">/home/nmilosev/Projects/graspe/src/graspe/common/graph.py</a></font></td></tr></table>
+    <p></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="dgl.html">dgl</a><br>
+</td><td width="25%" valign=top><a href="networkx.html">networkx</a><br>
+</td><td width="25%" valign=top><a href="random.html">random</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="builtins.html#object">builtins.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="graph.html#Graph">Graph</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Graph">class <strong>Graph</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#Graph">Graph</a>(data=None,&nbsp;label=None)<br>
+&nbsp;<br>
+A&nbsp;model&nbsp;class&nbsp;for&nbsp;graph.<br>
+&nbsp;<br>
+Attributes<br>
+----------<br>
+__graph&nbsp;:&nbsp;dict<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Data&nbsp;structure&nbsp;that&nbsp;stores&nbsp;all&nbsp;the&nbsp;graph's&nbsp;nodes&nbsp;and&nbsp;edges.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Graph-__init__"><strong>__init__</strong></a>(self, data=None, label=None)</dt><dd><tt>Parameters<br>
+data:&nbsp;?<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Data&nbsp;to&nbsp;initialize&nbsp;graph.&nbsp;If&nbsp;None&nbsp;(default)&nbsp;an&nbsp;empty&nbsp;graph&nbsp;is&nbsp;created.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Can&nbsp;be&nbsp;an&nbsp;edge&nbsp;list,&nbsp;NumPy&nbsp;matrix,&nbsp;2D&nbsp;array,&nbsp;SciPy&nbsp;sparse&nbsp;matrix,&nbsp;GRASPE&nbsp;graph,&nbsp;NetworkX&nbsp;graph,&nbsp;PyGraphviz&nbsp;graph,&nbsp;DGL&nbsp;graph.<br>
+label:&nbsp;string<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Name&nbsp;of&nbsp;node&nbsp;label.<br>
+----------</tt></dd></dl>
+
+<dl><dt><a name="Graph-add_edge"><strong>add_edge</strong></a>(self, node1, node2, weight=0)</dt><dd><tt>Adds&nbsp;a&nbsp;new&nbsp;edge&nbsp;into&nbsp;the&nbsp;graph.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+node1&nbsp;:&nbsp;int<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Identifier&nbsp;of&nbsp;the&nbsp;edge's&nbsp;starting&nbsp;node.<br>
+node2&nbsp;:&nbsp;int<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Identifier&nbsp;of&nbsp;the&nbsp;edge's&nbsp;ending&nbsp;node.<br>
+weight:&nbsp;numeric<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Weight&nbsp;of&nbsp;the&nbsp;edge.</tt></dd></dl>
+
+<dl><dt><a name="Graph-add_node"><strong>add_node</strong></a>(self, id, label='')</dt><dd><tt>Adds&nbsp;a&nbsp;new&nbsp;node&nbsp;into&nbsp;the&nbsp;graph.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+id&nbsp;:&nbsp;int<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;node's&nbsp;identifier.<br>
+label&nbsp;:&nbsp;int<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;node's&nbsp;label&nbsp;(class).</tt></dd></dl>
+
+<dl><dt><a name="Graph-edges"><strong>edges</strong></a>(self)</dt><dd><tt>Returns&nbsp;all&nbsp;edges&nbsp;of&nbsp;the&nbsp;graph.</tt></dd></dl>
+
+<dl><dt><a name="Graph-get_label"><strong>get_label</strong></a>(self, node)</dt><dd><tt>Returns&nbsp;label&nbsp;for&nbsp;the&nbsp;given&nbsp;node<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+node&nbsp;:&nbsp;int<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Id&nbsp;of&nbsp;a&nbsp;node.<br>
+&nbsp;<br>
+If&nbsp;a&nbsp;node&nbsp;with&nbsp;the&nbsp;given&nbsp;id&nbsp;exists,&nbsp;and&nbsp;if&nbsp;that&nbsp;node&nbsp;has&nbsp;a&nbsp;label,&nbsp;the&nbsp;method&nbsp;returns&nbsp;the&nbsp;node's&nbsp;label.<br>
+Otherwise&nbsp;the&nbsp;method&nbsp;returns&nbsp;None.</tt></dd></dl>
+
+<dl><dt><a name="Graph-induce_by_random_edges"><strong>induce_by_random_edges</strong></a>(self, p)</dt><dd><tt>Generates&nbsp;a&nbsp;graph&nbsp;induced&nbsp;by&nbsp;p*|E|&nbsp;randomly&nbsp;selected&nbsp;edges.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+p&nbsp;:&nbsp;float<br>
+&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;value&nbsp;in&nbsp;the&nbsp;range&nbsp;(0,1].&nbsp;Determines&nbsp;the&nbsp;size&nbsp;of&nbsp;the&nbsp;resulting&nbsp;graph's&nbsp;edges&nbsp;set.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;resulting&nbsp;graph's&nbsp;edges&nbsp;set&nbsp;will&nbsp;have&nbsp;p*|E|&nbsp;randomly&nbsp;selected&nbsp;edges.<br>
+&nbsp;<br>
+Returns&nbsp;the&nbsp;induced&nbsp;graph.</tt></dd></dl>
+
+<dl><dt><a name="Graph-induce_by_random_nodes"><strong>induce_by_random_nodes</strong></a>(self, p)</dt><dd><tt>Generates&nbsp;a&nbsp;graph&nbsp;induced&nbsp;by&nbsp;p*|N|&nbsp;randomly&nbsp;selected&nbsp;nodes.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+p&nbsp;:&nbsp;float<br>
+&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;value&nbsp;in&nbsp;the&nbsp;range&nbsp;(0,1].&nbsp;Determines&nbsp;the&nbsp;size&nbsp;of&nbsp;the&nbsp;resulting&nbsp;graph's&nbsp;nodes&nbsp;set.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;resulting&nbsp;graph's&nbsp;nodes&nbsp;set&nbsp;will&nbsp;have&nbsp;p*|N|&nbsp;randomly&nbsp;selected&nbsp;nodes.<br>
+&nbsp;<br>
+Returns&nbsp;the&nbsp;induced&nbsp;graph.</tt></dd></dl>
+
+<dl><dt><a name="Graph-labels"><strong>labels</strong></a>(self)</dt><dd><tt>Returns&nbsp;set&nbsp;of&nbsp;all&nbsp;possible&nbsp;node&nbsp;labels.</tt></dd></dl>
+
+<dl><dt><a name="Graph-link_precision"><strong>link_precision</strong></a>(self, g)</dt><dd><tt>The&nbsp;fraction&nbsp;of&nbsp;correct&nbsp;links&nbsp;in&nbsp;g.<br>
+A&nbsp;link&nbsp;in&nbsp;g&nbsp;is&nbsp;considered&nbsp;correct&nbsp;if&nbsp;it&nbsp;is&nbsp;also&nbsp;present&nbsp;within&nbsp;the&nbsp;links&nbsp;of&nbsp;the&nbsp;current&nbsp;graph&nbsp;<a href="builtins.html#object">object</a>&nbsp;(self).<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+g&nbsp;:&nbsp;common.graph.<a href="#Graph">Graph</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;graph&nbsp;<a href="builtins.html#object">object</a>.</tt></dd></dl>
+
+<dl><dt><a name="Graph-map"><strong>map</strong></a>(self, g)</dt><dd><tt>MAP&nbsp;estimates&nbsp;precision&nbsp;for&nbsp;every&nbsp;node&nbsp;and&nbsp;computes&nbsp;the&nbsp;average&nbsp;over&nbsp;all&nbsp;nodes.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+g&nbsp;:&nbsp;common.graph.<a href="#Graph">Graph</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;graph&nbsp;<a href="builtins.html#object">object</a>.</tt></dd></dl>
+
+<dl><dt><a name="Graph-nodes"><strong>nodes</strong></a>(self)</dt><dd><tt>Returns&nbsp;all&nbsp;nodes&nbsp;of&nbsp;the&nbsp;graph.</tt></dd></dl>
+
+<dl><dt><a name="Graph-to_dgl"><strong>to_dgl</strong></a>(self)</dt><dd><tt>Returns&nbsp;a&nbsp;DGL&nbsp;representation&nbsp;of&nbsp;the&nbsp;graph.</tt></dd></dl>
+
+<dl><dt><a name="Graph-to_networkx"><strong>to_networkx</strong></a>(self)</dt><dd><tt>Returns&nbsp;a&nbsp;networkx&nbsp;representation&nbsp;of&nbsp;the&nbsp;graph.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table>
+</body></html>
