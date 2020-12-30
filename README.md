@@ -26,6 +26,11 @@ Running tests
 
     cd src/graspe && pytest -rP
 
+Generate pydoc
+    cd src/graspe
+    pydoc -w `find . -name '*.py'`
+    mv *.html ../../reports/doc
+
 ## Authors
 
 (c) 2020 UNSPMF
