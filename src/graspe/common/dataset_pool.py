@@ -27,6 +27,7 @@ class DatasetPool:
             return method(parameter)
         return None
 
+    @staticmethod
     def get_datasets():
         """
         Returns names of the available datasets.
