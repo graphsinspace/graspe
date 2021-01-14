@@ -28,10 +28,16 @@ class Node2VecEmbedding(Embedding):
         print(nodes)
         print(self._g.edges())
 
-        node2vec = Node2Vec(graph=self._g, p=self._p, q=self._q, dimensions=self._d, walk_length=self._walk_length, num_walks=self._num_walks, workers=self._workers)
+        print(self._g.to_networkx())
+
+        node2vec = Node2Vec(graph=self._g.to_networkx(), p=self._p, q=self._q, dimensions=self._d, walk_length=self._walk_length, num_walks=self._num_walks, workers=self._workers)
         embedding = node2vec.fit()
+        vectors = embedding.wv
+
         self._embedding = {}
-        i = 0
-        for node in embedding:
-            self._embedding[nodes[i][0]] = node
-            i += 1
+        for node in nodes:
+            nid = node[0]
+            strnid = str(nid)
+            emb = vectors[strnid]
+            print(nid, "--", emb)
+            self._embedding[nid] = emb
