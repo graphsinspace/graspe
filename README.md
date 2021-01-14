@@ -32,6 +32,13 @@ Generate pydoc
     pydoc -w `find . -name '*.py'`
     mv *.html ../../reports/doc
 
+Graph Auto Encoders
+
+    python src/graspe embed gae -g karate_club_graph -d 10 
+    python src/graspe embed gae -g karate_club_graph -d 10 --variational # to use VAE 
+
+
+
 ## Authors
 
 (c) 2020 UNSPMF

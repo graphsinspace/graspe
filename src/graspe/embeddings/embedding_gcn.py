@@ -13,6 +13,7 @@ class GCN(nn.Module):
     """
     Example Graph-Convolutional neural network implementation. Single hidden layer.
     """
+
     def __init__(self, in_feats, hidden_size, num_classes):
         super(GCN, self).__init__()
         self.conv1 = GraphConv(in_feats, hidden_size)
@@ -62,19 +63,21 @@ class GCNEmbedding(Embedding):
 
         dgl_g = self._g.to_dgl()
         e = nn.Embedding(num_nodes, self._d)
-        dgl_g.ndata['feat'] = e.weight
+        dgl_g.ndata["feat"] = e.weight
         net = GCN(self._d, self._d, len(labels))
 
         inputs = e.weight
         labeled_nodes = []
         labels = []
         for node in nodes:
-            if 'label' in node[1]:
+            if "label" in node[1]:
                 labeled_nodes.append(node[0])
-                labels.append(node[1]['label'])
+                labels.append(node[1]["label"])
         labels = torch.tensor(labels)
 
-        optimizer = torch.optim.Adam(itertools.chain(net.parameters(), e.parameters()), lr=0.01)
+        optimizer = torch.optim.Adam(
+            itertools.chain(net.parameters(), e.parameters()), lr=0.01
+        )
         for epoch in range(self._epochs):
             logits = net(dgl_g, inputs)
             logp = F.log_softmax(logits, 1)
@@ -82,9 +85,11 @@ class GCNEmbedding(Embedding):
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            print('Epoch %d | Loss: %.4f' % (epoch, loss.item()))
+            print("Epoch %d | Loss: %.4f" % (epoch, loss.item()))
         print("completed training")
 
         self._embedding = {}
         for i in range(len(nodes)):
-            self._embedding[nodes[i][0]] = np.array([x.item() for x in dgl_g.ndata['feat'][i]])
+            self._embedding[nodes[i][0]] = np.array(
+                [x.item() for x in dgl_g.ndata["feat"][i]]
+            )
