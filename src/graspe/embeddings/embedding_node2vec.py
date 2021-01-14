@@ -23,12 +23,7 @@ class Node2VecEmbedding(Embedding):
 
 
     def embed(self):
-        print("usao u embed")
         nodes = self._g.nodes()
-        print(nodes)
-        print(self._g.edges())
-
-        print(self._g.to_networkx())
 
         node2vec = Node2Vec(graph=self._g.to_networkx(), p=self._p, q=self._q, dimensions=self._d, walk_length=self._walk_length, num_walks=self._num_walks, workers=self._workers)
         embedding = node2vec.fit()
@@ -39,5 +34,4 @@ class Node2VecEmbedding(Embedding):
             nid = node[0]
             strnid = str(nid)
             emb = vectors[strnid]
-            print(nid, "--", emb)
             self._embedding[nid] = emb
