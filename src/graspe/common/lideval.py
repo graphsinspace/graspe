@@ -13,56 +13,51 @@ from statistics import mean
 from scipy.stats import kendalltau
 import random
 
-from abc import ABC, abstractmethod  
+from abc import ABC, abstractmethod
+
 
 class LID_Estimator(ABC):
     """
     Base class for node LID estimators
     """
+
     def __init__(self, estimator_name, graph):
         self.estimator_name = estimator_name
         self.graph = graph
         self.nx_graph = graph.to_networkx()
         self.nodes = graph.nodes()
         self.lid_values = dict()
-        
 
     @abstractmethod
     def estimate_lids(self):
         pass
 
-
     def get_lid(self, node_id):
         return self.lid_values[node_id]
 
-    
     def get_avg_lid(self):
         return mean(self.lid_values.values())
 
-    
     def print_lid_values(self):
         print("\nLID estimates by", self.estimator_name)
         for d in self.lid_values:
             print("Node ", d, "LID =", self.lid_values[d])
 
 
-
-
 class LID_MLE_Estimator(LID_Estimator):
     """
     Base class for node LID MLE estimators
     """
+
     def __init__(self, estimator_name, graph, k):
         self.estimator_name = estimator_name
         self.k = k
         super().__init__(estimator_name, graph)
-    
 
     @abstractmethod
     def compute_distance(self, src, dst):
         pass
 
-    
     def estimate_lids(self):
         numn = len(self.nodes)
         for i in range(numn):
@@ -76,10 +71,8 @@ class LID_MLE_Estimator(LID_Estimator):
                     d = self.compute_distance(src, dst)
                     src_dists.append(d)
 
-            
             src_lid = self.estimate_lid(src_dists)
             self.lid_values[src] = src_lid
-
 
     def estimate_lids_bfs(self, stop_at_k=False, max_depth=None):
         numn = len(self.nodes)
@@ -100,7 +93,7 @@ class LID_MLE_Estimator(LID_Estimator):
                 curr = queue.pop(0)
                 dst = curr[0]
                 depth = curr[1]
-        
+
                 if max_depth != None and depth > max_depth:
                     break
 
@@ -118,8 +111,6 @@ class LID_MLE_Estimator(LID_Estimator):
             src_lid = self.estimate_lid(src_dists)
             self.lid_values[src] = src_lid
 
-
-
     def estimate_lid(self, distances):
         heapq.heapify(distances)
         k_smallest = heapq.nsmallest(self.k, distances)
@@ -134,20 +125,17 @@ class LID_MLE_Estimator(LID_Estimator):
         return lid
 
 
-
-
 class EmbLID_MLE_Estimator(LID_MLE_Estimator):
     """
     MLE estimator for node LIDs in the embedded space
     """
+
     def __init__(self, graph, embedding, k):
         self.node_vectors = [embedding[n[0]] for n in graph.nodes()]
         super().__init__("EMB-LID", graph, k)
-        
 
     def compute_distance(self, src, dst):
-        return np.linalg.norm(self.node_vectors[src] - self.node_vectors[dst])   
-    
+        return np.linalg.norm(self.node_vectors[src] - self.node_vectors[dst])
 
 
 def shortest_path_distance(nx_graph, src, dst):
@@ -158,34 +146,30 @@ def shortest_path_distance(nx_graph, src, dst):
         return nx_graph.number_of_nodes()
 
 
-
 class GLID_ShortestPath_MLE_Estimator(LID_MLE_Estimator):
     """
     MLE estimator for node LIDs based on shortest path distance
     """
+
     def __init__(self, graph, k):
         super().__init__("G-SP-LID", graph, k)
 
-
     def compute_distance(self, src, dst):
         return shortest_path_distance(self.nx_graph, src, dst)
-        
 
 
 class GLID_SimRank_MLE_Estimator(LID_MLE_Estimator):
     """
     MLE estimator for node LIDs based on SimRank node similarity
     """
+
     def __init__(self, graph, k):
         self.simrank = nx.simrank_similarity_numpy(graph.to_networkx())
         super().__init__("G-SimRank-LID", graph, k)
 
-
     def compute_distance(self, src, dst):
         sr = self.simrank[src][dst]
-        return 1 if sr == 0 else 1 / sr 
-
-
+        return 1 if sr == 0 else 1 / sr
 
 
 def jaccard_similarity(nx_graph, src, dst):
@@ -207,7 +191,7 @@ def adamic_adar_similarity(nx_graph, src, dst):
     aa = 0
     for c in common:
         aa += 1 / np.log(nx_graph.degree(c))
-    
+
     return aa
 
 
@@ -216,31 +200,28 @@ def adamic_adar_distance(nx_graph, src, dst):
     return 1 / aa if aa > 0 else 1
 
 
-
 class GLID_Jaccard_MLE_Estimator(LID_MLE_Estimator):
     """
     MLE estimator for node LIDs based on Jaccard node similarity
     """
+
     def __init__(self, graph, k):
         super().__init__("G-Jaccard-LID", graph, k)
 
-
     def compute_distance(self, src, dst):
         return jaccard_distance(self.nx_graph, src, dst)
-
-
 
 
 class GLID_AdamicAdar_MLE_Estimator(LID_MLE_Estimator):
     """
     MLE estimator for node LIDs based on Adamic-Adar node similarity
     """
+
     def __init__(self, graph, k):
         super().__init__("G-AdamicAdar-LID", graph, k)
 
     def compute_distance(self, src, dst):
         return adamic_adar_distance(self.nx_graph, src, dst)
-    
 
 
 class DistanceAnalyzer:
@@ -248,23 +229,23 @@ class DistanceAnalyzer:
     DistanceAnalyzer computes both graph-based and embedding-based
     distances and correlates them
     """
+
     def __init__(self, graph, embedding):
         self.graph = graph
         self.embedding = embedding
         self.nx_graph = graph.to_networkx()
         self.node_vectors = [embedding[n[0]] for n in graph.nodes()]
-        #print("Computing simrank matrix")
-        #self.simrank = nx.simrank_similarity_numpy(graph.to_networkx())
-        #self.compute_distances()
-
+        # print("Computing simrank matrix")
+        # self.simrank = nx.simrank_similarity_numpy(graph.to_networkx())
+        # self.compute_distances()
 
     def compute_distances(self):
         print("Computing distances...")
         self.emb_dist = []
         self.sp_dist = []
-        #self.sr_dist = []
-        #self.jaccard_dist = []
-        #self.aa_dist = []
+        # self.sr_dist = []
+        # self.jaccard_dist = []
+        # self.aa_dist = []
 
         nodes = self.graph.nodes()
         num_nodes = len(nodes)
@@ -275,18 +256,19 @@ class DistanceAnalyzer:
             for j in range(num_nodes):
                 dst = nodes[j][0]
                 if src != dst:
-                    self.emb_dist.append(np.linalg.norm(self.node_vectors[src] - self.node_vectors[dst]))
+                    self.emb_dist.append(
+                        np.linalg.norm(self.node_vectors[src] - self.node_vectors[dst])
+                    )
                     self.sp_dist.append(shortest_path_distance(self.nx_graph, src, dst))
-                    #self.sr_dist.append(1 / self.simrank[src][dst]) 
-                    #self.jaccard_dist.append(jaccard_distance(self.nx_graph, src, dst))
-                    #self.aa_dist.append(adamic_adar_distance(self.nx_graph, src, dst))
-
+                    # self.sr_dist.append(1 / self.simrank[src][dst])
+                    # self.jaccard_dist.append(jaccard_distance(self.nx_graph, src, dst))
+                    # self.aa_dist.append(adamic_adar_distance(self.nx_graph, src, dst))
 
     def compute_distances_rnd_sample(self, sample_size, seed=None):
         print("Computing distances...")
         self.emb_dist = []
         self.sp_dist = []
-        
+
         if seed != None:
             random.seed(seed)
 
@@ -302,16 +284,17 @@ class DistanceAnalyzer:
             src = sample1[i][0]
             dst = sample2[i][0]
             if src != dst:
-                self.emb_dist.append(np.linalg.norm(self.node_vectors[src] - self.node_vectors[dst]))
+                self.emb_dist.append(
+                    np.linalg.norm(self.node_vectors[src] - self.node_vectors[dst])
+                )
                 self.sp_dist.append(shortest_path_distance(self.nx_graph, src, dst))
 
-    
     def distance_correlations(self, to_print=True):
         corr = kendalltau(self.emb_dist, self.sp_dist)
         if to_print:
             print("KendallTau(EMB, ShortestPath) = ", corr)
         return corr
-        
+
         """
         corrs = [
             kendalltau(self.emb_dist, self.sp_dist),
@@ -328,19 +311,21 @@ class DistanceAnalyzer:
             print("KendallTau(EMB, AdamicAdar) = ", corrs[3])
 
         return corrs
-        """    
+        """
 
 
 ###
-###  LID estimated using natural communities 
+###  LID estimated using natural communities
 ###
+
 
 class Community(object):
     """
-    Taken from https://github.com/GiulioRossetti/cdlib/blob/master/cdlib/algorithms/internal/lfm.py 
-    G. Rossetti, L. Milli, R. Cazabet. CDlib: a Python Library to Extract, Compare and Evaluate Communities 
+    Taken from https://github.com/GiulioRossetti/cdlib/blob/master/cdlib/algorithms/internal/lfm.py
+    G. Rossetti, L. Milli, R. Cazabet. CDlib: a Python Library to Extract, Compare and Evaluate Communities
         from Complex Networks. Applied Network Science Journal. 2019. DOI:10.1007/s41109-019-0165-9
     """
+
     def __init__(self, G, alpha=1.0):
         self.g = G
         self.alpha = alpha
@@ -408,10 +393,11 @@ class Community(object):
 
 class LFM_nx(object):
     """
-    Modified from https://github.com/GiulioRossetti/cdlib/blob/master/cdlib/algorithms/internal/lfm.py 
-    G. Rossetti, L. Milli, R. Cazabet. CDlib: a Python Library to Extract, Compare and Evaluate Communities 
+    Modified from https://github.com/GiulioRossetti/cdlib/blob/master/cdlib/algorithms/internal/lfm.py
+    G. Rossetti, L. Milli, R. Cazabet. CDlib: a Python Library to Extract, Compare and Evaluate Communities
         from Complex Networks. Applied Network Science Journal. 2019. DOI:10.1007/s41109-019-0165-9
     """
+
     def __init__(self, G, alpha=1.0):
         if G.is_directed():
             self.g = G.to_undirected()
@@ -445,22 +431,20 @@ class LFM_nx(object):
             to_be_examined = c.get_neighbors()
 
         return list(c.nodes)
-        
 
 
 class NLID_Estimator(LID_Estimator):
     """
     Base class for LID estimators based on natural communities
     """
+
     def __init__(self, estimator_name, graph):
         super().__init__(estimator_name, graph)
         self.community_detector = LFM_nx(graph.to_networkx())
-        
 
     @abstractmethod
     def compute_distance(self, src, dst):
         pass
-
 
     def max_community_distance(self, src, src_community):
         maxd = 0
@@ -471,7 +455,6 @@ class NLID_Estimator(LID_Estimator):
 
         return maxd
 
-
     def estimate_lids(self):
         numn = len(self.nodes)
         for i in range(numn):
@@ -481,7 +464,7 @@ class NLID_Estimator(LID_Estimator):
                 self.lid_values[src] = 0
             else:
                 maxd = self.max_community_distance(src, src_community)
-                
+
                 # count how many nodes are from src at maxd distance
                 counter = 0
                 for j in range(numn):
@@ -490,60 +473,55 @@ class NLID_Estimator(LID_Estimator):
                     if d <= maxd:
                         counter += 1
 
-                #print(len(src_community), counter, "max_D = ", maxd)
+                # print(len(src_community), counter, "max_D = ", maxd)
                 self.lid_values[src] = -1.0 * np.log(len(src_community) / counter)
-
 
 
 class NLID_ShortestPath_Estimator(NLID_Estimator):
     """
     NLID estimated using shortest path distance
     """
+
     def __init__(self, graph):
         super().__init__("NLID-SP", graph)
 
-
     def compute_distance(self, src, dst):
         return shortest_path_distance(self.nx_graph, src, dst)
-
 
 
 class NLID_SimRank_Estimator(NLID_Estimator):
     """
     NLID estimated using SimRank
     """
+
     def __init__(self, graph):
         self.simrank = nx.simrank_similarity_numpy(graph.to_networkx())
         super().__init__("NLID-SR", graph)
-
 
     def compute_distance(self, src, dst):
         sr = self.simrank[src][dst]
         return 1 if sr == 0 else 1 / sr
 
 
-
 class NLID_Jaccard_Estimator(NLID_Estimator):
     """
     NLID estimated using Jaccard similarity
     """
+
     def __init__(self, graph):
         super().__init__("NLID-Jaccard", graph)
 
-
     def compute_distance(self, src, dst):
         return jaccard_distance(self.nx_graph, src, dst)
-
 
 
 class NLID_AdamicAdar_Estimator(NLID_Estimator):
     """
     NLID estimated using AdamicAdar similarity
     """
+
     def __init__(self, graph):
         super().__init__("NLID-Jaccard", graph)
 
-
     def compute_distance(self, src, dst):
         return adamic_adar_distance(self.nx_graph, src, dst)
-
