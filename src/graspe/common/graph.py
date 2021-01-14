@@ -2,6 +2,7 @@ import dgl
 import networkx as nx
 import random
 
+
 class Graph:
     """
     A model class for graph.
@@ -16,7 +17,7 @@ class Graph:
         """
         Parameters
         data: ?
-            Data to initialize graph. If None (default) an empty graph is created. 
+            Data to initialize graph. If None (default) an empty graph is created.
             Can be an edge list, NumPy matrix, 2D array, SciPy sparse matrix, GRASPE graph, NetworkX graph, PyGraphviz graph, DGL graph.
         label: string
             Name of node label.
@@ -34,11 +35,11 @@ class Graph:
                 old_labels = nx.get_node_attributes(self.__graph, label)
                 new_labels = {}
                 for node_id in old_labels:
-                    old_label = old_labels[node_id] 
+                    old_label = old_labels[node_id]
                     if not old_label in mapping:
                         mapping[old_label] = len(mapping)
                     new_labels[node_id] = mapping[old_label]
-                nx.set_node_attributes(self.__graph, new_labels, 'label')
+                nx.set_node_attributes(self.__graph, new_labels, "label")
 
     def nodes(self):
         """
@@ -55,7 +56,7 @@ class Graph:
     def get_label(self, node):
         """
         Returns label for the given node
-        
+
         Parameters
         ----------
         node : int
@@ -66,9 +67,9 @@ class Graph:
         """
         if not node in self.__graph:
             return None
-        if not 'label' in self.__graph[node]:
+        if not "label" in self.__graph[node]:
             return None
-        return self.__graph[node]['label']
+        return self.__graph[node]["label"]
 
     def labels(self):
         """
@@ -76,8 +77,8 @@ class Graph:
         """
         l = set()
         for node in self.nodes():
-            if 'label' in node[1]:
-                l.add(node[1]['label'])
+            if "label" in node[1]:
+                l.add(node[1]["label"])
         return l
 
     def add_node(self, id, label=""):
@@ -121,9 +122,13 @@ class Graph:
         Returns the induced graph.
         """
         if p <= 0 or p > 1:
-            raise Exception('p must be a value in the range (0,1]. The value of p was: {}'.format(p))
+            raise Exception(
+                "p must be a value in the range (0,1]. The value of p was: {}".format(p)
+            )
         g = Graph(self)
-        rnd_nodes = random.sample(self.__graph.nodes, k=int(round((1-p)*len(self.__graph.nodes))))
+        rnd_nodes = random.sample(
+            self.__graph.nodes, k=int(round((1 - p) * len(self.__graph.nodes)))
+        )
         g.__graph.remove_nodes_from(rnd_nodes)
         return g
 
@@ -140,9 +145,13 @@ class Graph:
         Returns the induced graph.
         """
         if p <= 0 or p > 1:
-            raise Exception('p must be a value in the range (0,1]. The value of p was: {}'.format(p))
+            raise Exception(
+                "p must be a value in the range (0,1]. The value of p was: {}".format(p)
+            )
         g = Graph(self)
-        rnd_edges = random.sample(self.__graph.edges, k=int(round((1-p)*len(self.__graph.edges))))
+        rnd_edges = random.sample(
+            self.__graph.edges, k=int(round((1 - p) * len(self.__graph.edges)))
+        )
         g.__graph.remove_edges_from(rnd_edges)
         return g
 
@@ -201,6 +210,6 @@ class Graph:
         if len(nodes) == 0:
             return dgl.DGLGraph()
         node_attrs = []
-        if 'label' in nodes[0][1]:
-            node_attrs.append('label')
+        if "label" in nodes[0][1]:
+            node_attrs.append("label")
         return dgl.from_networkx(self.__graph, node_attrs=node_attrs)
