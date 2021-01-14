@@ -51,6 +51,18 @@ class Graph:
         Returns all edges of the graph.
         """
         return list(self.__graph.edges)
+    
+    def edges(self, node):
+        """
+        Returns all edges of a node in the graph.
+        """
+        return list(self.__graph.edges[node])
+
+    def nodes_cnt(self):
+        """
+        Returns number of nodes in the graph.
+        """
+        return len(self.__graph)
 
     def get_label(self, node):
         """
@@ -204,3 +216,15 @@ class Graph:
         if 'label' in nodes[0][1]:
             node_attrs.append('label')
         return dgl.from_networkx(self.__graph, node_attrs=node_attrs)
+
+    def to_adj_matrix(self):
+        """
+        Returns adjacency matrix of the graph.
+        """
+        nodes = self.nodes()
+        mapping = {nodes[i][0]: i for i in range(len(nodes))}
+        node_size = len(nodes)
+        adj = np.zeros((node_size, node_size))
+        for edge in self.__graph.edges():
+            adj[mapping[edge[0]]][mapping[edge[1]]] = edge['w'] if 'w' in edge else 1
+        return mapping, adj
