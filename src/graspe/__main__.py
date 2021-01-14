@@ -25,6 +25,18 @@ def embed(args):
         from embeddings.embedding_gcn import GCNEmbedding
         embedding = GCNEmbedding(g, d, e)
         
+    if args.algorithm == 'deep_walk':
+        e = int(args.epochs)
+        wn = int(args.walk_number)
+        wl = int(args.walk_length)
+        w = int(args.workers)
+        ws = int(args.window_size)
+        lr = float(args.learning_rate)
+        mc = int(args.min_count)
+        s = int(args.seed)
+        from embeddings.embedding_deepwalk import DeepWalkEmbedding
+        embedding = DeepWalkEmbedding(g, d, wn, wl, w, ws, e, lr, mc, s)
+        
     if embedding:
         embedding.embed()
         embedding.to_file(o)
@@ -75,6 +87,22 @@ if __name__ == "__main__":
     parser_embed_gcn.add_argument('-o', '--out', help='Output file.', default='out.embedding')
     # ------ GCN-specific arguments:
     parser_embed_gcn.add_argument("-e", "--epochs", help="Number of epochs.", default=50)
+
+    # --- DeepWalk
+    parser_embed_deep_walk = subparsers_embed.add_parser('deep_walk', help='DeepWalk embedding')
+
+    parser_embed_deep_walk.add_argument('-g', '--graph', help='Path to the graph, or name of the dataset from the dataset pool (e.g. '
+                                              'karate_club_graph).', required=True)
+    parser_embed_deep_walk.add_argument('-d', '--dimensions', help='Dimensions of the embedding.', required=True)
+    parser_embed_deep_walk.add_argument('-o', '--out', help='Output file.', default='out.embedding')
+    parser_embed_deep_walk.add_argument('-e', '--epochs', help='Number of epochs.', default=50)
+    parser_embed_deep_walk.add_argument('-wn', '--walk_number', help='Number of random walks.', default=10)
+    parser_embed_deep_walk.add_argument('-wl', '--walk_length', help='Length of random walks.', default=80)
+    parser_embed_deep_walk.add_argument('-w', '--workers', help='Number of cores.', default=4)
+    parser_embed_deep_walk.add_argument('-ws', '--window_size', help='Matrix power order.', default=5)
+    parser_embed_deep_walk.add_argument('-lr', '--learning_rate', help='HogWild! learning rate.', default=0.05)
+    parser_embed_deep_walk.add_argument('-mc', '--min_count', help='Minimal count of node occurrences.', default=1)
+    parser_embed_deep_walk.add_argument('-s', '--seed', help='Random seed value.', default=42)
     
     # Execute the action.
     args = parser.parse_args()
