@@ -146,9 +146,9 @@ class GAEEmbedding(Embedding):
                 x,
                 train_pos_edge_index,
             )
-            print("Epoch: {:03d}, AUC: {:.4f}, AP: {:.4f}".format(epoch, auc, ap))
+            # print("Epoch: {:03d}, AUC: {:.4f}, AP: {:.4f}".format(epoch, auc, ap))
 
-        print("Final train loss:", loss)
+        print("loss:", loss)
 
         with torch.no_grad():
             self._embedding = {}

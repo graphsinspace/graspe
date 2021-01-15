@@ -26,8 +26,8 @@ def embed(args):
     if args.algorithm == "gcn":
         e = int(args.epochs)
         from embeddings.embedding_gcn import GCNEmbedding
-
         embedding = GCNEmbedding(g, d, e)
+    
     elif args.algorithm == 'sdne':
         layers = args.layers
         alpha = args.alpha
@@ -43,7 +43,7 @@ def embed(args):
         from embeddings.embedding_sdne import SDNEEmbedding
         embedding = SDNEEmbedding(g, d, layers, alpha, beta, nu1, nu2, bs, epochs, verbose)
         
-    if args.algorithm == 'deep_walk':
+    elif args.algorithm == 'deep_walk':
         e = int(args.epochs)
         wn = int(args.walk_number)
         wl = int(args.walk_length)
@@ -56,12 +56,11 @@ def embed(args):
         embedding = DeepWalkEmbedding(g, d, wn, wl, w, ws, e, lr, mc, s)
         
 
-    if args.algorithm == "gae":
+    elif args.algorithm == "gae":
         e = int(args.epochs)
         variational = bool(args.variational)
         linear = bool(args.linear)
         from embeddings.embedding_gae import GAEEmbedding
-
         embedding = GAEEmbedding(g, d, e, variational, linear)
 
         
@@ -120,13 +119,6 @@ if __name__ == "__main__":
         "-e", "--epochs", help="Number of epochs.", default=50
     )
     
-    parser_embed_gcn.add_argument('-g', '--graph', help='Path to the graph, or name of the dataset from the dataset pool (e.g. '
-                                              'karate_club_graph).', required=True)
-    parser_embed_gcn.add_argument('-d', '--dimensions', help='Dimensions of the embedding.', required=True)
-    parser_embed_gcn.add_argument('-o', '--out', help='Output file.', default='out.embedding')
-    # ------ GCN-specific arguments:
-    parser_embed_gcn.add_argument("-e", "--epochs", help="Number of epochs.", default=50)
-    
     # --- SDNE
     parser_embed_sdne = subparsers_embed.add_parser('sdne', help='SDNE embedding')    
     # --- SDNE arguments:
@@ -145,7 +137,7 @@ if __name__ == "__main__":
     parser_embed_sdne.add_argument("-e", "--epochs", type=int, help="Number of epochs.", default=50)
     parser_embed_sdne.add_argument("-v", "--verbose", type=int, help="Verbose.", default=0)
 
-    # ---
+    # --- GAE
     parser_embed_gae = subparsers_embed.add_parser("gae", help="GAE embedding")
     # --- GAE arguments:
     # ------ Mutual arguments:
@@ -183,12 +175,12 @@ if __name__ == "__main__":
     parser_embed_deep_walk.add_argument('-d', '--dimensions', help='Dimensions of the embedding.', required=True)
     parser_embed_deep_walk.add_argument('-o', '--out', help='Output file.', default='out.embedding')
     parser_embed_deep_walk.add_argument('-e', '--epochs', help='Number of epochs.', default=50)
-    parser_embed_deep_walk.add_argument('-wn', '--walk_number', help='Number of random walks.', default=10)
-    parser_embed_deep_walk.add_argument('-wl', '--walk_length', help='Length of random walks.', default=80)
-    parser_embed_deep_walk.add_argument('-w', '--workers', help='Number of cores.', default=4)
-    parser_embed_deep_walk.add_argument('-ws', '--window_size', help='Matrix power order.', default=5)
-    parser_embed_deep_walk.add_argument('-lr', '--learning_rate', help='HogWild! learning rate.', default=0.05)
-    parser_embed_deep_walk.add_argument('-mc', '--min_count', help='Minimal count of node occurrences.', default=1)
+    parser_embed_deep_walk.add_argument('--walk_number', help='Number of random walks.', default=10)
+    parser_embed_deep_walk.add_argument('--walk_length', help='Length of random walks.', default=80)
+    parser_embed_deep_walk.add_argument('--workers', help='Number of cores.', default=4)
+    parser_embed_deep_walk.add_argument('--window_size', help='Matrix power order.', default=5)
+    parser_embed_deep_walk.add_argument('-l', '--learning_rate', help='HogWild! learning rate.', default=0.05)
+    parser_embed_deep_walk.add_argument('--min_count', help='Minimal count of node occurrences.', default=1)
     parser_embed_deep_walk.add_argument('-s', '--seed', help='Random seed value.', default=42)
     
 
