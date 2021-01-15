@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from common.graph import Graph
 import heapq
 
+
 class Embedding(ABC):
     """
     A model-class for graph embedding.
@@ -45,7 +46,7 @@ class Embedding(ABC):
         - numpy.array - Embedding of the node.
         """
         return self._embedding[node]
-    
+
     @abstractmethod
     def embed(self):
         """
@@ -70,9 +71,15 @@ class Embedding(ABC):
         dists = []
         for i in range(len(nodes)):
             node1 = nodes[i]
-            for j in range(i+1, len(nodes)):
+            for j in range(i + 1, len(nodes)):
                 node2 = nodes[j]
-                dists.append((np.linalg.norm(self._embedding[node1] - self._embedding[node2]), node1, node2))
+                dists.append(
+                    (
+                        np.linalg.norm(self._embedding[node1] - self._embedding[node2]),
+                        node1,
+                        node2,
+                    )
+                )
         heapq.heapify(dists)
 
         g = Graph()
@@ -92,11 +99,16 @@ class Embedding(ABC):
             The output path.
         """
         if not self._embedding:
-            raise Exception('method embed has not been called yet')
-        
-        out = ''
+            raise Exception("method embed has not been called yet")
+
+        out = ""
         for node_id in self._embedding:
-            out += str(node_id) + ':' + ','.join([str(x) for x in self._embedding[node_id]]) + '\n'
+            out += (
+                str(node_id)
+                + ":"
+                + ",".join([str(x) for x in self._embedding[node_id]])
+                + "\n"
+            )
         f = open(path, "w")
         f.write(out)
         f.close()
