@@ -46,7 +46,13 @@ class DatasetPool:
         
         # Init from "data" directory.
         file_dataset_labels = {
-            'cora_ml': 'labels'
+            'amazon_electronics_computers': 'labels',
+            'amazon_electronics_photo': 'labels',
+            'citeseer': 'labels',
+            'cora_ml': 'labels',
+            'cora': 'labels',
+            'dblp': 'labels',
+            'pubmed': 'labels'
         }
         base_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', '..', '..', 'data')
         for f in os.listdir(base_path):

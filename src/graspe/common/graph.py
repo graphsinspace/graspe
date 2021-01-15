@@ -1,5 +1,6 @@
 import dgl
 import networkx as nx
+import numpy as np
 import random
 
 class Graph:
@@ -215,10 +216,4 @@ class Graph:
         """
         Returns adjacency matrix of the graph.
         """
-        nodes = self.nodes()
-        mapping = {nodes[i][0]: i for i in range(len(nodes))}
-        node_size = len(nodes)
-        adj = np.zeros((node_size, node_size))
-        for edge in self.__graph.edges():
-            adj[mapping[edge[0]]][mapping[edge[1]]] = edge['w'] if 'w' in edge else 1
-        return mapping, adj
+        return nx.to_scipy_sparse_matrix(self.__graph, weight="w")

@@ -82,8 +82,8 @@ class GCNEmbedding(Embedding):
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            print('Epoch %d | Loss: %.4f' % (epoch, loss.item()))
-        print("completed training")
+            # print('Epoch %d | Loss: %.4f' % (epoch, loss.item()))
+        print("loss: %.4f" % loss.item())
 
         self._embedding = {}
         for i in range(len(nodes)):
