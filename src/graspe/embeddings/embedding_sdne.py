@@ -112,7 +112,6 @@ class SDNEEmbedding(Embedding):
         """
         super().__init__(g, d)
         # self.g.remove_edges_from(self.g.selfloop_edges())
-        tf.compat.v1.disable_eager_execution()
         self.graph = g.to_networkx()
         self.idx2node, self.node2idx = preprocess_nxgraph(self.graph)
 
@@ -133,19 +132,12 @@ class SDNEEmbedding(Embedding):
         self.inputs = [self.A, self.L]
 
     def embed(self):
-        tf.compat.v1.disable_eager_execution()
         self.model, self.emb_model = create_model(
             self.node_size, hidden_size=self.hidden_size, l1=self.nu1, l2=self.nu2
         )
         self.model.compile("adam", [l_2nd(self.beta), l_1st(self.alpha)])
-        self._embeddings = {}
         if self.batch_size >= self.node_size:
             if self.batch_size > self.node_size:
-                print(
-                    "batch_size({0}) > node_size({1}),set batch_size = {1}".format(
-                        self.batch_size, self.node_size
-                    )
-                )
                 self.batch_size = self.node_size
             self.model.fit(
                 [self.A.todense(), self.L.todense()],
@@ -157,11 +149,7 @@ class SDNEEmbedding(Embedding):
             )
         else:
             steps_per_epoch = (self.node_size - 1) // self.batch_size + 1
-            hist = History()
-            hist.on_train_begin()
-            logs = {}
             for epoch in range(initial_epoch, self.epochs):
-                start_time = time.time()
                 losses = np.zeros(3)
                 for i in range(steps_per_epoch):
                     index = np.arange(
@@ -175,20 +163,16 @@ class SDNEEmbedding(Embedding):
                     losses += batch_losses
                 losses = losses / steps_per_epoch
 
-                logs["loss"] = losses[0]
-                logs["2nd_loss"] = losses[1]
-                logs["1st_loss"] = losses[2]
-                epoch_time = int(time.time() - start_time)
-                hist.on_epoch_end(epoch, logs)
                 if self.verbose > 0:
                     print("Epoch {0}/{1}".format(epoch + 1, self.epochs))
                     print(
-                        "{0}s - loss: {1: .4f} - 2nd_loss: {2: .4f} - 1st_loss: {3: .4f}".format(
-                            epoch_time, losses[0], losses[1], losses[2]
+                        "loss: {1: .4f} - 2nd_loss: {2: .4f} - 1st_loss: {3: .4f}".format(
+                            losses[0], losses[1], losses[2]
                         )
                     )
         self._embedding = {}
         embeddings = self.emb_model.predict(self.A.todense(), batch_size=self.node_size)
+        print(embeddings)
         look_back = self.idx2node
         for i, embedding in enumerate(embeddings):
             self._embedding[look_back[i]] = embedding
@@ -208,9 +192,9 @@ class SDNEEmbedding(Embedding):
 
         for edge in graph.edges():
             v1, v2 = edge
-            edge_weight = graph[v1][v2].get("weight", 1)
+            edge_weight = graph[v1][v2].get("w", 1)
 
-            A_data.append(edge_weight)
+            A_data.append(float(edge_weight))
             A_row_index.append(node2idx[v1])
             A_col_index.append(node2idx[v2])
 
