@@ -52,7 +52,7 @@ class Graph:
         """
         Returns edges of the graph.
         """
-        return list(self.__graph.edges if node==None else self.__graph.edges[node])
+        return list(self.__graph.edges if node == None else self.__graph.edges[node])
 
     def nodes_cnt(self):
         """
@@ -217,8 +217,8 @@ class Graph:
         if len(nodes) == 0:
             return dgl.DGLGraph()
         node_attrs = []
-        if 'label' in nodes[0][1]:
-            node_attrs.append('label')
+        if "label" in nodes[0][1]:
+            node_attrs.append("label")
         return dgl.from_networkx(self.__graph, node_attrs=node_attrs)
 
     def to_adj_matrix(self):
