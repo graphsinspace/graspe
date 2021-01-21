@@ -68,6 +68,17 @@ def embed(args):
 
         embedding = GAEEmbedding(g, d, e, variational, linear)
 
+    elif args.algorithm == "node2vec":
+        p = float(args.p)
+        q = float(args.q)
+        walk_length = int(args.walk_length)
+        num_walks = int(args.num_walks)
+        workers = int(args.workers)
+        from embeddings.embedding_node2vec import Node2VecEmbedding
+
+
+        embedding = Node2VecEmbedding(g, d, p, q, walk_length, num_walks, workers)
+
     if embedding:
         embedding.embed()
         embedding.to_file(o)
@@ -242,6 +253,40 @@ if __name__ == "__main__":
     parser_embed_deep_walk.add_argument(
         "-s", "--seed", help="Random seed value.", default=42
     )
+
+    #-------- Node2Vec
+    parser_embed_node2vec = subparsers_embed.add_parser(
+        "node2vec", help="Node2Vec embedding"
+    )
+    parser_embed_node2vec.add_argument(
+        "-g",
+        "--graph",
+        help="Path to the graph, or name of the dataset from the dataset pool (e.g. "
+        "karate_club_graph).",
+        required=True,
+    )
+    parser_embed_node2vec.add_argument(
+        "-p", "--p", help="Return hyper parameter.", required=True
+    )
+    parser_embed_node2vec.add_argument(
+        "-q", "--q", help="Inout hyper parameter.", required=True
+    )
+    parser_embed_node2vec.add_argument(
+        "-d", "--dimensions", help="Dimensions of the embedding.", required=True
+    )
+    parser_embed_node2vec.add_argument(
+        "-o", "--out", help="Output file.", default="out.embedding"
+    )
+    parser_embed_node2vec.add_argument(
+        "-walk_length", "--walk_length", help="Length of random walks.", default=10
+    )
+    parser_embed_node2vec.add_argument(
+        "-num_walks", "--num_walks", help="Number of random walks.", default=200
+    )
+    parser_embed_node2vec.add_argument(
+        "-workers", "--workers", help="Number of workers for parallel execution.", default=1
+    )
+    
 
     # Execute the action.
     args = parser.parse_args()
