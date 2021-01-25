@@ -75,6 +75,19 @@ def embed(args):
         print("precission@k: " + str(g.link_precision(reconstruction)))
         print("map: " + str(g.map(reconstruction)))
 
+def classify(args):
+    classes = None
+    if args.classify == "kNN":
+        from classifications.kNearestNeighbors import KNN
+
+        graph = DatasetPool.load(args.graph)
+
+        classes = KNN(graph, args.embedding, int(args.k_neighbors))
+
+
+    if classes:
+        classes.classify()    
+
 
 if __name__ == "__main__":
     # Parsing arguments.
@@ -242,6 +255,36 @@ if __name__ == "__main__":
     parser_embed_deep_walk.add_argument(
         "-s", "--seed", help="Random seed value.", default=42
     )
+
+    # Action: classify.
+    parser_classify = subparsers.add_parser("classify", help="Do classification")
+    subparsers_classify = parser_classify.add_subparsers(
+        title="classify",
+        dest="classify",
+        required=True,
+    )
+
+    parser_classify_knn = subparsers_classify.add_parser("kNN", help="k Nearest Neighbors classification.")
+    parser_classify_knn.add_argument(
+        "-g",
+        "--graph",
+        help="Path to the graph, or name of the dataset from the dataset pool (e.g. "
+        "karate_club_graph).",
+        required=True,
+    )
+    parser_classify_knn.add_argument(
+        "-e",
+        "--embedding",
+        help="Path to the embedding file.",
+        required=True
+    )
+    parser_classify_knn.add_argument(
+        "-k",
+        "--k_neighbors",
+        help= "Number of neighbors to use by default for kneighbors queries.",
+        required=True
+    )
+
 
     # Execute the action.
     args = parser.parse_args()
