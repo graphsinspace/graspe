@@ -1,22 +1,19 @@
-from sklearn.neighbors import KNeighborsClassifier
+from sklearn import tree
 
 from sklearn.model_selection import train_test_split
-
 from sklearn.metrics import accuracy_score, precision_score, recall_score
 
 import numpy as np
 
 
-class KNN():
+class DecisionTree():
     def __init__(
         self,
         g,
-        embedding,
-        k_neighbors
+        embedding
     ):
         self._g = g
         self._embedding = embedding
-        self._k_neighbors = k_neighbors
 
 
     def classify(self):
@@ -32,19 +29,19 @@ class KNN():
         for line in lines:
             line = line.split(":")[1]
             line = line.split(",")
-            #line = line.astype(np.float64)
+            
+            line = np.array(line, dtype='float64')
             node_vectors.append(line)
 
 
-        train_data, test_data, train_labels, test_labels = train_test_split(node_vectors, labels, test_size=.2)
+        train_data, test_data, train_labels, test_labels = train_test_split(node_vectors, labels, test_size=.33)
 
-        knn = KNeighborsClassifier(self._k_neighbors)
+        clf = tree.DecisionTreeClassifier()
+        clf.fit(train_data, train_labels)
 
-        knn.fit(train_data, train_labels)
-
-        predicted_labels = knn.predict(test_data)
+        predicted_labels = clf.predict(test_data)
 
         acc = accuracy_score(test_labels, predicted_labels)
         print("Accuracy", acc)
         print("Precisions: ", precision_score(test_labels, predicted_labels, average=None))
-        print("Recalls: ", recall_score(test_labels, predicted_labels, average=None))
+        print("Recalls: ", recall_score(test_labels, predicted_labels, average=None))   
