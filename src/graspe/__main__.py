@@ -110,7 +110,14 @@ def classify(args):
 
         graph = DatasetPool.load(args.graph)
 
-        classes = DecisionTree(graph, args.embedding)        
+        classes = DecisionTree(graph, args.embedding)
+
+    elif args.classify == "nn":
+        from classifications.neural_network import NeuralNetworkClassification
+
+        graph = DatasetPool.load(args.graph)
+
+        classes = NeuralNetworkClassification(graph, args.embedding, int(args.epochs))        
 
     if classes:
         classes.classify()    
@@ -381,6 +388,25 @@ if __name__ == "__main__":
         "--embedding",
         help="Path to the embedding file.",
         required=True
+    )
+
+    # NeuralNetwork - Not Working!
+    parser_classify_nn = subparsers_classify.add_parser("nn", help="Neural Network classification.")
+    parser_classify_nn.add_argument(
+        "-g",
+        "--graph",
+        help="Path to the graph, or name of the dataset from the dataset pool (e.g. "
+        "karate_club_graph).",
+        required=True,
+    )
+    parser_classify_nn.add_argument(
+        "-em",
+        "--embedding",
+        help="Path to the embedding file.",
+        required=True
+    )
+    parser_classify_nn.add_argument(
+        "-ep", "--epochs", help="Number of epochs.", required=True
     )
 
     # Execute the action.
