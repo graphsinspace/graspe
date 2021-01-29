@@ -48,6 +48,8 @@ class UnsupervisedLinkPrediction():
 
         #TODO: prepraviti u pravi heap
         #self._distssorted = sorted(dists, key=lambda p: p[1])
+        self._precisionATh = self.get_precisionATk(self._h)
+        self._mapATh = self.get_map(self._h)
         
 
 
@@ -87,3 +89,9 @@ class UnsupervisedLinkPrediction():
 
         return sum/float(self._graph.nodes_cnt())
         
+
+    def get_mapATh(self):
+        return self._mapATh
+
+    def get_precisionATh(self):
+        return self._precisionATh
