@@ -12,24 +12,26 @@ import numpy as np
 
 
 class Net(nn.Module):
-    def __init__(self):
-        super(Net, self).__init__()
-        self.conv1 = nn.Conv2d(3, 6, 5)
-        self.pool = nn.MaxPool2d(2, 2)
-        self.conv2 = nn.Conv2d(6, 16, 5)
-        self.fc1 = nn.Linear(16 * 5 * 5, 120)
-        self.fc2 = nn.Linear(120, 84)
-        self.fc3 = nn.Linear(84, 10)
+    def __init__(self, attributes_cnt, labels_cnt, layers=[200,100,50], p=0.5):
+        super().__init__()
+        self.batch_norm = nn.BatchNorm1d(attributes_cnt)
+        input_size = attributes_cnt
+        all_layers = []
+        for i in layers:
+            all_layers.append(nn.Linear(input_size, i))
+            all_layers.append(nn.ReLU(inplace=True))
+            all_layers.append(nn.BatchNorm1d(i))
+            all_layers.append(nn.Dropout(p))
+            input_size = i
 
-    def forward(self, x):
-        x = self.pool(F.relu(self.conv1(x)))
-        x = self.pool(F.relu(self.conv2(x)))
-        x = x.view(-1, 16 * 5 * 5)
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = self.fc3(x)
+        all_layers.append(nn.Linear(input_size, labels_cnt))
+
+        self.layers = nn.Sequential(*all_layers)
+
+    def forward(self, x):  
+        x = self.batch_norm(x)
+        x = self.layers(x)
         return x
-
 
 class NeuralNetworkClassification():
     def __init__(
@@ -65,44 +67,41 @@ class NeuralNetworkClassification():
 
         train_data = torch.FloatTensor(train_data)
         test_data = torch.FloatTensor(test_data)
-        train_labels = torch.FloatTensor(train_labels)
-        test_labels = torch.FloatTensor(test_labels)
+        train_labels = torch.tensor(train_labels, dtype=torch.int64)
+        test_labels = torch.tensor(test_labels, dtype=torch.int64)
 
-        net = Net()
+        # attributes_cnt, labels_cnt, layers
+        labels_cnt = len(set(labels))
+        atts_cnt = train_data.shape[1]
 
-        criterion = nn.CrossEntropyLoss()
-        optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
+        net = Net(atts_cnt, labels_cnt)
+
+        loss_function = nn.CrossEntropyLoss()
+        optimizer = torch.optim.Adam(net.parameters(), lr=0.001)
 
 
-        for _ in range(self._epochs):
-
-            running_loss = 0.0
+        for i in range(self._epochs):
+            train_pred = net(train_data)
+            single_loss = loss_function(train_pred, train_labels)
 
             optimizer.zero_grad()
-
-            outputs = net(train_data)
-            loss = criterion(outputs, train_labels)
-            loss.backward()
+            single_loss.backward()
             optimizer.step()
 
-            running_loss += loss.item()
-
+            print(f'epoch: {i:3} loss: {single_loss.item():10.10f}')
 
         print('Finished Training')
 
         correct = 0
         total = 0
+        pred_labels = []
         with torch.no_grad():
-            for t_d, t_l in test_data, test_labels:
-                images, labels = t_d, t_l
-                outputs = net(images)
-                _, predicted = torch.max(outputs.data, 1)
-                total += labels.size(0)
-                correct += (predicted == labels).sum().item()
+            predicted = np.argmax(net(test_data), axis=1)
 
-
+        correct = (predicted == test_labels).sum().item()
+        total = len(predicted)
         acc = correct / total
 
         print("Accuracy", acc)
-        print("Precisions: ", precision_score(test_labels, correct, average=None))
-        print("Recalls: ", recall_score(test_labels, correct, average=None))
+        print("Precisions: ", precision_score(test_labels, predicted, average=None))
+        print("Recalls: ", recall_score(test_labels, predicted, average=None))
