@@ -35,7 +35,6 @@ def embed(args):
         beta = args.beta
         nu1 = args.nu1
         nu2 = args.nu2
-        bs = args.bs
         epochs = args.epochs
         verbose = args.verbose
         if len(layers) == 0:
@@ -44,7 +43,7 @@ def embed(args):
         from embeddings.embedding_sdne import SDNEEmbedding
 
         embedding = SDNEEmbedding(
-            g, d, layers, alpha, beta, nu1, nu2, bs, epochs, verbose
+            g, d, layers, alpha, beta, nu1, nu2, epochs, verbose
         )
 
     elif args.algorithm == "deep_walk":
@@ -214,7 +213,6 @@ if __name__ == "__main__":
     parser_embed_sdne.add_argument(
         "--nu2", type=float, help="nu2 parameter.", default=1e-6
     )
-    parser_embed_sdne.add_argument("--bs", type=int, help="Batch size.", default=500)
     parser_embed_sdne.add_argument(
         "-e", "--epochs", type=int, help="Number of epochs.", default=50
     )
