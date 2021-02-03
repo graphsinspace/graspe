@@ -368,6 +368,13 @@ if __name__ == "__main__":
     # RandomForest
     parser_classify_rf = subparsers_classify.add_parser("rf", help="Random Forest classification.")
     parser_classify_rf.add_argument(
+        "-g",
+        "--graph",
+        help="Path to the graph, or name of the dataset from the dataset pool (e.g. "
+        "karate_club_graph).",
+        required=True,
+    )
+    parser_classify_rf.add_argument(
         "-e",
         "--embedding",
         help="Path to the embedding file.",
@@ -428,7 +435,7 @@ if __name__ == "__main__":
         required=True
     )
 
-    # NeuralNetwork - Not Working!
+    # NeuralNetwork
     parser_classify_nn = subparsers_classify.add_parser("nn", help="Neural Network classification.")
     parser_classify_nn.add_argument(
         "-g",
