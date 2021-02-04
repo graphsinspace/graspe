@@ -135,7 +135,7 @@ class SDNEEmbedding(Embedding):
         self.model, self.emb_model = create_model(
             self.node_size, hidden_size=self.hidden_size, l1=self.nu1, l2=self.nu2
         )
-        self.model.compile("adam", [l_2nd(self.beta), l_1st(self.alpha)])
+        self.model.compile("relu", [l_2nd(self.beta), l_1st(self.alpha)])
         if self.batch_size >= self.node_size:
             if self.batch_size > self.node_size:
                 self.batch_size = self.node_size
@@ -172,7 +172,6 @@ class SDNEEmbedding(Embedding):
                     )
         self._embedding = {}
         embeddings = self.emb_model.predict(self.A.todense(), batch_size=self.node_size)
-        print(embeddings)
         look_back = self.idx2node
         for i, embedding in enumerate(embeddings):
             self._embedding[look_back[i]] = embedding

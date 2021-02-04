@@ -5,7 +5,37 @@ from embeddings.embedding_node2vec import Node2VecEmbedding
 import numpy as np
 import heapq as hq
 
-class UnsupervisedLinkPrediction():
+class DistanceNodesPair:
+    def __init__(self, dist, node_pair):
+        self.dist = dist
+        self.node_pair = node_pair
+
+    def __lt__(self, other):
+        return self.dist < other.dist
+
+    def __gt__(self, other):
+        return self.dist > other.dist
+
+    def __le__(self, other):
+        return self.dist <= other.dist
+
+    def __ge__(self, other):
+        return self.dist >= other.dist
+
+    def __eq__(self, other):
+        return self.dist == other.dist
+
+    def __ne__(self, other):
+        return self.dist != other.dist
+
+    def get_node_pair(self):
+        return self.node_pair
+
+    def get_dist(self):
+        return self.dist
+    
+
+class UnsupervisedLinkPrediction:
     def __init__(
         self,
         graph,
@@ -20,7 +50,23 @@ class UnsupervisedLinkPrediction():
 
     def __predict(self):
         edgeset = self._graph.edges()
-        self._hidden_edges = random.sample(edgeset, self._h)
+        hes_seed = 20
+        random.seed(hes_seed)
+        hesample = random.sample(edgeset, self._h)
+        self._hidden_edges = []
+        for he in hesample:
+            src = he[0]
+            dst = he[1]
+            if src > dst:
+                src = he[1]
+                dst = he[0]
+            self._hidden_edges.append((src, dst))
+
+        print("Sampled edges are")
+        for he in self._hidden_edges:
+            print(he)
+        print("\n")
+
         nodeset = self._graph.nodes()
         self._newgraph = Graph()
         for node in nodeset:
@@ -30,11 +76,8 @@ class UnsupervisedLinkPrediction():
             if edge not in self._hidden_edges:
                 self._newgraph.add_edge(edge[0], edge[1])
 
-        #TODO: how to make a "random" embedding????
-        #embedding method field as idea
         self._newembedding = Node2VecEmbedding(self._newgraph, 10, 0.1, 0.5, seed=42)
         self._newembedding.embed()
-
 
         self._dists = []
         for i in range(len(nodeset)):
@@ -43,55 +86,47 @@ class UnsupervisedLinkPrediction():
                 node2 = nodeset[j]
                 e = (node1[0], node2[0])
                 if e not in self._newgraph.edges():
-                    #dists.append(((node1[0], node2[0]), np.linalg.norm(self._newembedding._embedding[node1[0]] - self._newembedding._embedding[node2[0]])))
-                    hq.heappush(self._dists,((np.linalg.norm(self._newembedding._embedding[node1[0]] - self._newembedding._embedding[node2[0]]), (node1[0], node2[0]))))
-
-        #TODO: prepraviti u pravi heap
-        #self._distssorted = sorted(dists, key=lambda p: p[1])
-        self._precisionATh = self.get_precisionATk(self._h)
-        self._mapATh = self.get_map(self._h)
+                    d = np.linalg.norm(self._newembedding._embedding[node1[0]] - self._newembedding._embedding[node2[0]])
+                    hq.heappush(self._dists, DistanceNodesPair(d, (node1[0], node2[0])))
+      
+        pred = hq.nsmallest(self._h, self._dists)
+        self._prediction = [p.get_node_pair() for p in pred]
+        print("\nPredictions are")
+        for p in pred:
+            print(p.get_node_pair(), " dist = ", p.get_dist(), " among hidden links", p.get_node_pair() in self._hidden_edges)
         
-
 
     def get_precisionATk(self, k):
-        prediction = hq.nsmallest(k, self._dists, key=lambda p: p[0])
-        print("dists=",self._dists)
-        print("preds=", prediction)
-        
         cnt = 0
-        for e in prediction:
-            if e[1] in self._hidden_edges:
-                cnt=cnt+1
+        for i in range(0, k):
+            if self._prediction[i] in self._hidden_edges:
+                cnt += 1 
 
-        return float(cnt)/float(k)
+        return float(cnt) / float(k)
 
-    def get_map(self, k):
-        prediction = hq.nsmallest(k, self._dists, key=lambda p: p[0]) #key=lambda p: p[0]
+
+    def get_map(self, k):    
         nodeset = self._graph.nodes()
         sum = 0.0
+        relevant_nodes = 0
 
         for node in nodeset:
             prednode = 0
             enode = 0
             
-            for e in prediction:
-                if node[0]==e[1][0] or node[0]==e[1][1]:
-                    prednode = prednode + 1
+            for i in range(0, k):
+                e = self._prediction[i]
+                if e in self._hidden_edges and (node[0] == e[0] or node[0] == e[1]):
+                    prednode += 1
 
-            
             for e in self._hidden_edges:
-                if node[0]==e[0] or node[0]==e[1]:
-                    enode = enode + 1
+                if node[0] == e[0] or node[0] == e[1]:
+                    enode += 1
 
-            if enode!=0:
-                sum = sum + float(prednode)/float(enode)
+            if enode != 0:
+                relevant_nodes += 1
+                score = float(prednode) / float(enode)
+                #print(node, " -- MAP = ", score)
+                sum += score
 
-
-        return sum/float(self._graph.nodes_cnt())
-        
-
-    def get_mapATh(self):
-        return self._mapATh
-
-    def get_precisionATh(self):
-        return self._precisionATh
+        return sum / float(relevant_nodes)

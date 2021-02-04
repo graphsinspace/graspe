@@ -86,6 +86,53 @@ def embed(args):
         print("precission@k: " + str(g.link_precision(reconstruction)))
         print("map: " + str(g.map(reconstruction)))
 
+def classify(args):
+    classes = None
+    if args.classify == "kNN":
+        from classifications.k_nearest_neighbors import KNN
+
+        graph = DatasetPool.load(args.graph)
+
+        classes = KNN(graph, args.embedding, int(args.k_neighbors))
+
+    elif args.classify == "rf":
+        from classifications.random_forest import RandomForest
+
+        graph = DatasetPool.load(args.graph)
+
+        classes = RandomForest(graph, args.embedding, int(args.n_estimators))
+
+    elif args.classify == "svm":
+        from classifications.support_vector_machines import SVM
+
+        graph = DatasetPool.load(args.graph)
+
+        classes = SVM(graph, args.embedding)
+
+    elif args.classify == "nb":
+        from classifications.naive_bayes import NaiveBayes
+
+        graph = DatasetPool.load(args.graph)
+
+        classes = NaiveBayes(graph, args.embedding)
+
+    elif args.classify == "dt":
+        from classifications.decision_tree import DecisionTree
+
+        graph = DatasetPool.load(args.graph)
+
+        classes = DecisionTree(graph, args.embedding)
+
+    elif args.classify == "nn":
+        from classifications.neural_network import NeuralNetworkClassification
+
+        graph = DatasetPool.load(args.graph)
+
+        classes = NeuralNetworkClassification(graph, args.embedding, int(args.epochs))        
+
+    if classes:
+        classes.classify()    
+
 
 if __name__ == "__main__":
     # Parsing arguments.
@@ -252,19 +299,20 @@ if __name__ == "__main__":
     )
     parser_embed_deep_walk.add_argument(
         "-s", "--seed", help="Random seed value.", default=42
-    )
+    )  
 
     #-------- Node2Vec
     parser_embed_node2vec = subparsers_embed.add_parser(
         "node2vec", help="Node2Vec embedding"
     )
     parser_embed_node2vec.add_argument(
+
         "-g",
         "--graph",
         help="Path to the graph, or name of the dataset from the dataset pool (e.g. "
         "karate_club_graph).",
         required=True,
-    )
+    )    
     parser_embed_node2vec.add_argument(
         "-p", "--p", help="Return hyper parameter.", required=True
     )
@@ -285,6 +333,125 @@ if __name__ == "__main__":
     )
     parser_embed_node2vec.add_argument(
         "-workers", "--workers", help="Number of workers for parallel execution.", default=1
+    )
+
+    # Action: classify.
+    parser_classify = subparsers.add_parser("classify", help="Do classification")
+    subparsers_classify = parser_classify.add_subparsers(
+        title="classify",
+        dest="classify",
+        required=True,
+    )
+
+    # kNN
+    parser_classify_knn = subparsers_classify.add_parser("kNN", help="k Nearest Neighbors classification.")
+    parser_classify_knn.add_argument(
+        "-g",
+        "--graph",
+        help="Path to the graph, or name of the dataset from the dataset pool (e.g. "
+        "karate_club_graph).",
+        required=True,
+    )
+    parser_classify_knn.add_argument(
+        "-e",
+        "--embedding",
+        help="Path to the embedding file.",
+        required=True
+    )
+    parser_classify_knn.add_argument(
+        "-k",
+        "--k_neighbors",
+        help="Number of neighbors to use by default for kneighbors queries.",
+        required=True
+    )
+
+    # RandomForest
+    parser_classify_rf = subparsers_classify.add_parser("rf", help="Random Forest classification.")
+    parser_classify_rf.add_argument(
+        "-g",
+        "--graph",
+        help="Path to the graph, or name of the dataset from the dataset pool (e.g. "
+        "karate_club_graph).",
+        required=True,
+    )
+    parser_classify_rf.add_argument(
+        "-e",
+        "--embedding",
+        help="Path to the embedding file.",
+        required=True
+    )
+    parser_classify_rf.add_argument(
+        "-n",
+        "--n_estimators",
+        help="The number of trees in the forest.",
+        required=True
+    )
+
+    # SVM
+    parser_classify_svm = subparsers_classify.add_parser("svm", help="Support Vector Machines classification.")
+    parser_classify_svm.add_argument(
+        "-g",
+        "--graph",
+        help="Path to the graph, or name of the dataset from the dataset pool (e.g. "
+        "karate_club_graph).",
+        required=True,
+    )
+    parser_classify_svm.add_argument(
+        "-e",
+        "--embedding",
+        help="Path to the embedding file.",
+        required=True
+    )
+
+    # NaiveBayes
+    parser_classify_nb = subparsers_classify.add_parser("nb", help="Naive Bayes classification (Gaussian).")
+    parser_classify_nb.add_argument(
+        "-g",
+        "--graph",
+        help="Path to the graph, or name of the dataset from the dataset pool (e.g. "
+        "karate_club_graph).",
+        required=True,
+    )
+    parser_classify_nb.add_argument(
+        "-e",
+        "--embedding",
+        help="Path to the embedding file.",
+        required=True
+    )
+
+    # DecisionTree
+    parser_classify_dt = subparsers_classify.add_parser("dt", help="Decision Tree classification.")
+    parser_classify_dt.add_argument(
+        "-g",
+        "--graph",
+        help="Path to the graph, or name of the dataset from the dataset pool (e.g. "
+        "karate_club_graph).",
+        required=True,
+    )
+    parser_classify_dt.add_argument(
+        "-e",
+        "--embedding",
+        help="Path to the embedding file.",
+        required=True
+    )
+
+    # NeuralNetwork
+    parser_classify_nn = subparsers_classify.add_parser("nn", help="Neural Network classification.")
+    parser_classify_nn.add_argument(
+        "-g",
+        "--graph",
+        help="Path to the graph, or name of the dataset from the dataset pool (e.g. "
+        "karate_club_graph).",
+        required=True,
+    )
+    parser_classify_nn.add_argument(
+        "-em",
+        "--embedding",
+        help="Path to the embedding file.",
+        required=True
+    )
+    parser_classify_nn.add_argument(
+        "-ep", "--epochs", help="Number of epochs.", required=True
     )
     
 

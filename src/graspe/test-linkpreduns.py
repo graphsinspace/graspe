@@ -83,7 +83,7 @@ k = 20 #parametar k, broj predikcija za selektovanje
 # map = sum/float(graph.nodes_cnt())
 # print(map)
 
-ulp = UnsupervisedLinkPrediction(graph, h, k, "node2vec")
+ulp = UnsupervisedLinkPrediction(graph, h, "node2vec")
 patk = ulp.get_precisionATk(h)
 map = ulp.get_map(h)
 
