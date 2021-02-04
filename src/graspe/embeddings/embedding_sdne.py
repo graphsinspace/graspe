@@ -37,6 +37,7 @@ def l_2nd(beta):
             x,
             axis=-1,
         )
+        tf.print(K.mean(t))
         return K.mean(t)
 
     return loss_2nd
