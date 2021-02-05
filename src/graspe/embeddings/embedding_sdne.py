@@ -37,7 +37,6 @@ def l_2nd(beta):
             x,
             axis=-1,
         )
-        tf.print(K.mean(t))
         return K.mean(t)
 
     return loss_2nd
@@ -58,19 +57,19 @@ def create_model(node_size, hidden_size=[256, 128], l1=1e-5, l2=1e-4):
         if i == len(hidden_size) - 1:
             fc = Dense(
                 hidden_size[i],
-                activation="relu",
+                activation="sigmoid",
                 kernel_regularizer=l1_l2(l1, l2),
                 name="1st",
             )(fc)
         else:
             fc = Dense(
-                hidden_size[i], activation="relu", kernel_regularizer=l1_l2(l1, l2)
+                hidden_size[i], activation="sigmoid", kernel_regularizer=l1_l2(l1, l2)
             )(fc)
     Y = fc
     for i in reversed(range(len(hidden_size) - 1)):
-        fc = Dense(hidden_size[i], activation="relu", kernel_regularizer=l1_l2(l1, l2))(fc)
+        fc = Dense(hidden_size[i], activation="sigmoid", kernel_regularizer=l1_l2(l1, l2))(fc)
 
-    A_ = Dense(node_size, "relu", name="2nd")(fc)
+    A_ = Dense(node_size, "sigmoid", name="2nd")(fc)
     model = Model(inputs=[A, L], outputs=[A_, Y])
     emb = Model(inputs=A, outputs=Y)
     return model, emb
@@ -82,10 +81,11 @@ class SDNEEmbedding(Embedding):
         g,
         d,
         hidden_size=[32, 16],
-        alpha=1e-6,
+        alpha=1,
         beta=5.0,
         nu1=1e-5,
         nu2=1e-4,
+        batch_size=1024,
         epochs=1,
         verbose=1,
     ):
@@ -112,6 +112,7 @@ class SDNEEmbedding(Embedding):
         self.beta = beta
         self.nu1 = nu1
         self.nu2 = nu2
+        self.batch_size = batch_size
         self.epochs = epochs
         self.verbose = verbose
 
@@ -125,6 +126,8 @@ class SDNEEmbedding(Embedding):
             self.node_size, hidden_size=self.hidden_size, l1=self.nu1, l2=self.nu2
         )
         self.model.compile("adam", [l_2nd(self.beta), l_1st(self.alpha)])
+        
+        # if self.batch_size >= self.node_size:
         self.model.fit(
             [self.A.todense(), self.A.todense()],
             [self.A.todense(), self.A.todense()],
@@ -133,6 +136,30 @@ class SDNEEmbedding(Embedding):
             verbose=self.verbose,
             shuffle=False,
         )
+        # SUPPORT FOR BATCH TRAINING - does not work.
+        # else:
+        #     steps_per_epoch = (self.node_size - 1) // self.batch_size + 1
+        #     print(steps_per_epoch)
+        #     for epoch in range(0, self.epochs):
+        #         losses = np.zeros(3)
+        #         for i in range(steps_per_epoch):
+        #             start_index = i * self.batch_size
+        #             end_index = min((i + 1) * self.batch_size, self.node_size)
+        #             A_train = tf.slice(self.A.todense(), [start_index, start_index], [end_index, end_index])
+        #             # A_train = self.A[index, :].todense()
+        #             tf.print(tf.shape(A_train))
+        #             batch_losses = self.model.train_on_batch([A_train, A_train], [A_train, A_train])
+        #             losses += batch_losses
+        #         losses = losses / steps_per_epoch
+
+        #         if self.verbose > 0:
+        #             print("Epoch {0}/{1}".format(epoch + 1, self.epochs))
+        #             print(
+        #                 "loss: {1: .4f} - 2nd_loss: {2: .4f} - 1st_loss: {3: .4f}".format(
+        #                     losses[0], losses[1], losses[2]
+        #                 )
+        #             )
+        
         self._embedding = {}
         embeddings = self.emb_model.predict(self.A.todense(), batch_size=self.node_size)
         look_back = self.idx2node
