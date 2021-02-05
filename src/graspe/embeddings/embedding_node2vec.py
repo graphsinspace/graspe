@@ -8,11 +8,11 @@ class Node2VecEmbedding(Embedding):
         self,
         g,
         d,
-        p,
-        q,
-        walk_length=10,
-        num_walks=200,
-        workers=1,
+        p=1,
+        q=1,
+        walk_length=80,
+        num_walks=10,
+        workers=4,
         seed=42
     ):
         super().__init__(g,d)
@@ -27,7 +27,7 @@ class Node2VecEmbedding(Embedding):
     def embed(self):
         nodes = self._g.nodes()
 
-        node2vec = Node2Vec(graph=self._g.to_networkx(), p=self._p, q=self._q, dimensions=self._d, walk_length=self._walk_length, num_walks=self._num_walks, workers=self._workers, seed=self._seed)
+        node2vec = Node2Vec(graph=self._g.to_networkx(), p=self._p, q=self._q, dimensions=self._d, walk_length=self._walk_length, num_walks=self._num_walks, workers=self._workers, seed=self._seed, quiet=True)
         embedding = node2vec.fit()
         vectors = embedding.wv
 
