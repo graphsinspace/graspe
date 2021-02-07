@@ -194,16 +194,18 @@ class Graph:
 
         for node in g.__graph.nodes:
             predicted_edges = g.__graph.edges(node)
-            if len(predicted_edges) == 0:
-                continue
-            nodes_cnt += 1
-            real_edges = self.__graph.edges(node)
-            node_s = 0
-            for p_edge in predicted_edges:
-                if p_edge in real_edges:
-                    node_s += 1
             
-            mpn = node_s / len(predicted_edges)
+            mpn = 0
+            if len(predicted_edges) != 0:         
+                real_edges = self.__graph.edges(node)
+                node_s = 0
+                for p_edge in predicted_edges:
+                    if p_edge in real_edges:
+                        node_s += 1
+            
+                mpn = node_s / len(predicted_edges)
+            
+            nodes_cnt += 1
             self.map_dict[node] = mpn
             s += mpn
 
