@@ -190,6 +190,8 @@ class Graph:
         """
         s = 0
         nodes_cnt = 0
+        self.map_dict = dict()
+
         for node in g.__graph.nodes:
             predicted_edges = g.__graph.edges(node)
             if len(predicted_edges) == 0:
@@ -200,8 +202,19 @@ class Graph:
             for p_edge in predicted_edges:
                 if p_edge in real_edges:
                     node_s += 1
-            s += node_s / len(predicted_edges)
+            
+            mpn = node_s / len(predicted_edges)
+            self.map_dict[node] = mpn
+            s += mpn
+
         return s / nodes_cnt
+
+    def get_map_per_node(self):
+        """
+        This method returns a dictionary containing 
+        precision per node. It should be called after map!
+        """
+        return self.map_dict
 
     def to_networkx(self):
         """
