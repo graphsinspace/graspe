@@ -78,6 +78,25 @@ class Graph:
             return None
         return self.__graph[node]["label"]
 
+    def get_hubness(self, nodes=None):
+        """
+        Returns hubness values for the given nodes.
+
+        Parameters
+        ----------
+        nodes : iterable container
+            A container of nodes. The container will be iterated through once.
+            Default is all nodes.
+
+        Returns a dictionary with nodes as keys and in-degree as values
+        or a number if a single node is specified.
+        """
+        h = self.__graph.in_degree(nodes)
+        if h is int:
+            return h
+        return {n: n_h for n, n_h in h}
+
+    
     def labels(self):
         """
         Returns set of all possible node labels.

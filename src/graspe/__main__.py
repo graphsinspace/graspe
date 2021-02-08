@@ -1,4 +1,5 @@
 import argparse
+import os
 import torch
 
 from common.dataset_pool import DatasetPool
@@ -133,6 +134,12 @@ def classify(args):
     if classes:
         classes.classify()    
 
+def hub_eval(args):
+    import evaluation.hub_focused_eval as he
+    out = args.out
+    if not out:
+        out = os.path.join(os.path.dirname(__file__),"..","..","reports","figures","hub_focused_eval")
+    he.eval(args.dimensions, out, args.graph)
 
 if __name__ == "__main__":
     # Parsing arguments.
@@ -456,6 +463,21 @@ if __name__ == "__main__":
         "-ep", "--epochs", help="Number of epochs.", required=True
     )
     
+    # Action: hub_eval.
+    parser_hub_eval = subparsers.add_parser("hub_eval", help="hub_eval help")
+    parser_hub_eval.add_argument(
+        "-g",
+        "--graph",
+        help="Path to the graph, or name of the dataset from the dataset pool (e.g. "
+        "karate_club_graph).",
+        default=None,
+    )
+    parser_hub_eval.add_argument(
+        "-d", "--dimensions", help="Dimensions of the embedding.", required=True, type=int
+    )
+    parser_hub_eval.add_argument(
+        "-o", "--out", help="Directory for the figures."
+    )
 
     # Execute the action.
     args = parser.parse_args()
