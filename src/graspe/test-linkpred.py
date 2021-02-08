@@ -14,27 +14,30 @@ embedding.embed()
 x = []
 y = []
 nodes = list(embedding._embedding.keys())
-#print(nodes)
+# print(nodes)
 for i in range(len(nodes)):
     node1 = nodes[i]
     for j in range(i + 1, len(nodes)):
         node2 = nodes[j]
-        x.append(np.linalg.norm(embedding._embedding[node1] - embedding._embedding[node2]))
+        x.append(
+            np.linalg.norm(embedding._embedding[node1] - embedding._embedding[node2])
+        )
         y.append(1 if j in graph.to_networkx().neighbors(i) else 0)
-                
-       
-
-#print(x)
-#print(y)
 
 
-xtrain, xtest, ytrain, ytest = train_test_split(np.array(x).reshape(-1, 1), y, test_size=0.33, random_state=42)
-#print(xtrain)
+# print(x)
+# print(y)
 
-#print(xtest)
+
+xtrain, xtest, ytrain, ytest = train_test_split(
+    np.array(x).reshape(-1, 1), y, test_size=0.33, random_state=42
+)
+# print(xtrain)
+
+# print(xtest)
 
 lr = LogisticRegression()
 lr.fit(xtrain, ytrain)
 predictions = lr.predict_proba(xtest)
-ras = roc_auc_score(ytest, predictions[:,1])
+ras = roc_auc_score(ytest, predictions[:, 1])
 print(ras)

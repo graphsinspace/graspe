@@ -96,7 +96,6 @@ class Graph:
             return h
         return {n: n_h for n, n_h in h}
 
-    
     def labels(self):
         """
         Returns set of all possible node labels.
@@ -213,17 +212,17 @@ class Graph:
 
         for node in g.__graph.nodes:
             predicted_edges = g.__graph.edges(node)
-            
+
             mpn = 0
-            if len(predicted_edges) != 0:         
+            if len(predicted_edges) != 0:
                 real_edges = self.__graph.edges(node)
                 node_s = 0
                 for p_edge in predicted_edges:
                     if p_edge in real_edges:
                         node_s += 1
-            
+
                 mpn = node_s / len(predicted_edges)
-            
+
             nodes_cnt += 1
             self.map_dict[node] = mpn
             s += mpn
@@ -232,7 +231,7 @@ class Graph:
 
     def get_map_per_node(self):
         """
-        This method returns a dictionary containing 
+        This method returns a dictionary containing
         precision per node. It should be called after map!
         """
         return self.map_dict

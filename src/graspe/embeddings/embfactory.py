@@ -1,4 +1,3 @@
-
 from embeddings.embedding_gcn import GCNEmbedding
 from embeddings.embedding_node2vec import Node2VecEmbedding
 from embeddings.embedding_gae import GAEEmbedding
@@ -11,20 +10,17 @@ from timeit import default_timer as timer
 
 class LazyEmbFactory:
     def __init__(self, graph, dim, quiet=False, epochs=200):
-        self.ids = [
-            "GCN", "GAE", "SDNE", "DW", "N2V"
-        ]
+        self.ids = ["GCN", "GAE", "SDNE", "DW", "N2V"]
 
         self.ems = [
             GCNEmbedding(graph, dim, epochs),
             GAEEmbedding(graph, dim, epochs=epochs),
             SDNEEmbedding(graph, dim, epochs=epochs, verbose=0),
             DeepWalkEmbedding(graph, dim, epochs=epochs),
-            Node2VecEmbedding(graph, dim)
+            Node2VecEmbedding(graph, dim),
         ]
 
         self.quiet = quiet
-
 
     def get_embedding(self, index):
         try:
@@ -38,19 +34,20 @@ class LazyEmbFactory:
             return self.ems[index]
         except:
             if not self.quiet:
-                print("[WARNING]", self.ids[index], "not working for given graph", sys.exc_info()[0])
-            
-            return None
+                print(
+                    "[WARNING]",
+                    self.ids[index],
+                    "not working for given graph",
+                    sys.exc_info()[0],
+                )
 
+            return None
 
     def num_methods(self):
         return len(self.ems)
 
-    
     def get_name(self, index):
         return self.ids[index]
-
-
 
 
 class EagerEmbFactory(LazyEmbFactory):
@@ -69,23 +66,12 @@ class EagerEmbFactory(LazyEmbFactory):
             emb = super().get_embedding(i)
             if emb != None:
                 self.embs.append((emb, self.ids[i]))
-            
 
     def num_methods(self):
         return len(self.embs)
 
-
     def get_embedding(self, index):
         return self.embs[index][0]
 
-
     def get_name(self, index):
         return self.embs[index][1]
-
-
-
-
-
-
-
-

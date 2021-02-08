@@ -12,7 +12,7 @@ import numpy as np
 
 
 class Net(nn.Module):
-    def __init__(self, attributes_cnt, labels_cnt, layers=[200,100,50], p=0.5):
+    def __init__(self, attributes_cnt, labels_cnt, layers=[200, 100, 50], p=0.5):
         super().__init__()
         self.batch_norm = nn.BatchNorm1d(attributes_cnt)
         input_size = attributes_cnt
@@ -28,42 +28,38 @@ class Net(nn.Module):
 
         self.layers = nn.Sequential(*all_layers)
 
-    def forward(self, x):  
+    def forward(self, x):
         x = self.batch_norm(x)
         x = self.layers(x)
         return x
 
-class NeuralNetworkClassification():
-    def __init__(
-        self,
-        g,
-        embedding,
-        epochs
-    ):
+
+class NeuralNetworkClassification:
+    def __init__(self, g, embedding, epochs):
         self._g = g
         self._embedding = embedding
         self._epochs = epochs
-
 
     def classify(self):
 
         nodes = self._g.nodes()
 
-        labels = [n[1]['label'] for n in nodes]
+        labels = [n[1]["label"] for n in nodes]
 
-        embedding_file = open(self._embedding, 'r')
+        embedding_file = open(self._embedding, "r")
         lines = embedding_file.readlines()
 
         node_vectors = []
         for line in lines:
             line = line.split(":")[1]
             line = line.split(",")
-            
-            line = np.array(line, dtype='float64')
+
+            line = np.array(line, dtype="float64")
             node_vectors.append(line)
 
-
-        train_data, test_data, train_labels, test_labels = train_test_split(node_vectors, labels, test_size=.33)
+        train_data, test_data, train_labels, test_labels = train_test_split(
+            node_vectors, labels, test_size=0.33
+        )
 
         train_data = torch.FloatTensor(train_data)
         test_data = torch.FloatTensor(test_data)
@@ -79,7 +75,6 @@ class NeuralNetworkClassification():
         loss_function = nn.CrossEntropyLoss()
         optimizer = torch.optim.Adam(net.parameters(), lr=0.001)
 
-
         for i in range(self._epochs):
             train_pred = net(train_data)
             single_loss = loss_function(train_pred, train_labels)
@@ -88,9 +83,9 @@ class NeuralNetworkClassification():
             single_loss.backward()
             optimizer.step()
 
-            print(f'epoch: {i:3} loss: {single_loss.item():10.10f}')
+            print(f"epoch: {i:3} loss: {single_loss.item():10.10f}")
 
-        print('Finished Training')
+        print("Finished Training")
 
         correct = 0
         total = 0

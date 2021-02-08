@@ -49,17 +49,14 @@ def embed(args):
         )
 
     elif args.algorithm == "deep_walk":
-        e = int(args.epochs)
-        wn = int(args.walk_number)
-        wl = int(args.walk_length)
+        pn = int(args.path_number)
+        pl = int(args.path_length)
         w = int(args.workers)
         ws = int(args.window_size)
-        lr = float(args.learning_rate)
-        mc = int(args.min_count)
-        s = int(args.seed)
+
         from embeddings.embedding_deepwalk import DeepWalkEmbedding
 
-        embedding = DeepWalkEmbedding(g, d, wn, wl, w, ws, e, lr, mc, s)
+        embedding = DeepWalkEmbedding(g, d, pn, pl, w, ws)
 
     elif args.algorithm == "gae":
         e = int(args.epochs)
@@ -77,7 +74,6 @@ def embed(args):
         workers = int(args.workers)
         from embeddings.embedding_node2vec import Node2VecEmbedding
 
-
         embedding = Node2VecEmbedding(g, d, p, q, walk_length, num_walks, workers)
 
     if embedding:
@@ -86,6 +82,7 @@ def embed(args):
         reconstruction = embedding.reconstruct(len(g.edges()))
         print("precission@k: " + str(g.link_precision(reconstruction)))
         print("map: " + str(g.map(reconstruction)))
+
 
 def classify(args):
     classes = None
@@ -129,17 +126,27 @@ def classify(args):
 
         graph = DatasetPool.load(args.graph)
 
-        classes = NeuralNetworkClassification(graph, args.embedding, int(args.epochs))        
+        classes = NeuralNetworkClassification(graph, args.embedding, int(args.epochs))
 
     if classes:
-        classes.classify()    
+        classes.classify()
+
 
 def hub_eval(args):
     import evaluation.hub_focused_eval as he
+
     out = args.out
     if not out:
-        out = os.path.join(os.path.dirname(__file__),"..","..","reports","figures","hub_focused_eval")
+        out = os.path.join(
+            os.path.dirname(__file__),
+            "..",
+            "..",
+            "reports",
+            "figures",
+            "hub_focused_eval",
+        )
     he.eval(args.dimensions, out, args.graph)
+
 
 if __name__ == "__main__":
     # Parsing arguments.
@@ -288,40 +295,27 @@ if __name__ == "__main__":
         "-o", "--out", help="Output file.", default="out.embedding"
     )
     parser_embed_deep_walk.add_argument(
-        "-e", "--epochs", help="Number of epochs.", default=50
+        "--path_number", help="Number of random path.", default=10
     )
     parser_embed_deep_walk.add_argument(
-        "--walk_number", help="Number of random walks.", default=10
-    )
-    parser_embed_deep_walk.add_argument(
-        "--walk_length", help="Length of random walks.", default=80
+        "--path_length", help="Length of random path.", default=80
     )
     parser_embed_deep_walk.add_argument("--workers", help="Number of cores.", default=4)
     parser_embed_deep_walk.add_argument(
         "--window_size", help="Matrix power order.", default=5
     )
-    parser_embed_deep_walk.add_argument(
-        "-l", "--learning_rate", help="HogWild! learning rate.", default=0.05
-    )
-    parser_embed_deep_walk.add_argument(
-        "--min_count", help="Minimal count of node occurrences.", default=1
-    )
-    parser_embed_deep_walk.add_argument(
-        "-s", "--seed", help="Random seed value.", default=42
-    )  
 
-    #-------- Node2Vec
+    # -------- Node2Vec
     parser_embed_node2vec = subparsers_embed.add_parser(
         "node2vec", help="Node2Vec embedding"
     )
     parser_embed_node2vec.add_argument(
-
         "-g",
         "--graph",
         help="Path to the graph, or name of the dataset from the dataset pool (e.g. "
         "karate_club_graph).",
         required=True,
-    )    
+    )
     parser_embed_node2vec.add_argument(
         "-p", "--p", help="Return hyper parameter.", required=True
     )
@@ -341,7 +335,10 @@ if __name__ == "__main__":
         "-num_walks", "--num_walks", help="Number of random walks.", default=200
     )
     parser_embed_node2vec.add_argument(
-        "-workers", "--workers", help="Number of workers for parallel execution.", default=1
+        "-workers",
+        "--workers",
+        help="Number of workers for parallel execution.",
+        default=1,
     )
 
     # Action: classify.
@@ -353,7 +350,9 @@ if __name__ == "__main__":
     )
 
     # kNN
-    parser_classify_knn = subparsers_classify.add_parser("kNN", help="k Nearest Neighbors classification.")
+    parser_classify_knn = subparsers_classify.add_parser(
+        "kNN", help="k Nearest Neighbors classification."
+    )
     parser_classify_knn.add_argument(
         "-g",
         "--graph",
@@ -362,20 +361,19 @@ if __name__ == "__main__":
         required=True,
     )
     parser_classify_knn.add_argument(
-        "-e",
-        "--embedding",
-        help="Path to the embedding file.",
-        required=True
+        "-e", "--embedding", help="Path to the embedding file.", required=True
     )
     parser_classify_knn.add_argument(
         "-k",
         "--k_neighbors",
         help="Number of neighbors to use by default for kneighbors queries.",
-        required=True
+        required=True,
     )
 
     # RandomForest
-    parser_classify_rf = subparsers_classify.add_parser("rf", help="Random Forest classification.")
+    parser_classify_rf = subparsers_classify.add_parser(
+        "rf", help="Random Forest classification."
+    )
     parser_classify_rf.add_argument(
         "-g",
         "--graph",
@@ -384,20 +382,16 @@ if __name__ == "__main__":
         required=True,
     )
     parser_classify_rf.add_argument(
-        "-e",
-        "--embedding",
-        help="Path to the embedding file.",
-        required=True
+        "-e", "--embedding", help="Path to the embedding file.", required=True
     )
     parser_classify_rf.add_argument(
-        "-n",
-        "--n_estimators",
-        help="The number of trees in the forest.",
-        required=True
+        "-n", "--n_estimators", help="The number of trees in the forest.", required=True
     )
 
     # SVM
-    parser_classify_svm = subparsers_classify.add_parser("svm", help="Support Vector Machines classification.")
+    parser_classify_svm = subparsers_classify.add_parser(
+        "svm", help="Support Vector Machines classification."
+    )
     parser_classify_svm.add_argument(
         "-g",
         "--graph",
@@ -406,14 +400,13 @@ if __name__ == "__main__":
         required=True,
     )
     parser_classify_svm.add_argument(
-        "-e",
-        "--embedding",
-        help="Path to the embedding file.",
-        required=True
+        "-e", "--embedding", help="Path to the embedding file.", required=True
     )
 
     # NaiveBayes
-    parser_classify_nb = subparsers_classify.add_parser("nb", help="Naive Bayes classification (Gaussian).")
+    parser_classify_nb = subparsers_classify.add_parser(
+        "nb", help="Naive Bayes classification (Gaussian)."
+    )
     parser_classify_nb.add_argument(
         "-g",
         "--graph",
@@ -422,14 +415,13 @@ if __name__ == "__main__":
         required=True,
     )
     parser_classify_nb.add_argument(
-        "-e",
-        "--embedding",
-        help="Path to the embedding file.",
-        required=True
+        "-e", "--embedding", help="Path to the embedding file.", required=True
     )
 
     # DecisionTree
-    parser_classify_dt = subparsers_classify.add_parser("dt", help="Decision Tree classification.")
+    parser_classify_dt = subparsers_classify.add_parser(
+        "dt", help="Decision Tree classification."
+    )
     parser_classify_dt.add_argument(
         "-g",
         "--graph",
@@ -438,14 +430,13 @@ if __name__ == "__main__":
         required=True,
     )
     parser_classify_dt.add_argument(
-        "-e",
-        "--embedding",
-        help="Path to the embedding file.",
-        required=True
+        "-e", "--embedding", help="Path to the embedding file.", required=True
     )
 
     # NeuralNetwork
-    parser_classify_nn = subparsers_classify.add_parser("nn", help="Neural Network classification.")
+    parser_classify_nn = subparsers_classify.add_parser(
+        "nn", help="Neural Network classification."
+    )
     parser_classify_nn.add_argument(
         "-g",
         "--graph",
@@ -454,15 +445,12 @@ if __name__ == "__main__":
         required=True,
     )
     parser_classify_nn.add_argument(
-        "-em",
-        "--embedding",
-        help="Path to the embedding file.",
-        required=True
+        "-em", "--embedding", help="Path to the embedding file.", required=True
     )
     parser_classify_nn.add_argument(
         "-ep", "--epochs", help="Number of epochs.", required=True
     )
-    
+
     # Action: hub_eval.
     parser_hub_eval = subparsers.add_parser("hub_eval", help="hub_eval help")
     parser_hub_eval.add_argument(
@@ -473,11 +461,13 @@ if __name__ == "__main__":
         default=None,
     )
     parser_hub_eval.add_argument(
-        "-d", "--dimensions", help="Dimensions of the embedding.", required=True, type=int
+        "-d",
+        "--dimensions",
+        help="Dimensions of the embedding.",
+        required=True,
+        type=int,
     )
-    parser_hub_eval.add_argument(
-        "-o", "--out", help="Directory for the figures."
-    )
+    parser_hub_eval.add_argument("-o", "--out", help="Directory for the figures.")
 
     # Execute the action.
     args = parser.parse_args()

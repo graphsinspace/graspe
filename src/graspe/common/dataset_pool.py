@@ -56,9 +56,7 @@ class DatasetPool:
             "dblp": "labels",
             "pubmed": "labels",
         }
-        file_dataset_needs_dense = [
-            "cora_ml"
-        ]
+        file_dataset_needs_dense = ["cora_ml"]
         base_path = os.path.join(
             os.path.dirname(os.path.realpath(__file__)), "..", "..", "..", "data"
         )
@@ -72,7 +70,8 @@ class DatasetPool:
                         file_dataset_labels.get(
                             os.path.splitext(os.path.basename(x))[0]
                         ),
-                        to_dense=os.path.splitext(os.path.basename(x))[0] in file_dataset_needs_dense
+                        to_dense=os.path.splitext(os.path.basename(x))[0]
+                        in file_dataset_needs_dense,
                     ),
                     path,
                 )
