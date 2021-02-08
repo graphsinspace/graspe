@@ -148,7 +148,7 @@ class GAEEmbedding(Embedding):
             )
             # print("Epoch: {:03d}, AUC: {:.4f}, AP: {:.4f}".format(epoch, auc, ap))
 
-        #print("loss:", loss)
+        # print("loss:", loss)
 
         with torch.no_grad():
             self._embedding = {}

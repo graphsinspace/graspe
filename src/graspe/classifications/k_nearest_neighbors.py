@@ -7,37 +7,32 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score
 import numpy as np
 
 
-class KNN():
-    def __init__(
-        self,
-        g,
-        embedding,
-        k_neighbors
-    ):
+class KNN:
+    def __init__(self, g, embedding, k_neighbors):
         self._g = g
         self._embedding = embedding
         self._k_neighbors = k_neighbors
-
 
     def classify(self):
 
         nodes = self._g.nodes()
 
-        labels = [n[1]['label'] for n in nodes]
+        labels = [n[1]["label"] for n in nodes]
 
-        embedding_file = open(self._embedding, 'r')
+        embedding_file = open(self._embedding, "r")
         lines = embedding_file.readlines()
 
         node_vectors = []
         for line in lines:
             line = line.split(":")[1]
             line = line.split(",")
-            
-            line = np.array(line, dtype='float64')
+
+            line = np.array(line, dtype="float64")
             node_vectors.append(line)
 
-
-        train_data, test_data, train_labels, test_labels = train_test_split(node_vectors, labels, test_size=.2)
+        train_data, test_data, train_labels, test_labels = train_test_split(
+            node_vectors, labels, test_size=0.2
+        )
 
         knn = KNeighborsClassifier(n_neighbors=self._k_neighbors)
 
@@ -47,5 +42,7 @@ class KNN():
 
         acc = accuracy_score(test_labels, predicted_labels)
         print("Accuracy", acc)
-        print("Precisions: ", precision_score(test_labels, predicted_labels, average=None))
+        print(
+            "Precisions: ", precision_score(test_labels, predicted_labels, average=None)
+        )
         print("Recalls: ", recall_score(test_labels, predicted_labels, average=None))

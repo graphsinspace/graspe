@@ -3,29 +3,29 @@ from common.graph import Graph
 from evaluation.unsupervised_link_prediction import UnsupervisedLinkPrediction
 
 graph = DatasetPool.load("karate_club_graph")
-#print(graph.edges())
-#edgeset = graph.edges()
-h = 20 # broj hidden grana
-k = 20 #parametar k, broj predikcija za selektovanje
-#hidden = random.sample(edgeset, h)
-#print(proba)
-#print(graph.nodes())
-#nodeset = graph.nodes()
-#newgraph = Graph()
-#kopiranje cvorova
-#for node in nodeset:
+# print(graph.edges())
+# edgeset = graph.edges()
+h = 20  # broj hidden grana
+k = 20  # parametar k, broj predikcija za selektovanje
+# hidden = random.sample(edgeset, h)
+# print(proba)
+# print(graph.nodes())
+# nodeset = graph.nodes()
+# newgraph = Graph()
+# kopiranje cvorova
+# for node in nodeset:
 #    newgraph.add_node(node[0], node[1])
 
-#kopiranje grana koje nisu hidden
-#for edge in edgeset:
+# kopiranje grana koje nisu hidden
+# for edge in edgeset:
 #    if edge not in hidden:
 #        newgraph.add_edge(edge[0], edge[1])
 
 # embNovi = Node2VecEmbedding(newgraph, 10, 0.1, 0.5)
 # embNovi.embed()
 
-#ideja: uzeti distance svih mogucih parova, staviti u mapu grana:vrednost
-#sortirati mapu ako moze i uzeti prvih k grana kao predikcije
+# ideja: uzeti distance svih mogucih parova, staviti u mapu grana:vrednost
+# sortirati mapu ako moze i uzeti prvih k grana kao predikcije
 
 # dists = []
 # for i in range(len(nodeset)):
