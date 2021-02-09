@@ -42,7 +42,7 @@ class GCNEmbedding(Embedding):
     - labels : labels for labeled_nodes (torch.tensor)
     """
 
-    def __init__(self, g, d, epochs):
+    def __init__(self, g, d, epochs, deterministic=False):
         """
         Parameters
         ----------
@@ -52,9 +52,17 @@ class GCNEmbedding(Embedding):
             Dimensionality of the embedding.
         epochs : int
             Number of epochs.
+        deterministic : bool
+            Whether to try and run in deterministic mode
         """
         super().__init__(g, d)
         self._epochs = epochs
+        if deterministic:  # not thread-safe, beware if running multiple at once
+            torch.set_deterministic(True)
+            torch.manual_seed(0)
+            np.random.seed(0)
+        else:
+            torch.set_deterministic(False)
 
     def embed(self):
         nodes = self._g.nodes()

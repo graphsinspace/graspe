@@ -3,6 +3,9 @@ import torch_geometric as tg
 import torch.nn.functional as F
 from torch_geometric.nn import GCNConv, GAE, VGAE
 from torch_geometric.utils import train_test_split_edges
+import numpy as np
+import random
+import os
 
 from embeddings.base.embedding import Embedding
 
@@ -65,7 +68,9 @@ class GAEEmbedding(Embedding):
 
     """
 
-    def __init__(self, g, d, epochs=500, variational=False, linear=False):
+    def __init__(
+        self, g, d, epochs=500, variational=False, linear=False, deterministic=False
+    ):
         """
         Parameters
         ----------
@@ -79,11 +84,24 @@ class GAEEmbedding(Embedding):
             Whether to use Variational autoencoders (VAEs)
         linear : bool
             Whether to use Linear Encoders for the autoencoder model
+        deterministic : bool
+            Whether to try and run in deterministic mode
         """
         super().__init__(g, d)
         self.epochs = epochs
         self.variational = variational
         self.linear = linear
+        if deterministic:  # not thread-safe, beware if running multiple at once
+            torch.set_deterministic(True)
+            torch.manual_seed(0)
+            np.random.seed(0)
+            random.seed(0)
+            torch.cuda.manual_seed_all(0)
+            os.environ["PYTHONHASHSEED"] = str(0)
+            torch.backends.cudnn.deterministic = True
+            torch.backends.cudnn.benchmark = False
+        else:
+            torch.set_deterministic(False)
 
     def _train(self, model, optimizer, train_pos_edge_index, data, x):
         model.train()
