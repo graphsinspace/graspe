@@ -3,8 +3,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import itertools
 import numpy as np
+import dgl
 
-from common.graph import Graph
 from embeddings.base.embedding import Embedding
 from dgl.nn.pytorch import GraphConv
 
@@ -42,7 +42,7 @@ class GCNEmbedding(Embedding):
     - labels : labels for labeled_nodes (torch.tensor)
     """
 
-    def __init__(self, g, d, epochs):
+    def __init__(self, g, d, epochs, deterministic=False, add_self_loop=False):
         """
         Parameters
         ----------
@@ -52,11 +52,20 @@ class GCNEmbedding(Embedding):
             Dimensionality of the embedding.
         epochs : int
             Number of epochs.
+        deterministic : bool
+            Whether to try and run in deterministic mode
         """
         super().__init__(g, d)
-        self._epochs = epochs
         if not g.labels():
             raise Exception('GCNEmbedding works only with labeled graphs.')
+        self._epochs = epochs
+        self.add_self_loop = add_self_loop
+        if deterministic:  # not thread-safe, beware if running multiple at once
+            torch.set_deterministic(True)
+            torch.manual_seed(0)
+            np.random.seed(0)
+        else:
+            torch.set_deterministic(False)
 
     def embed(self):
         nodes = self._g.nodes()
@@ -64,6 +73,10 @@ class GCNEmbedding(Embedding):
         labels = self._g.labels()
 
         dgl_g = self._g.to_dgl()
+
+        if self.add_self_loop:
+            dgl_g = dgl.add_self_loop(dgl_g)
+
         e = nn.Embedding(num_nodes, self._d)
         dgl_g.ndata["feat"] = e.weight
         net = GCN(self._d, self._d, len(labels))
