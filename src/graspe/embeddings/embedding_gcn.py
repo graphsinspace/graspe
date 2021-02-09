@@ -54,6 +54,8 @@ class GCNEmbedding(Embedding):
             Number of epochs.
         deterministic : bool
             Whether to try and run in deterministic mode
+        add_self_loop : bool
+            Whether to add self loop to the DGL dataset
         """
         super().__init__(g, d)
         self._epochs = epochs
