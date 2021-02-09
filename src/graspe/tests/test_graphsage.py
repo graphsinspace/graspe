@@ -8,6 +8,7 @@ def test_graphsage():
     e = GraphSageEmbedding(g, d=500, epochs=200)
     e.embed()
     assert e._embedding is not None
+    # print(e._embedding)
 
 
 if __name__ == "__main__":

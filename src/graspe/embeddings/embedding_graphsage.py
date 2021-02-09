@@ -42,12 +42,14 @@ class GraphSAGE(nn.Module):
 
     def forward(self, graph, inputs):
         h = self.dropout(inputs)
+        last_non_exiting = None
         for l, layer in enumerate(self.layers):
             h = layer(graph, h)
             if l != len(self.layers) - 1:
                 h = self.activation(h)
                 h = self.dropout(h)
-        return h
+                last_non_exiting = h
+        return h, last_non_exiting
 
 
 class GraphSageEmbedding(Embedding):
@@ -118,7 +120,7 @@ class GraphSageEmbedding(Embedding):
     def _evaluate(self, model, graph, features, labels, nid):
         model.eval()
         with torch.no_grad():
-            logits = model(graph, features)
+            logits, _ = model(graph, features)
             logits = logits[nid]
             labels = labels[nid]
             _, indices = torch.max(logits, dim=1)
@@ -181,7 +183,7 @@ class GraphSageEmbedding(Embedding):
             if epoch >= 3:
                 t0 = time.time()
             # forward
-            logits = model(g, features)
+            logits, _ = model(g, features)
             loss = F.cross_entropy(logits[train_nid], labels[train_nid])
 
             optimizer.zero_grad()
@@ -203,10 +205,16 @@ class GraphSageEmbedding(Embedding):
         print("Test Accuracy {:.4f}".format(acc))
 
         # TODO: da li su zapravo features embeddings? Mislim da nisu...
-
         if (features.numpy() == features_copy).all():
             print("ne valja")  # nisu se promenile ni malo
 
-        self._embedding = {}
-        for i in range(len(features)):
-            self._embedding[i] = features[i].numpy()
+        # TODO: dodao sam da hvata poslednji "ne-izlazni" skriveni sloj, da li je to rešenje?
+        # vrati ovde tensor dimenzija [broj_cvorova, self.hidden]
+        # ali šta je onda features?
+
+        with torch.no_grad():
+            _, embedding = model(g, features)
+            self._embedding = {}
+
+            for i in range(len(embedding)):
+                self._embedding[i] = embedding[i].numpy()
