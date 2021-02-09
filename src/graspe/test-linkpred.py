@@ -22,8 +22,18 @@ for i in range(len(nodes)):
         x.append(
             np.linalg.norm(embedding._embedding[node1] - embedding._embedding[node2])
         )
-        y.append(1 if j in graph.to_networkx().neighbors(i) else 0)
+        y.append(1 if node2 in graph.to_networkx().neighbors(node1) else 0)
 
+# if the graph is directed, the adjacency matrix is not symmetric
+# i.e. we need to iterate over the lower triangular part
+
+# if nx.is_directed(graph.to_networkx()):
+#     for i in range(len(nodes)):
+#         node1 = nodes[i]
+#         for j in range(i):
+#             node2 = nodes[j]
+#             x.append(np.concatenate([embedding._embedding[node1], embedding._embedding[node2]], axis=-1))
+#             y.append(1 if node2 in graph.to_networkx().neighbors(node1) else 0)
 
 # print(x)
 # print(y)
