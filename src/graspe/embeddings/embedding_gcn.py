@@ -55,6 +55,8 @@ class GCNEmbedding(Embedding):
         """
         super().__init__(g, d)
         self._epochs = epochs
+        if not g.labels():
+            raise Exception('GCNEmbedding works only with labeled graphs.')
 
     def embed(self):
         nodes = self._g.nodes()

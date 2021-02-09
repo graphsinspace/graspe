@@ -93,12 +93,15 @@ def load_npz(path, label="labels", to_dense=False):
         # get labels first
         node_attrs = {i: {"label": label} for i, label in enumerate(labels)}
 
-        # add attrs
-        for node_id in node_attrs:
-            if to_dense:
-                node_attrs[node_id]["attrs"] = attr_matrix[node_id].todense()
-            else:
-                node_attrs[node_id]["attrs"] = attr_matrix[node_id]
+        # For now we do not deal with attributes.
+        # # add attrs
+        # for node_id in node_attrs:
+        #     if to_dense:
+        #         node_attrs[node_id]["attrs"] = attr_matrix[node_id].todense()
+        #     else:
+        #         node_attrs[node_id]["attrs"] = attr_matrix[node_id]
+
+        # # print(node_attrs)
 
         nx.set_node_attributes(nx_graph, node_attrs)
 
