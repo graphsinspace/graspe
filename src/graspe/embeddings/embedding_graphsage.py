@@ -24,6 +24,7 @@ class GraphSAGE(nn.Module):
         activation,
         dropout,
         aggregator_type,
+        fc_dim,
     ):
         super(GraphSAGE, self).__init__()
         self.layers = nn.ModuleList()
@@ -37,19 +38,19 @@ class GraphSAGE(nn.Module):
             self.layers.append(SAGEConv(n_hidden, n_hidden, aggregator_type))
         # output layer
         self.layers.append(
-            SAGEConv(n_hidden, n_classes, aggregator_type)
+            SAGEConv(n_hidden, fc_dim, aggregator_type)
         )  # activation None
+        # idea for embedding extraction from: https://github.com/stellargraph/stellargraph/issues/1586
+        self.fc = nn.Linear(fc_dim, n_classes)
 
     def forward(self, graph, inputs):
         h = self.dropout(inputs)
-        last_non_exiting = None
         for l, layer in enumerate(self.layers):
             h = layer(graph, h)
             if l != len(self.layers) - 1:
                 h = self.activation(h)
                 h = self.dropout(h)
-                last_non_exiting = h
-        return h, last_non_exiting
+        return self.fc(h), h
 
 
 class GraphSageEmbedding(Embedding):
@@ -75,7 +76,7 @@ class GraphSageEmbedding(Embedding):
         test=0.1,
         hidden=16,
         layers=1,
-        lr=1e-3,
+        lr=1e-2,
         deterministic=False,
     ):
         """
@@ -130,22 +131,19 @@ class GraphSageEmbedding(Embedding):
     def embed(self):
         g = self._g.to_dgl()
 
-        # DGL-ov cora ima manje cvorova (2708) od naseg (2995)? Jako cudno...
-
         num_nodes = len(g)
 
         train_num = int(num_nodes * self.train)
         val_num = int(num_nodes * self.val)
         test_num = int(num_nodes * self.test)
 
-        # sa torch.zeros mnogo losiji rezultat, u originalnoj implementaciji zovu g.ndata['feat']
-        # koji je neki cudan tensor dimenzije [broj_cvorova, neki_broj] i zbir svakog reda je 1
-        # ali nije one-hot vector nego su neke male vrednosti koje u zbiru daju 1
-        # za test: load_cora()[0].ndata['feat'] i pogledati u debuggeru, sta je zapravo to?
+        # not using attrs, using node degrees as features
+        degrees = [self._g.to_networkx().degree(i) for i in range(self._g.nodes_cnt())]
+        max_degree = max(degrees)
+        features = torch.zeros((num_nodes, max_degree + 1))
 
-        features = torch.randn((num_nodes, self._d))
-
-        features_copy = features.numpy()
+        for i, d in enumerate(degrees):
+            features[i][d] = 1  # one hot vector, node degree
 
         labels = g.ndata["label"]
         train_mask = torch.tensor(
@@ -170,7 +168,14 @@ class GraphSageEmbedding(Embedding):
 
         # create GraphSAGE model
         model = GraphSAGE(
-            in_feats, self.hidden, n_classes, self.layers, F.relu, 0.5, "gcn"
+            in_feats,
+            self.hidden,
+            n_classes,
+            self.layers,
+            F.relu,
+            0.5,
+            "gcn",
+            fc_dim=self._d,
         )
 
         # use optimizer
@@ -203,14 +208,6 @@ class GraphSageEmbedding(Embedding):
 
         acc = self._evaluate(model, g, features, labels, test_nid)
         print("Test Accuracy {:.4f}".format(acc))
-
-        # TODO: da li su zapravo features embeddings? Mislim da nisu...
-        if (features.numpy() == features_copy).all():
-            print("ne valja")  # nisu se promenile ni malo
-
-        # TODO: dodao sam da hvata poslednji "ne-izlazni" skriveni sloj, da li je to rešenje?
-        # vrati ovde tensor dimenzija [broj_cvorova, self.hidden]
-        # ali šta je onda features?
 
         with torch.no_grad():
             _, embedding = model(g, features)
