@@ -58,6 +58,8 @@ class GCNEmbedding(Embedding):
             Whether to add self loop to the DGL dataset
         """
         super().__init__(g, d)
+        if not g.labels():
+            raise Exception('GCNEmbedding works only with labeled graphs.')
         self._epochs = epochs
         self.add_self_loop = add_self_loop
         if deterministic:  # not thread-safe, beware if running multiple at once

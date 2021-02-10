@@ -49,17 +49,14 @@ def embed(args):
         )
 
     elif args.algorithm == "deep_walk":
-        e = int(args.epochs)
-        wn = int(args.walk_number)
-        wl = int(args.walk_length)
+        pn = int(args.path_number)
+        pl = int(args.path_length)
         w = int(args.workers)
         ws = int(args.window_size)
-        lr = float(args.learning_rate)
-        mc = int(args.min_count)
-        s = int(args.seed)
+
         from embeddings.embedding_deepwalk import DeepWalkEmbedding
 
-        embedding = DeepWalkEmbedding(g, d, wn, wl, w, ws, e, lr, mc, s)
+        embedding = DeepWalkEmbedding(g, d, pn, pl, w, ws)
 
     elif args.algorithm == "gae":
         e = int(args.epochs)
@@ -298,28 +295,16 @@ if __name__ == "__main__":
         "-o", "--out", help="Output file.", default="out.embedding"
     )
     parser_embed_deep_walk.add_argument(
-        "-e", "--epochs", help="Number of epochs.", default=50
+        "--path_number", help="Number of random path.", default=10
     )
     parser_embed_deep_walk.add_argument(
-        "--walk_number", help="Number of random walks.", default=10
-    )
-    parser_embed_deep_walk.add_argument(
-        "--walk_length", help="Length of random walks.", default=80
+        "--path_length", help="Length of random path.", default=80
     )
     parser_embed_deep_walk.add_argument("--workers", help="Number of cores.", default=4)
     parser_embed_deep_walk.add_argument(
         "--window_size", help="Matrix power order.", default=5
     )
-    parser_embed_deep_walk.add_argument(
-        "-l", "--learning_rate", help="HogWild! learning rate.", default=0.05
-    )
-    parser_embed_deep_walk.add_argument(
-        "--min_count", help="Minimal count of node occurrences.", default=1
-    )
-    parser_embed_deep_walk.add_argument(
-        "-s", "--seed", help="Random seed value.", default=42
-    )
-
+    
     # -------- Node2Vec
     parser_embed_node2vec = subparsers_embed.add_parser(
         "node2vec", help="Node2Vec embedding"

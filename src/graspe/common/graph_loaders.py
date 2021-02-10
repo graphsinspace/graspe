@@ -93,23 +93,24 @@ def load_npz(path, label="labels", to_dense=False):
         # get labels first
         node_attrs = {i: {"label": label} for i, label in enumerate(labels)}
 
-        if not to_dense:
-            try:
-                len(attr_matrix)
-            except TypeError as e:
-                if "sparse matrix length" in str(e):
-                    print(
-                        "WARNING: You have chosen to use sparse representation of this dataset, "
-                        "which may not work, depending on the embedding. Please consider passing "
-                        "to_dense=True if you encounter errors regarding sparse matrix length."
-                    )
+        # For now we do not need attributes.
+        # if not to_dense:
+        #     try:
+        #         len(attr_matrix)
+        #     except TypeError as e:
+        #         if "sparse matrix length" in str(e):
+        #             print(
+        #                 "WARNING: You have chosen to use sparse representation of this dataset, "
+        #                 "which may not work, depending on the embedding. Please consider passing "
+        #                 "to_dense=True if you encounter errors regarding sparse matrix length."
+        #             )
 
-        # add attrs
-        for node_id in node_attrs:
-            if to_dense:
-                node_attrs[node_id]["attrs"] = attr_matrix[node_id].todense()
-            else:
-                node_attrs[node_id]["attrs"] = attr_matrix[node_id]
+        # # add attrs
+        # for node_id in node_attrs:
+        #     if to_dense:
+        #         node_attrs[node_id]["attrs"] = attr_matrix[node_id].todense()
+        #     else:
+        #         node_attrs[node_id]["attrs"] = attr_matrix[node_id]
 
         nx.set_node_attributes(nx_graph, node_attrs)
 

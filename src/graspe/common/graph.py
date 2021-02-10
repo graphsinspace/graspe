@@ -134,6 +134,19 @@ class Graph:
         """
         self.__graph.add_edge(node1, node2, w=weight)
 
+    def has_edge(self, node1, node2):
+        """
+        Determines if the graph has the edge defined by node1 and node2.
+
+        Parameters
+        ----------
+        node1 : int
+            Identifier of the edge's starting node.
+        node2 : int
+            Identifier of the edge's ending node.
+        """
+        return self.__graph.has_edge(node1, node2)
+
     def induce_by_random_nodes(self, p):
         """
         Generates a graph induced by p*|N| randomly selected nodes.
