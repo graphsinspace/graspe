@@ -17,3 +17,4 @@ torch-spline-conv==1.2.0
 torchaudio==0.7.2
 torchvision==0.8.2
 node2vec==0.4.1
+deepwalk==1.0.3

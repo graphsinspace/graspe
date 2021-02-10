@@ -1,9 +1,9 @@
+from deepwalk import graph as dwgraph
+from gensim.models import Word2Vec
 from common.graph import Graph
 from embeddings.base.embedding import Embedding
 
 import numpy as np
-
-from karateclub import DeepWalk
 
 
 class DeepWalkEmbedding(Embedding):
@@ -11,47 +11,46 @@ class DeepWalkEmbedding(Embedding):
         self,
         g,
         d,
-        walk_number=10,
-        walk_length=80,
+        path_number=10,
+        path_length=80,
         workers=4,
-        window_size=5,
-        epochs=1,
-        learning_rate=0.05,
-        min_count=1,
-        seed=42,
+        window=5,
     ):
 
         super().__init__(g, d)
-        self._walk_number = walk_number
-        self._walk_length = walk_length
+        self._path_number = path_number
+        self._path_length = path_length
         self._workers = workers
-        self._window_size = window_size
-        self._epochs = epochs
-        self._learning_rate = learning_rate
-        self._min_count = min_count
-        self._seed = seed
+        self._window = window
+
+    def from_networkx(self, G_input, undirected=True):
+        G = dwgraph.Graph()
+
+        for x in G_input.nodes():
+            for y in G_input[x]:
+                G[x].append(y)
+
+        if undirected:
+            G.make_undirected()
+
+        return G
 
     def embed(self):
 
         nodes = self._g.nodes()
+        nxg = self._g.to_networkx()
+        dwg = self.from_networkx(nxg)
 
-        deep_walk = DeepWalk(
-            dimensions=self._d,
-            walk_number=self._walk_number,
-            walk_length=self._walk_length,
-            workers=self._workers,
-            epochs=self._epochs,
-            learning_rate=self._learning_rate,
-            min_count=self._min_count,
-            seed=self._seed,
+        walks = dwgraph.build_deepwalk_corpus(
+            dwg, num_paths=self._path_number, path_length=self._path_length
         )
-
-        deep_walk.fit(self._g.to_networkx().to_undirected())
-
-        embedding = deep_walk.get_embedding()
+        model = Word2Vec(walks, size=self._d, window=self._window)
+        vectors = model.wv
 
         self._embedding = {}
-        i = 0
-        for node in embedding:
-            self._embedding[nodes[i][0]] = node
-            i += 1
+
+        for node in nodes:
+            nid = node[0]
+            strnid = str(nid)
+            emb = vectors[strnid]
+            self._embedding[nid] = emb
