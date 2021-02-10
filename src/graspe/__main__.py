@@ -304,7 +304,7 @@ if __name__ == "__main__":
     parser_embed_deep_walk.add_argument(
         "--window_size", help="Matrix power order.", default=5
     )
-    
+
     # -------- Node2Vec
     parser_embed_node2vec = subparsers_embed.add_parser(
         "node2vec", help="Node2Vec embedding"

@@ -9,7 +9,6 @@ from timeit import default_timer as timer
 
 
 class LazyEmbFactory:
-
     def __init__(self, graph, dim, quiet=False, epochs=200, preset="_"):
         presets = {
             "_": ["GCN", "GAE", "SDNE", "DW", "N2V"],
@@ -33,7 +32,6 @@ class LazyEmbFactory:
             "N2V_p0.5_q1": Node2VecEmbedding(graph, dim, p=0.5, q=1),
             "N2V_p2_q1": Node2VecEmbedding(graph, dim, p=2, q=1),
         }
-
 
         self.quiet = quiet
 
@@ -64,7 +62,6 @@ class LazyEmbFactory:
             if not self.quiet:
                 print("[WARNING]", id, "not working for given graph", sys.exc_info()[0])
 
-
             return None
 
     def num_methods(self):
@@ -90,7 +87,6 @@ class EagerEmbFactory(LazyEmbFactory):
             emb = super().get_embedding(i)
             if emb != None:
                 self.embs.append((emb, self.ids[i]))
-
 
     def get_embedding(self, index):
         return self.embs[index][0]

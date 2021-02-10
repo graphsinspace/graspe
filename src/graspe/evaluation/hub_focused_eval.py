@@ -47,4 +47,3 @@ def eval(d, out, g=None):
             )
             plt.savefig(os.path.join(out, "{}_{}.png".format(g_name, e_name)))
             plt.close()
-
