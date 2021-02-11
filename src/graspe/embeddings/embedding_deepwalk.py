@@ -27,6 +27,7 @@ class DeepWalkEmbedding(Embedding):
         G = dwgraph.Graph()
 
         for x in G_input.nodes():
+            G[x].append(x)
             for y in G_input[x]:
                 G[x].append(y)
 
@@ -52,5 +53,5 @@ class DeepWalkEmbedding(Embedding):
         for node in nodes:
             nid = node[0]
             strnid = str(nid)
-            emb = vectors[strnid]
+            emb = vectors[strnid] if strnid in vectors else np.zeros(self._d)
             self._embedding[nid] = emb
