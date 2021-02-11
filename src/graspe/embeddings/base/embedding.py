@@ -13,6 +13,8 @@ class Embedding(ABC):
     _embedding : dict
         Graph embedding. Keys of the dict are ids of the nodes,
         while the values are numpy arrays that holds the nodes' embeddings.
+    _labels : dict
+        Nodes' labels.
     _g : common.graph.Graph
         The original graph.
     _d : int
@@ -31,6 +33,7 @@ class Embedding(ABC):
         self._g = g
         self._d = d
         self._embedding = None
+        self._labels = {x[0]: g.get_label(x[0]) for x in g.nodes()}
 
     def __getitem__(self, node):
         """
@@ -89,6 +92,33 @@ class Embedding(ABC):
             g.add_edge(edge[1], edge[2])
         return g
 
+    def get_label(self, node):
+        """
+        Returns label for the given node
+
+        Parameters
+        ----------
+        node : int
+            Id of a node.
+
+        If a node with the given id exists, and if that node has a label, the method returns the node's label.
+        Otherwise the method returns None.
+        """
+        if not node in self._labels:
+            return None
+        return self._labels[node]
+    
+    def get_dataset(self):
+        """
+        Returns the embedding in a dataset format (data, labels).
+        """
+        data = []
+        labels = []
+        for node in self._embedding:
+            data.append(self._embedding[node])
+            labels.append(self._labels[node])
+        return data, labels
+
     def to_file(self, path):
         """
         Outputs the embedding into a file
@@ -103,8 +133,11 @@ class Embedding(ABC):
 
         out = ""
         for node_id in self._embedding:
+            l = self._labels[node_id]
             out += (
                 str(node_id)
+                + ":"
+                + str(l if l != None else "")
                 + ":"
                 + ",".join([str(x) for x in self._embedding[node_id]])
                 + "\n"
@@ -112,3 +145,30 @@ class Embedding(ABC):
         f = open(path, "w")
         f.write(out)
         f.close()
+
+    @classmethod
+    def from_file(self, path):
+        e = DummyEmbedding()
+        e._embedding = {}
+        e._labels = {}
+        f = open(path, "r")
+        try:
+            for line in f:
+                line_s = line.split(":")
+                node_id = line_s[0]
+                node_label = line_s[1] if line_s[1] != "" else None
+                node_embedding = [float(x) for x in line_s[2].split(",")]
+                e._embedding[node_id] = node_embedding
+                e._labels[node_id] = node_label
+        except:
+            print("Invalid file format.")
+            return None
+        f.close()
+        return e
+
+class DummyEmbedding(Embedding):
+    def __init__(self):
+        pass
+
+    def embed(self):
+        pass

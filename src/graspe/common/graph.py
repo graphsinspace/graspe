@@ -74,9 +74,9 @@ class Graph:
         """
         if not node in self.__graph:
             return None
-        if not "label" in self.__graph[node]:
+        if not "label" in self.__graph.nodes[node]:
             return None
-        return self.__graph[node]["label"]
+        return self.__graph.nodes[node]["label"]
 
     def get_hubness(self, nodes=None):
         """

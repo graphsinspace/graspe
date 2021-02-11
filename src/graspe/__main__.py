@@ -88,45 +88,27 @@ def classify(args):
     classes = None
     if args.classify == "kNN":
         from classifications.k_nearest_neighbors import KNN
-
-        graph = DatasetPool.load(args.graph)
-
-        classes = KNN(graph, args.embedding, int(args.k_neighbors))
+        classes = KNN(args.embedding, int(args.k_neighbors))
 
     elif args.classify == "rf":
         from classifications.random_forest import RandomForest
-
-        graph = DatasetPool.load(args.graph)
-
-        classes = RandomForest(graph, args.embedding, int(args.n_estimators))
+        classes = RandomForest(args.embedding, int(args.n_estimators))
 
     elif args.classify == "svm":
         from classifications.support_vector_machines import SVM
-
-        graph = DatasetPool.load(args.graph)
-
-        classes = SVM(graph, args.embedding)
+        classes = SVM(args.embedding)
 
     elif args.classify == "nb":
         from classifications.naive_bayes import NaiveBayes
-
-        graph = DatasetPool.load(args.graph)
-
-        classes = NaiveBayes(graph, args.embedding)
+        classes = NaiveBayes(args.embedding)
 
     elif args.classify == "dt":
         from classifications.decision_tree import DecisionTree
-
-        graph = DatasetPool.load(args.graph)
-
-        classes = DecisionTree(graph, args.embedding)
+        classes = DecisionTree(args.embedding)
 
     elif args.classify == "nn":
         from classifications.neural_network import NeuralNetworkClassification
-
-        graph = DatasetPool.load(args.graph)
-
-        classes = NeuralNetworkClassification(graph, args.embedding, int(args.epochs))
+        classes = NeuralNetworkClassification(args.embedding, int(args.epochs))
 
     if classes:
         classes.classify()
@@ -354,13 +336,6 @@ if __name__ == "__main__":
         "kNN", help="k Nearest Neighbors classification."
     )
     parser_classify_knn.add_argument(
-        "-g",
-        "--graph",
-        help="Path to the graph, or name of the dataset from the dataset pool (e.g. "
-        "karate_club_graph).",
-        required=True,
-    )
-    parser_classify_knn.add_argument(
         "-e", "--embedding", help="Path to the embedding file.", required=True
     )
     parser_classify_knn.add_argument(
@@ -375,13 +350,6 @@ if __name__ == "__main__":
         "rf", help="Random Forest classification."
     )
     parser_classify_rf.add_argument(
-        "-g",
-        "--graph",
-        help="Path to the graph, or name of the dataset from the dataset pool (e.g. "
-        "karate_club_graph).",
-        required=True,
-    )
-    parser_classify_rf.add_argument(
         "-e", "--embedding", help="Path to the embedding file.", required=True
     )
     parser_classify_rf.add_argument(
@@ -393,26 +361,12 @@ if __name__ == "__main__":
         "svm", help="Support Vector Machines classification."
     )
     parser_classify_svm.add_argument(
-        "-g",
-        "--graph",
-        help="Path to the graph, or name of the dataset from the dataset pool (e.g. "
-        "karate_club_graph).",
-        required=True,
-    )
-    parser_classify_svm.add_argument(
         "-e", "--embedding", help="Path to the embedding file.", required=True
     )
 
     # NaiveBayes
     parser_classify_nb = subparsers_classify.add_parser(
         "nb", help="Naive Bayes classification (Gaussian)."
-    )
-    parser_classify_nb.add_argument(
-        "-g",
-        "--graph",
-        help="Path to the graph, or name of the dataset from the dataset pool (e.g. "
-        "karate_club_graph).",
-        required=True,
     )
     parser_classify_nb.add_argument(
         "-e", "--embedding", help="Path to the embedding file.", required=True
@@ -423,26 +377,12 @@ if __name__ == "__main__":
         "dt", help="Decision Tree classification."
     )
     parser_classify_dt.add_argument(
-        "-g",
-        "--graph",
-        help="Path to the graph, or name of the dataset from the dataset pool (e.g. "
-        "karate_club_graph).",
-        required=True,
-    )
-    parser_classify_dt.add_argument(
         "-e", "--embedding", help="Path to the embedding file.", required=True
     )
 
     # NeuralNetwork
     parser_classify_nn = subparsers_classify.add_parser(
         "nn", help="Neural Network classification."
-    )
-    parser_classify_nn.add_argument(
-        "-g",
-        "--graph",
-        help="Path to the graph, or name of the dataset from the dataset pool (e.g. "
-        "karate_club_graph).",
-        required=True,
     )
     parser_classify_nn.add_argument(
         "-em", "--embedding", help="Path to the embedding file.", required=True

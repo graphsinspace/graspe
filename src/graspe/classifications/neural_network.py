@@ -10,6 +10,7 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score
 
 import numpy as np
 
+from classifications.base.classifier import Classifier
 
 class Net(nn.Module):
     def __init__(self, attributes_cnt, labels_cnt, layers=[200, 100, 50], p=0.5):
@@ -34,31 +35,16 @@ class Net(nn.Module):
         return x
 
 
-class NeuralNetworkClassification:
-    def __init__(self, g, embedding, epochs):
-        self._g = g
-        self._embedding = embedding
+class NeuralNetworkClassification(Classifier):
+    def __init__(self, embedding, epochs):
+        super().__init__(embedding)
         self._epochs = epochs
+        self._labels = [int(l) for l in self._labels]
 
     def classify(self):
 
-        nodes = self._g.nodes()
-
-        labels = [n[1]["label"] for n in nodes]
-
-        embedding_file = open(self._embedding, "r")
-        lines = embedding_file.readlines()
-
-        node_vectors = []
-        for line in lines:
-            line = line.split(":")[1]
-            line = line.split(",")
-
-            line = np.array(line, dtype="float64")
-            node_vectors.append(line)
-
         train_data, test_data, train_labels, test_labels = train_test_split(
-            node_vectors, labels, test_size=0.33
+            self._data, self._labels, test_size=0.33
         )
 
         train_data = torch.FloatTensor(train_data)
@@ -67,7 +53,7 @@ class NeuralNetworkClassification:
         test_labels = torch.tensor(test_labels, dtype=torch.int64)
 
         # attributes_cnt, labels_cnt, layers
-        labels_cnt = len(set(labels))
+        labels_cnt = len(set(self._labels))
         atts_cnt = train_data.shape[1]
 
         net = Net(atts_cnt, labels_cnt)
