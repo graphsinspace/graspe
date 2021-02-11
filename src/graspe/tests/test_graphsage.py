@@ -1,17 +1,17 @@
 from common.dataset_pool import DatasetPool
 from embeddings.embedding_gcn import GCNEmbedding
+from embeddings.embedding_graphsage import GraphSageEmbedding
 
 
-def test_gcn_citeseer():
-    g = DatasetPool.load("citeseer")
-    e = GCNEmbedding(g, d=10, epochs=1)
+def test_graphsage():
+    g = DatasetPool.load("cora_ml")
+    e = GraphSageEmbedding(g, d=10, epochs=200)
     e.embed()
     assert e._embedding is not None
-    for i in range(34):
-        print(i, e[i])
+    # print(e._embedding)
 
 
-def test_gcn_all():
+def test_graphsage_all():
     datasets = DatasetPool.get_datasets()
     needs_self_loop = ["amazon_electronics_computers", "amazon_electronics_photo"]
     print(datasets)
@@ -24,13 +24,11 @@ def test_gcn_all():
             continue
         print(dataset_name)
         g = DatasetPool.load(dataset_name)
-        e = GCNEmbedding(
-            g, d=1, epochs=1, add_self_loop=dataset_name in needs_self_loop
-        )
+        e = GraphSageEmbedding(g, d=10, epochs=1)
         e.embed()
         assert e._embedding is not None
 
 
 if __name__ == "__main__":
-    test_gcn_citeseer()
-    test_gcn_all()
+    test_graphsage_all()
+    # test_graphsage()
