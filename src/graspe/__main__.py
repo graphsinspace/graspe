@@ -183,6 +183,46 @@ def hub_eval(args):
         he.knng_hubness_map_correlation(
             input_path, args.dimensions, args.k, output_path, args.graph
         )
+    elif args.hub_eval == "rec_hub_hub_correl":
+        output_path = args.out
+        if not output_path:
+            output_path = os.path.join(
+                os.path.dirname(__file__),
+                "..",
+                "..",
+                "reports",
+                "figures",
+                "hub_focused_eval",
+                "rec_hubness_hubness_correlation",
+            )
+        input_path = args.input
+        if not input_path:
+            input_path = os.path.join(
+                os.path.dirname(__file__), "..", "..", "data", "embeddings"
+            )
+        he.rec_hubness_hubness_correlation(
+            input_path, args.dimensions, output_path, args.graph
+        )
+    elif args.hub_eval == "knng_hub_hub_correl":
+        output_path = args.out
+        if not output_path:
+            output_path = os.path.join(
+                os.path.dirname(__file__),
+                "..",
+                "..",
+                "reports",
+                "figures",
+                "hub_focused_eval",
+                "knng_hubness_hubness_correlation",
+            )
+        input_path = args.input
+        if not input_path:
+            input_path = os.path.join(
+                os.path.dirname(__file__), "..", "..", "data", "embeddings"
+            )
+        he.knng_hubness_hubness_correlation(
+            input_path, args.dimensions, args.k, output_path, args.graph
+        )
 
 
 if __name__ == "__main__":
@@ -507,7 +547,7 @@ if __name__ == "__main__":
         "-i", "--input", help="Directory where the embeddings are stored."
     )
 
-    # kNNG Hubness - MAP correlation.
+    # kNNG hubness - MAP correlation.
 
     parser_hub_eval_hubness_map_correl = subparsers_hub_eval.add_parser(
         "knng_hub_map_correl",
@@ -536,6 +576,64 @@ if __name__ == "__main__":
         "-o", "--out", help="Directory for the figures."
     )
     parser_hub_eval_hubness_map_correl.add_argument(
+        "-i", "--input", help="Directory where the embeddings are stored."
+    )
+
+    # Native hubness - reconstructed hubness correlation.
+
+    parser_hub_eval_hubness_hubness_correl = subparsers_hub_eval.add_parser(
+        "rec_hub_hub_correl",
+        help="Evaluation of correlation between native hubness and reconstructed hubness values.",
+    )
+    parser_hub_eval_hubness_hubness_correl.add_argument(
+        "-g",
+        "--graph",
+        help="Name of the dataset from the dataset pool",
+        default=None,
+    )
+    parser_hub_eval_hubness_hubness_correl.add_argument(
+        "-d",
+        "--dimensions",
+        help="Dimensions of the embedding.",
+        required=True,
+        type=int,
+    )
+    parser_hub_eval_hubness_hubness_correl.add_argument(
+        "-o", "--out", help="Directory for the figures."
+    )
+    parser_hub_eval_hubness_hubness_correl.add_argument(
+        "-i", "--input", help="Directory where the embeddings are stored."
+    )
+
+    # Native hubness - kNNG hubness correlation.
+
+    parser_hub_eval_hubness_hubness_correl = subparsers_hub_eval.add_parser(
+        "knng_hub_hub_correl",
+        help="Evaluation of correlation between native hubness and kNNG hubness values.",
+    )
+    parser_hub_eval_hubness_hubness_correl.add_argument(
+        "-g",
+        "--graph",
+        help="Name of the dataset from the dataset pool",
+        default=None,
+    )
+    parser_hub_eval_hubness_hubness_correl.add_argument(
+        "-d",
+        "--dimensions",
+        help="Dimensions of the embedding.",
+        required=True,
+        type=int,
+    )
+    parser_hub_eval_hubness_hubness_correl.add_argument(
+        "-k",
+        help="K value for kNN graph.",
+        required=True,
+        type=int,
+    )
+    parser_hub_eval_hubness_hubness_correl.add_argument(
+        "-o", "--out", help="Directory for the figures."
+    )
+    parser_hub_eval_hubness_hubness_correl.add_argument(
         "-i", "--input", help="Directory where the embeddings are stored."
     )
 
