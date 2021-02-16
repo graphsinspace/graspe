@@ -160,7 +160,11 @@ class Embedding(ABC):
         e = DummyEmbedding()
         e._embedding = {}
         e._labels = {}
-        f = open(path, "r")
+        try:
+            f = open(path, "r")
+        except:
+            print("Unexisting file " + path)
+            return None
         try:
             for line in f:
                 line_s = line.split(":")
@@ -181,4 +185,7 @@ class DummyEmbedding(Embedding):
         pass
 
     def embed(self):
+        pass
+
+    def requires_labels(self):
         pass

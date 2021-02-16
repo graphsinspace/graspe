@@ -90,12 +90,11 @@ def batch_embed(args):
     for d in args.dimensions:
         emb_factory = LazyEmbFactory(g, d, preset=args.preset)
         for i in range(emb_factory.num_methods()):
-            name = emb_factory.get_name(i)
             embedding = emb_factory.get_embedding(i)
             embedding.embed()
             embedding.to_file(
                 os.path.join(
-                    args.out, args.graph + "_d" + str(d) + "_" + name + ".embedding"
+                    args.out, emb_factory.get_full_name(args.graph, i) + ".embedding"
                 )
             )
 
