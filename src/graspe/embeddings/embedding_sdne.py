@@ -125,6 +125,8 @@ class SDNEEmbedding(Embedding):
         self.inputs = [self.A, self.A]
 
     def embed(self):
+        super().embed()
+
         self.model, self.emb_model = create_model(
             self.node_size, hidden_size=self.hidden_size, l1=self.nu1, l2=self.nu2
         )
@@ -194,3 +196,6 @@ class SDNEEmbedding(Embedding):
             (A_data, (A_row_index, A_col_index)), shape=(node_size, node_size)
         )
         return A
+
+    def requires_labels(self):
+        return False

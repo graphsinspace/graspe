@@ -121,6 +121,8 @@ class GAEEmbedding(Embedding):
         return model.test(z, pos_edge_index, neg_edge_index)
 
     def embed(self):
+        super().embed()
+
         # TODO: this seems like extra work to me, since pytorch_geometric already has
         # TODO: datasets ready to use...
         data = tg.utils.from_networkx(self._g.to_networkx())
@@ -173,3 +175,6 @@ class GAEEmbedding(Embedding):
             encoded = model.encode(x, train_pos_edge_index).numpy()
             for i in range(num_nodes):
                 self._embedding[i] = encoded[i, :]
+
+    def requires_labels(self):
+        return False

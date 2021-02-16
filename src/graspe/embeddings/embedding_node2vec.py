@@ -17,6 +17,8 @@ class Node2VecEmbedding(Embedding):
         self._seed = seed
 
     def embed(self):
+        super().embed()
+
         nodes = self._g.nodes()
 
         node2vec = Node2Vec(
@@ -39,3 +41,6 @@ class Node2VecEmbedding(Embedding):
             strnid = str(nid)
             emb = vectors[strnid]
             self._embedding[nid] = emb
+
+    def requires_labels(self):
+        return False

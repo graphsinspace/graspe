@@ -60,6 +60,22 @@ class Graph:
         """
         return len(self.__graph)
 
+    def is_labeled(self):
+        """
+        Returns True if the graph is labeled, and False otherwise.
+        """
+        return len(self.labels()) > 0
+
+    def labels(self):
+        """
+        Returns set of all possible node labels.
+        """
+        l = set()
+        for node in self.nodes():
+            if "label" in node[1]:
+                l.add(node[1]["label"])
+        return l
+
     def get_label(self, node):
         """
         Returns label for the given node
@@ -95,16 +111,6 @@ class Graph:
         if h is int:
             return h
         return {n: n_h for n, n_h in h}
-
-    def labels(self):
-        """
-        Returns set of all possible node labels.
-        """
-        l = set()
-        for node in self.nodes():
-            if "label" in node[1]:
-                l.add(node[1]["label"])
-        return l
 
     def add_node(self, id, label=""):
         """

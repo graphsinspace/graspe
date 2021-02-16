@@ -58,8 +58,6 @@ class GCNEmbedding(Embedding):
             Whether to add self loop to the DGL dataset
         """
         super().__init__(g, d)
-        if not g.labels():
-            raise Exception("GCNEmbedding works only with labeled graphs.")
         self._epochs = epochs
         self.add_self_loop = add_self_loop
         if deterministic:  # not thread-safe, beware if running multiple at once
@@ -70,6 +68,8 @@ class GCNEmbedding(Embedding):
             torch.set_deterministic(False)
 
     def embed(self):
+        super().embed()
+
         nodes = self._g.nodes()
         num_nodes = len(nodes)
         labels = self._g.labels()
@@ -110,3 +110,6 @@ class GCNEmbedding(Embedding):
             self._embedding[nodes[i][0]] = np.array(
                 [x.item() for x in dgl_g.ndata["feat"][i]]
             )
+
+    def requires_labels(self):
+        return True

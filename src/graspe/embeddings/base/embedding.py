@@ -50,10 +50,19 @@ class Embedding(ABC):
         """
         return self._embedding[node]
 
-    @abstractmethod
     def embed(self):
         """
         Embedding algorithm that must be implemented in subclasses.
+        """
+        if self.requires_labels() and not self._g.is_labeled():
+            raise Exception(
+                "{} works only with labeled graphs.".format(type(self).__name__)
+            )
+
+    @abstractmethod
+    def requires_labels(self):
+        """
+        Determines if the algorithm requires labels or not.
         """
         pass
 

@@ -129,6 +129,8 @@ class GraphSageEmbedding(Embedding):
             return correct.item() * 1.0 / len(labels)
 
     def embed(self):
+        super().embed()
+
         g = self._g.to_dgl()
 
         num_nodes = len(g)
@@ -215,3 +217,6 @@ class GraphSageEmbedding(Embedding):
 
             for i in range(len(embedding)):
                 self._embedding[i] = embedding[i].numpy()
+
+    def requires_labels(self):
+        return True

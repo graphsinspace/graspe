@@ -37,6 +37,7 @@ class DeepWalkEmbedding(Embedding):
         return G
 
     def embed(self):
+        super().embed()
 
         nodes = self._g.nodes()
         nxg = self._g.to_networkx()
@@ -55,3 +56,6 @@ class DeepWalkEmbedding(Embedding):
             strnid = str(nid)
             emb = vectors[strnid] if strnid in vectors else np.zeros(self._d)
             self._embedding[nid] = emb
+
+    def requires_labels(self):
+        return False

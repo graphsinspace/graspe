@@ -18,8 +18,7 @@ class LazyEmbFactory:
             self.ids = presets[preset]
         else:
             self.ids = presets["_"]
-            if not quiet:
-                print("Preset {} does not exist. Switching to default.".format(preset))
+            print("Preset {} does not exist. Switching to default.".format(preset))
 
         self.ems = {
             "GCN": GCNEmbedding(graph, dim, epochs),
@@ -32,6 +31,9 @@ class LazyEmbFactory:
             "N2V_p0.5_q1": Node2VecEmbedding(graph, dim, p=0.5, q=1),
             "N2V_p2_q1": Node2VecEmbedding(graph, dim, p=2, q=1),
         }
+
+        if not graph.is_labeled():
+            self.ids = filter(lambda e: self.ems[e].requires_labels(), self.ids)
 
         self.quiet = quiet
 
