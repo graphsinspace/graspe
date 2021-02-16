@@ -138,17 +138,51 @@ def classify(args):
 def hub_eval(args):
     import evaluation.hub_focused_eval as he
 
-    out = args.out
-    if not out:
-        out = os.path.join(
-            os.path.dirname(__file__),
-            "..",
-            "..",
-            "reports",
-            "figures",
-            "hub_focused_eval",
+    if args.hub_eval == "native_hub_map_correl":
+        output_path = args.out
+        if not output_path:
+            directory = (
+                "hubness_map_correlation"
+                if args.hub_eval == "hub_map_correl"
+                else "knnghubness_map_correlation"
+            )
+            output_path = os.path.join(
+                os.path.dirname(__file__),
+                "..",
+                "..",
+                "reports",
+                "figures",
+                "hub_focused_eval",
+                "native_hubness_map_correlation",
+            )
+        input_path = args.input
+        if not input_path:
+            input_path = os.path.join(
+                os.path.dirname(__file__), "..", "..", "data", "embeddings"
+            )
+        he.native_hubness_map_correlation(
+            input_path, args.dimensions, output_path, args.graph
         )
-    he.eval(args.dimensions, out, args.graph)
+    elif args.hub_eval == "knng_hub_map_correl":
+        output_path = args.out
+        if not output_path:
+            output_path = os.path.join(
+                os.path.dirname(__file__),
+                "..",
+                "..",
+                "reports",
+                "figures",
+                "hub_focused_eval",
+                "knng_hubness_map_correlation",
+            )
+        input_path = args.input
+        if not input_path:
+            input_path = os.path.join(
+                os.path.dirname(__file__), "..", "..", "data", "embeddings"
+            )
+        he.knng_hubness_map_correlation(
+            input_path, args.dimensions, args.k, output_path, args.graph
+        )
 
 
 if __name__ == "__main__":
@@ -441,21 +475,69 @@ if __name__ == "__main__":
 
     # Action: hub_eval.
     parser_hub_eval = subparsers.add_parser("hub_eval", help="hub_eval help")
-    parser_hub_eval.add_argument(
+    subparsers_hub_eval = parser_hub_eval.add_subparsers(
+        title="hub_eval",
+        dest="hub_eval",
+        required=True,
+    )
+
+    # Native hubness - MAP correlation.
+
+    parser_hub_eval_hubness_map_correl = subparsers_hub_eval.add_parser(
+        "native_hub_map_correl",
+        help="Evaluation of correlation between hubness and map values.",
+    )
+    parser_hub_eval_hubness_map_correl.add_argument(
         "-g",
         "--graph",
-        help="Path to the graph, or name of the dataset from the dataset pool (e.g. "
-        "karate_club_graph).",
+        help="Name of the dataset from the dataset pool",
         default=None,
     )
-    parser_hub_eval.add_argument(
+    parser_hub_eval_hubness_map_correl.add_argument(
         "-d",
         "--dimensions",
         help="Dimensions of the embedding.",
         required=True,
         type=int,
     )
-    parser_hub_eval.add_argument("-o", "--out", help="Directory for the figures.")
+    parser_hub_eval_hubness_map_correl.add_argument(
+        "-o", "--out", help="Directory for the figures."
+    )
+    parser_hub_eval_hubness_map_correl.add_argument(
+        "-i", "--input", help="Directory where the embeddings are stored."
+    )
+
+    # kNNG Hubness - MAP correlation.
+
+    parser_hub_eval_hubness_map_correl = subparsers_hub_eval.add_parser(
+        "knng_hub_map_correl",
+        help="Evaluation of correlation between kNNG hubness and map values.",
+    )
+    parser_hub_eval_hubness_map_correl.add_argument(
+        "-g",
+        "--graph",
+        help="Name of the dataset from the dataset pool",
+        default=None,
+    )
+    parser_hub_eval_hubness_map_correl.add_argument(
+        "-d",
+        "--dimensions",
+        help="Dimensions of the embedding.",
+        required=True,
+        type=int,
+    )
+    parser_hub_eval_hubness_map_correl.add_argument(
+        "-k",
+        help="K value for kNN graph.",
+        required=True,
+        type=int,
+    )
+    parser_hub_eval_hubness_map_correl.add_argument(
+        "-o", "--out", help="Directory for the figures."
+    )
+    parser_hub_eval_hubness_map_correl.add_argument(
+        "-i", "--input", help="Directory where the embeddings are stored."
+    )
 
     # Execute the action.
     args = parser.parse_args()

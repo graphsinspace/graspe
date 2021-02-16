@@ -1,5 +1,6 @@
 import numpy as np
 from abc import ABC, abstractmethod
+import bisect
 from common.graph import Graph
 import heapq
 
@@ -96,9 +97,47 @@ class Embedding(ABC):
 
         g = Graph()
         for node in nodes:
-            g.add_node(node, self._g.get_label(node))
+            g.add_node(node, self._labels[node])
         for edge in heapq.nsmallest(k, dists):
             g.add_edge(edge[1], edge[2])
+        return g
+
+    def get_knng(self, k):
+        """
+        Returns k-NN graph based on the embedding.
+        """
+        nodes = list(self._embedding.keys())
+        if len(nodes) < k + 1:
+            print("[ERROR] Number of nodes must be greater than k.")
+            return None
+        dists = {x: [] for x in nodes}
+        for i in range(len(nodes)):
+            node1 = nodes[i]
+            for j in range(i + 1, len(nodes)):
+                node2 = nodes[j]
+                bisect.insort(
+                    dists[node1],
+                    (
+                        np.linalg.norm(self._embedding[node1] - self._embedding[node2]),
+                        node2,
+                    ),
+                )
+                bisect.insort(
+                    dists[node2],
+                    (
+                        np.linalg.norm(self._embedding[node1] - self._embedding[node2]),
+                        node1,
+                    ),
+                )
+                dists[node1] = dists[node1][:k]
+                dists[node2] = dists[node2][:k]
+
+        g = Graph()
+        for node in nodes:
+            g.add_node(node, self._labels[node])
+        for node in nodes:
+            for neighbor in dists[node]:
+                g.add_edge(node, neighbor[1])
         return g
 
     def get_label(self, node):
@@ -169,9 +208,13 @@ class Embedding(ABC):
             for line in f:
                 line_s = line.split(":")
                 node_id = line_s[0]
+                try:
+                    node_id = int(node_id)
+                except:
+                    pass
                 node_label = line_s[1] if line_s[1] != "" else None
                 node_embedding = [float(x) for x in line_s[2].split(",")]
-                e._embedding[node_id] = node_embedding
+                e._embedding[node_id] = np.array(node_embedding)
                 e._labels[node_id] = node_label
         except:
             print("Invalid file format.")

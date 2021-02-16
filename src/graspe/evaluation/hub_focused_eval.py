@@ -1,6 +1,6 @@
 from common.dataset_pool import DatasetPool
 from embeddings.embedding_node2vec import Node2VecEmbedding
-from embeddings.embfactory import LazyEmbFactory
+from embeddings.embfactory import FileEmbFactory
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -9,18 +9,28 @@ import scipy.stats
 import numpy as np
 
 
-def eval(d, out, g=None):
-    datasets = DatasetPool.get_datasets() if g == None else [g]
+def native_hubness_map_correlation(emb_directory, d, out, g_name=None):
+    hubness_func = lambda g, e: g.get_hubness()
+    hubness_map_correlation(emb_directory, d, out, hubness_func, g_name)
+
+
+def knng_hubness_map_correlation(emb_directory, d, k, out, g_name=None):
+    hubness_func = lambda g, e: e.get_knng(k).get_hubness()
+    hubness_map_correlation(emb_directory, d, out, hubness_func, g_name)
+
+
+def hubness_map_correlation(emb_directory, d, out, hubness_func, g_name=None):
+    datasets = DatasetPool.get_datasets() if g_name == None else [g_name]
     for g_name in datasets:
         g = DatasetPool.load(g_name)
         g_edges_cnt = len(g.edges())
-        g_hubness = g.get_hubness()
-
-        emb_fact = LazyEmbFactory(g, d, preset="N2V")
+        emb_fact = FileEmbFactory(g_name, emb_directory, d, preset="N2V")
         for i in range(emb_fact.num_methods()):
             e = emb_fact.get_embedding(i)
-            e_name = emb_fact.get_name(i)
+            e_name = emb_fact.get_full_name(g_name, i)
             gr = e.reconstruct(g_edges_cnt)
+
+            g_hubness = hubness_func(g, e)
 
             g.map(gr)
             map = g.get_map_per_node()
@@ -45,5 +55,5 @@ def eval(d, out, g=None):
                     round(pearson, 2), round(spearman, 2), round(kendall, 2)
                 )
             )
-            plt.savefig(os.path.join(out, "{}_{}.png".format(g_name, e_name)))
+            plt.savefig(os.path.join(out, "{}.png".format(e_name)))
             plt.close()

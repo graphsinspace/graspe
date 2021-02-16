@@ -20,7 +20,7 @@ class EmbFactory(ABC):
 
         self._dim = dim
         self._quiet = quiet
-        
+
         if preset in presets:
             self._ids = presets[preset]
         else:
@@ -34,7 +34,7 @@ class EmbFactory(ABC):
     @abstractmethod
     def _init_embeddings(self):
         pass
-    
+
     def get_embedding(self, index):
         if index < 0 or index >= len(self._ids):
             print(
@@ -47,7 +47,9 @@ class EmbFactory(ABC):
 
     def get_embedding_by_name(self, name):
         if not name in self._ems:
-            print("[ERROR] Embedding id {} does not exist. Returning None.".format(name))
+            print(
+                "[ERROR] Embedding id {} does not exist. Returning None.".format(name)
+            )
             return None
         return self._ems[name]
 
@@ -70,13 +72,17 @@ class LazyEmbFactory(EmbFactory):
         self._epochs = epochs
         super().__init__(dim, quiet, preset)
         if not graph.is_labeled():
-            self._ids = list(filter(lambda e: self._ems[e].requires_labels(), self._ids))
+            self._ids = list(
+                filter(lambda e: self._ems[e].requires_labels(), self._ids)
+            )
 
     def _init_embeddings(self):
         self._ems = {
             "GCN": GCNEmbedding(self._graph, self._dim, self._epochs),
             "GAE": GAEEmbedding(self._graph, self._dim, epochs=self._epochs),
-            "SDNE": SDNEEmbedding(self._graph, self._dim, epochs=self._epochs, verbose=0),
+            "SDNE": SDNEEmbedding(
+                self._graph, self._dim, epochs=self._epochs, verbose=0
+            ),
             "DW": DeepWalkEmbedding(self._graph, self._dim),
             "N2V": Node2VecEmbedding(self._graph, self._dim),
             "N2V_p1_q0.5": Node2VecEmbedding(self._graph, self._dim, p=1, q=0.5),
@@ -87,12 +93,12 @@ class LazyEmbFactory(EmbFactory):
 
     def get_embedding_by_name(self, name):
         e = super().get_embedding_by_name(name)
-        
+
         if not e:
             if not self._quiet:
                 print("* ", name, "embedding not found")
             return None
-        
+
         try:
             start = timer()
             e.embed()
@@ -104,21 +110,23 @@ class LazyEmbFactory(EmbFactory):
             if not self._quiet:
                 print("[WARNING]", id, "not working for given graph", sys.exc_info()[0])
             return None
-        
+
         return e
+
 
 class EagerEmbFactory(LazyEmbFactory):
     def __init__(self, graph, dim, quiet=False, epochs=200, exclude=[], preset="_"):
         super().__init__(graph, dim, quiet, epochs, preset)
         self._ids = list(filter(lambda e: not e in exclude, self._ids))
-        
+
     def _init_embeddings(self):
         super()._init_embeddings()
         for i in range(len(self._ids)):
             LazyEmbFactory.get_embedding_by_name(self, self.get_name(i))
-    
+
     def get_embedding_by_name(self, name):
         EmbFactory.get_embedding_by_name(self, name)
+
 
 class FileEmbFactory(EmbFactory):
     def __init__(self, graph_name, directory, dim, quiet=False, preset="_"):
@@ -129,7 +137,12 @@ class FileEmbFactory(EmbFactory):
     def _init_embeddings(self):
         self._ems = {}
         for name in self._ids:
-            e = Embedding.from_file(os.path.join(self._directory, self.get_full_name_for_name(self._graph_name, name) + ".embedding"))
+            e = Embedding.from_file(
+                os.path.join(
+                    self._directory,
+                    self.get_full_name_for_name(self._graph_name, name) + ".embedding",
+                )
+            )
             if e:
                 self._ems[name] = e
                 if not self._quiet:
