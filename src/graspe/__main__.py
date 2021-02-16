@@ -10,7 +10,7 @@ from embeddings.embfactory import LazyEmbFactory
 def load_graph(g):
     graph = DatasetPool.load(g)
     if graph == None:
-        graph = load_from_file(g)
+        graph = load_from_file(g, "")
     if graph == None:
         raise Exception("invalid graph")
     return graph

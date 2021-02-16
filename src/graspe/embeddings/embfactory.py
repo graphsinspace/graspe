@@ -73,7 +73,7 @@ class LazyEmbFactory(EmbFactory):
         super().__init__(dim, quiet, preset)
         if not graph.is_labeled():
             self._ids = list(
-                filter(lambda e: self._ems[e].requires_labels(), self._ids)
+                filter(lambda e: not self._ems[e].requires_labels(), self._ids)
             )
 
     def _init_embeddings(self):
