@@ -107,7 +107,7 @@ class Embedding(ABC):
         if not node in self._labels:
             return None
         return self._labels[node]
-    
+
     def get_dataset(self):
         """
         Returns the embedding in a dataset format (data, labels).
@@ -165,6 +165,7 @@ class Embedding(ABC):
             return None
         f.close()
         return e
+
 
 class DummyEmbedding(Embedding):
     def __init__(self):

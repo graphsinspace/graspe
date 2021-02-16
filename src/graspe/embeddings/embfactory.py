@@ -25,7 +25,7 @@ class LazyEmbFactory:
             "GCN": GCNEmbedding(graph, dim, epochs),
             "GAE": GAEEmbedding(graph, dim, epochs=epochs),
             "SDNE": SDNEEmbedding(graph, dim, epochs=epochs, verbose=0),
-            "DW": DeepWalkEmbedding(graph, dim, epochs=epochs),
+            "DW": DeepWalkEmbedding(graph, dim),
             "N2V": Node2VecEmbedding(graph, dim),
             "N2V_p1_q0.5": Node2VecEmbedding(graph, dim, p=1, q=0.5),
             "N2V_p1_q2": Node2VecEmbedding(graph, dim, p=1, q=2),

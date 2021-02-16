@@ -4,6 +4,7 @@ import torch
 
 from common.dataset_pool import DatasetPool
 from common.graph_loaders import load_from_file
+from embeddings.embfactory import LazyEmbFactory
 
 
 def load_graph(g):
@@ -84,30 +85,51 @@ def embed(args):
         print("map: " + str(g.map(reconstruction)))
 
 
+def batch_embed(args):
+    g = load_graph(args.graph)
+    for d in args.dimensions:
+        emb_factory = LazyEmbFactory(g, d, preset=args.preset)
+        for i in range(emb_factory.num_methods()):
+            name = emb_factory.get_name(i)
+            embedding = emb_factory.get_embedding(i)
+            embedding.embed()
+            embedding.to_file(
+                os.path.join(
+                    args.out, args.graph + "_d" + str(d) + "_" + name + ".embedding"
+                )
+            )
+
+
 def classify(args):
     classes = None
     if args.classify == "kNN":
         from classifications.k_nearest_neighbors import KNN
+
         classes = KNN(args.embedding, int(args.k_neighbors))
 
     elif args.classify == "rf":
         from classifications.random_forest import RandomForest
+
         classes = RandomForest(args.embedding, int(args.n_estimators))
 
     elif args.classify == "svm":
         from classifications.support_vector_machines import SVM
+
         classes = SVM(args.embedding)
 
     elif args.classify == "nb":
         from classifications.naive_bayes import NaiveBayes
+
         classes = NaiveBayes(args.embedding)
 
     elif args.classify == "dt":
         from classifications.decision_tree import DecisionTree
+
         classes = DecisionTree(args.embedding)
 
     elif args.classify == "nn":
         from classifications.neural_network import NeuralNetworkClassification
+
         classes = NeuralNetworkClassification(args.embedding, int(args.epochs))
 
     if classes:
@@ -145,7 +167,7 @@ if __name__ == "__main__":
     )
 
     # Action: embed.
-    parser_embed = subparsers.add_parser("embed", help="list_datasets help")
+    parser_embed = subparsers.add_parser("embed", help="Embed a graph")
     subparsers_embed = parser_embed.add_subparsers(
         title="algorithm",
         description="embedding algorithm",
@@ -321,6 +343,33 @@ if __name__ == "__main__":
         "--workers",
         help="Number of workers for parallel execution.",
         default=1,
+    )
+
+    # Action: batch_embed.
+
+    parser_batch_embed = subparsers.add_parser(
+        "batch_embed", help="Create a number of embeddings for a graph."
+    )
+    parser_batch_embed.add_argument(
+        "-g",
+        "--graph",
+        help="Path to the graph, or name of the dataset from the dataset pool (e.g. "
+        "karate_club_graph).",
+        required=True,
+    )
+    parser_batch_embed.add_argument(
+        "-d",
+        "--dimensions",
+        help="Dimensions of the embedding.",
+        type=int,
+        nargs="+",
+        required=True,
+    )
+    parser_batch_embed.add_argument(
+        "-p", "--preset", help="Algorithms preset name.", default="_"
+    )
+    parser_batch_embed.add_argument(
+        "-o", "--out", help="Output directory.", required=True
     )
 
     # Action: classify.

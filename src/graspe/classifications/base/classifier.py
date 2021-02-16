@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from embeddings.base.embedding import Embedding
 
+
 class Classifier(ABC):
     """
     Represents a single classification algorithm.

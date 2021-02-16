@@ -12,6 +12,7 @@ import numpy as np
 
 from classifications.base.classifier import Classifier
 
+
 class Net(nn.Module):
     def __init__(self, attributes_cnt, labels_cnt, layers=[200, 100, 50], p=0.5):
         super().__init__()

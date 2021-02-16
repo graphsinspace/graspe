@@ -6,6 +6,7 @@ import numpy as np
 
 from classifications.base.classifier import Classifier
 
+
 class RandomForest(Classifier):
     def __init__(self, embedding, n_estimators):
         super().__init__(embedding)

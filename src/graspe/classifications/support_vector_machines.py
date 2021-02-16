@@ -7,8 +7,8 @@ import numpy as np
 
 from classifications.base.classifier import Classifier
 
-class SVM(Classifier):
 
+class SVM(Classifier):
     def classify(self):
 
         train_data, test_data, train_labels, test_labels = train_test_split(

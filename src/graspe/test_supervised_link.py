@@ -39,19 +39,22 @@ if __name__ == "__main__":
 
     x = np.stack(x, axis=0)
     y = np.array(y)
-    print('number of positive samples in dataset : ', len(y[y == 1]))
+    print("number of positive samples in dataset : ", len(y[y == 1]))
     pos_indices = np.where(y == 1)[0]  # indices of positive samples
     num_positive = len(pos_indices)
 
     # subsampling
     neg_indices = np.where(y == 0)[0]  # indices of negative samples
     np.random.shuffle(neg_indices)  # shuffle (inplace)
-    neg_indices_sub = neg_indices[:int(num_positive)]  # subsample
+    neg_indices_sub = neg_indices[: int(num_positive)]  # subsample
     indices = np.concatenate([neg_indices_sub, pos_indices], axis=-1)
     np.random.shuffle(indices)  # shuffle (inplace)
     x_sub = x[indices]
     y_sub = y[indices]
-    print('percentage of negative class in subsampled dataset : ', len(y_sub[y_sub == 0]) / len(y_sub))
+    print(
+        "percentage of negative class in subsampled dataset : ",
+        len(y_sub[y_sub == 0]) / len(y_sub),
+    )
 
     xtrain, xtest, ytrain, ytest = train_test_split(
         x_sub, y_sub, test_size=0.33, random_state=42
@@ -65,6 +68,6 @@ if __name__ == "__main__":
     prec = precision_score(ytest, predictions)
     recall = recall_score(ytest, predictions)
 
-    print('RandomForestClassifier accuracy score : ', acc)
-    print('RandomForestClassifier precision score : ', prec)
-    print('RandomForestClassifier recall score : ', recall)
+    print("RandomForestClassifier accuracy score : ", acc)
+    print("RandomForestClassifier precision score : ", prec)
+    print("RandomForestClassifier recall score : ", recall)

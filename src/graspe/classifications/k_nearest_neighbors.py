@@ -8,6 +8,7 @@ import numpy as np
 
 from classifications.base.classifier import Classifier
 
+
 class KNN(Classifier):
     def __init__(self, embedding, k_neighbors):
         super().__init__(embedding)
