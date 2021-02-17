@@ -88,7 +88,7 @@ def load_npz(path, label="labels", to_dense=False):
 
         labels = loader.get(label)
 
-        nx_graph = nx.from_scipy_sparse_matrix(adj_matrix)
+        nx_graph = nx.from_scipy_sparse_matrix(adj_matrix, create_using=nx.DiGraph)
 
         # get labels first
         node_attrs = {i: {"label": label} for i, label in enumerate(labels)}
