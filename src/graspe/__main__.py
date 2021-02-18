@@ -138,7 +138,7 @@ def classify(args):
 def hub_eval(args):
     import evaluation.hub_focused_eval as he
 
-    if args.hub_eval == "native_hub_map_correl":
+    if args.hub_eval == "native_hub_map_stats":
         output_path = args.out
         if not output_path:
             directory = (
@@ -163,7 +163,7 @@ def hub_eval(args):
         he.native_hubness_map_stats(
             input_path, args.dimensions, output_path, args.graph
         )
-    elif args.hub_eval == "knng_hub_map_correl":
+    elif args.hub_eval == "knng_hub_map_stats":
         output_path = args.out
         if not output_path:
             output_path = os.path.join(
@@ -183,7 +183,7 @@ def hub_eval(args):
         he.knng_hubness_map_stats(
             input_path, args.dimensions, args.k, output_path, args.graph
         )
-    elif args.hub_eval == "rec_hub_hub_correl":
+    elif args.hub_eval == "rec_hub_hub_stats":
         output_path = args.out
         if not output_path:
             output_path = os.path.join(
@@ -203,7 +203,7 @@ def hub_eval(args):
         he.rec_hubness_hubness_stats(
             input_path, args.dimensions, output_path, args.graph
         )
-    elif args.hub_eval == "knng_hub_hub_correl":
+    elif args.hub_eval == "knng_hub_hub_stats":
         output_path = args.out
         if not output_path:
             output_path = os.path.join(
@@ -524,7 +524,7 @@ if __name__ == "__main__":
     # Native hubness - MAP correlation.
 
     parser_hub_eval_hubness_map_correl = subparsers_hub_eval.add_parser(
-        "native_hub_map_correl",
+        "native_hub_map_stats",
         help="Evaluation of correlation between hubness and map values.",
     )
     parser_hub_eval_hubness_map_correl.add_argument(
@@ -550,7 +550,7 @@ if __name__ == "__main__":
     # kNNG hubness - MAP correlation.
 
     parser_hub_eval_hubness_map_correl = subparsers_hub_eval.add_parser(
-        "knng_hub_map_correl",
+        "knng_hub_map_stats",
         help="Evaluation of correlation between kNNG hubness and map values.",
     )
     parser_hub_eval_hubness_map_correl.add_argument(
@@ -582,7 +582,7 @@ if __name__ == "__main__":
     # Native hubness - reconstructed hubness correlation.
 
     parser_hub_eval_hubness_hubness_correl = subparsers_hub_eval.add_parser(
-        "rec_hub_hub_correl",
+        "rec_hub_hub_stats",
         help="Evaluation of correlation between native hubness and reconstructed hubness values.",
     )
     parser_hub_eval_hubness_hubness_correl.add_argument(
@@ -608,7 +608,7 @@ if __name__ == "__main__":
     # Native hubness - kNNG hubness correlation.
 
     parser_hub_eval_hubness_hubness_correl = subparsers_hub_eval.add_parser(
-        "knng_hub_hub_correl",
+        "knng_hub_hub_stats",
         help="Evaluation of correlation between native hubness and kNNG hubness values.",
     )
     parser_hub_eval_hubness_hubness_correl.add_argument(

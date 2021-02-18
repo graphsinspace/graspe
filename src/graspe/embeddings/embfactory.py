@@ -12,7 +12,7 @@ from abc import ABC, abstractmethod
 
 
 class EmbFactory(ABC):
-    def __init__(self, dim, quiet, preset):
+    def __init__(self, dim, quiet, preset, algs=None):
         presets = {
             "_": ["GCN", "GAE", "SDNE", "DW", "N2V"],
             "N2V": ["N2V", "N2V_p1_q0.5", "N2V_p1_q2", "N2V_p0.5_q1", "N2V_p2_q1"],
@@ -21,7 +21,9 @@ class EmbFactory(ABC):
         self._dim = dim
         self._quiet = quiet
 
-        if preset in presets:
+        if algs:
+            self._ids = algs
+        elif preset in presets:
             self._ids = presets[preset]
         else:
             self._ids = presets["_"]
@@ -67,10 +69,10 @@ class EmbFactory(ABC):
 
 
 class LazyEmbFactory(EmbFactory):
-    def __init__(self, graph, dim, quiet=False, epochs=200, preset="_"):
+    def __init__(self, graph, dim, quiet=False, epochs=200, preset="_", algs=None):
         self._graph = graph
         self._epochs = epochs
-        super().__init__(dim, quiet, preset)
+        super().__init__(dim, quiet, preset, algs)
         if not graph.is_labeled():
             self._ids = list(
                 filter(lambda e: not self._ems[e].requires_labels(), self._ids)
@@ -115,8 +117,8 @@ class LazyEmbFactory(EmbFactory):
 
 
 class EagerEmbFactory(LazyEmbFactory):
-    def __init__(self, graph, dim, quiet=False, epochs=200, exclude=[], preset="_"):
-        super().__init__(graph, dim, quiet, epochs, preset)
+    def __init__(self, graph, dim, quiet=False, epochs=200, exclude=[], preset="_", algs=None):
+        super().__init__(graph, dim, quiet, epochs, preset, algs)
         self._ids = list(filter(lambda e: not e in exclude, self._ids))
 
     def _init_embeddings(self):
@@ -129,10 +131,10 @@ class EagerEmbFactory(LazyEmbFactory):
 
 
 class FileEmbFactory(EmbFactory):
-    def __init__(self, graph_name, directory, dim, quiet=False, preset="_"):
+    def __init__(self, graph_name, directory, dim, quiet=False, preset="_", algs=None):
         self._graph_name = graph_name
         self._directory = directory
-        super().__init__(dim, quiet, preset)
+        super().__init__(dim, quiet, preset, algs)
 
     def _init_embeddings(self):
         self._ems = {}

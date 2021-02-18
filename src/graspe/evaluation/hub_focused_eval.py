@@ -26,7 +26,7 @@ def hubness_map_stats(emb_directory, d, out, hubness_func, g_name=None):
         g = DatasetPool.load(g_name)
         g_nodes_cnt = len(g.nodes())
         g_edges_cnt = len(g.edges())
-        emb_fact = FileEmbFactory(g_name, emb_directory, d, preset="N2V")
+        emb_fact = FileEmbFactory(g_name, emb_directory, d, algs=["N2V"])
         for i in range(emb_fact.num_methods()):
             e = emb_fact.get_embedding(i)
             e_name = emb_fact.get_full_name(g_name, i)
