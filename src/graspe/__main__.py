@@ -142,9 +142,9 @@ def hub_eval(args):
         output_path = args.out
         if not output_path:
             directory = (
-                "hubness_map_correlation"
+                "hubness_map_stats"
                 if args.hub_eval == "hub_map_correl"
-                else "knnghubness_map_correlation"
+                else "knnghubness_map_stats"
             )
             output_path = os.path.join(
                 os.path.dirname(__file__),
@@ -153,14 +153,14 @@ def hub_eval(args):
                 "reports",
                 "figures",
                 "hub_focused_eval",
-                "native_hubness_map_correlation",
+                "native_hubness_map_stats",
             )
         input_path = args.input
         if not input_path:
             input_path = os.path.join(
                 os.path.dirname(__file__), "..", "..", "data", "embeddings"
             )
-        he.native_hubness_map_correlation(
+        he.native_hubness_map_stats(
             input_path, args.dimensions, output_path, args.graph
         )
     elif args.hub_eval == "knng_hub_map_correl":
@@ -173,14 +173,14 @@ def hub_eval(args):
                 "reports",
                 "figures",
                 "hub_focused_eval",
-                "knng_hubness_map_correlation",
+                "knng_hubness_map_stats",
             )
         input_path = args.input
         if not input_path:
             input_path = os.path.join(
                 os.path.dirname(__file__), "..", "..", "data", "embeddings"
             )
-        he.knng_hubness_map_correlation(
+        he.knng_hubness_map_stats(
             input_path, args.dimensions, args.k, output_path, args.graph
         )
     elif args.hub_eval == "rec_hub_hub_correl":
@@ -193,14 +193,14 @@ def hub_eval(args):
                 "reports",
                 "figures",
                 "hub_focused_eval",
-                "rec_hubness_hubness_correlation",
+                "rec_hubness_hubness_stats",
             )
         input_path = args.input
         if not input_path:
             input_path = os.path.join(
                 os.path.dirname(__file__), "..", "..", "data", "embeddings"
             )
-        he.rec_hubness_hubness_correlation(
+        he.rec_hubness_hubness_stats(
             input_path, args.dimensions, output_path, args.graph
         )
     elif args.hub_eval == "knng_hub_hub_correl":
@@ -213,14 +213,14 @@ def hub_eval(args):
                 "reports",
                 "figures",
                 "hub_focused_eval",
-                "knng_hubness_hubness_correlation",
+                "knng_hubness_hubness_stats",
             )
         input_path = args.input
         if not input_path:
             input_path = os.path.join(
                 os.path.dirname(__file__), "..", "..", "data", "embeddings"
             )
-        he.knng_hubness_hubness_correlation(
+        he.knng_hubness_hubness_stats(
             input_path, args.dimensions, args.k, output_path, args.graph
         )
 
