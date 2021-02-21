@@ -6,6 +6,6 @@ Average map for high hubness: 0.1294186386210926
 Mann Whitney U: 0.06376933601349052
 Probability that low hubness points have greater map: 0.1102200593607863
 Probability that high hubness points have greater map: 0.12800985317554103
-Pearson: 0.17819260924651042
+Pearson: 0.17819260924651065
 Spearman: 0.022773749160386842
 Kendall: 0.020517611886613878
