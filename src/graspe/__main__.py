@@ -225,6 +225,15 @@ def hub_eval(args):
         )
 
 
+def generate_graphs(args):
+    out = (
+        args.out
+        if args.out
+        else os.path.join(os.path.dirname(__file__), "..", "..", "data")
+    )
+    DatasetPool.generate_random_graphs(args.nvals, args.pvals, args.kmvals, out)
+
+
 if __name__ == "__main__":
     # Parsing arguments.
     parser = argparse.ArgumentParser(
@@ -636,6 +645,37 @@ if __name__ == "__main__":
     parser_hub_eval_hubness_hubness_correl.add_argument(
         "-i", "--input", help="Directory where the embeddings are stored."
     )
+
+    # Action: generate_graphs
+
+    parser_generate_graphs = subparsers.add_parser(
+        "generate_graphs", help="generate_graphs help"
+    )
+    parser_generate_graphs.add_argument(
+        "-n",
+        "--nvals",
+        help="Number of nodes",
+        type=int,
+        nargs="+",
+        default=[100],
+    )
+    parser_generate_graphs.add_argument(
+        "-p",
+        "--pvals",
+        help="Generator probability (determines sparsity of a graph)",
+        type=float,
+        nargs="+",
+        default=[0.5],
+    )
+    parser_generate_graphs.add_argument(
+        "-km",
+        "--kmvals",
+        help="Values k (for newman-watts-strogatz) and values m (for barabasi-albert and powerlaw-cluster).",
+        type=int,
+        nargs="+",
+        default=[5],
+    )
+    parser_generate_graphs.add_argument("-o", "--out", help="Output directory.")
 
     # Execute the action.
     args = parser.parse_args()

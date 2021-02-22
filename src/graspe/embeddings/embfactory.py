@@ -117,7 +117,9 @@ class LazyEmbFactory(EmbFactory):
 
 
 class EagerEmbFactory(LazyEmbFactory):
-    def __init__(self, graph, dim, quiet=False, epochs=200, exclude=[], preset="_", algs=None):
+    def __init__(
+        self, graph, dim, quiet=False, epochs=200, exclude=[], preset="_", algs=None
+    ):
         super().__init__(graph, dim, quiet, epochs, preset, algs)
         self._ids = list(filter(lambda e: not e in exclude, self._ids))
 

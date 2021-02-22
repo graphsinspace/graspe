@@ -81,10 +81,11 @@ def load_npz(path, label="labels", to_dense=False):
             shape=loader["adj_shape"],
         )
 
-        attr_matrix = sp.csr_matrix(
-            (loader["attr_data"], loader["attr_indices"], loader["attr_indptr"]),
-            shape=loader["attr_shape"],
-        )
+        # For now we do not need attributes.
+        # attr_matrix = sp.csr_matrix(
+        #     (loader["attr_data"], loader["attr_indices"], loader["attr_indptr"]),
+        #     shape=loader["attr_shape"],
+        # )
 
         labels = loader.get(label)
 
