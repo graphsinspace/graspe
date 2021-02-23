@@ -231,7 +231,7 @@ def generate_graphs(args):
         if args.out
         else os.path.join(os.path.dirname(__file__), "..", "..", "data")
     )
-    DatasetPool.generate_random_graphs(args.nvals, args.pvals, args.kmvals, out)
+    DatasetPool.generate_random_graphs(args.nvals, args.kmvals, out)
 
 
 if __name__ == "__main__":
@@ -660,15 +660,6 @@ if __name__ == "__main__":
         default=[100],
     )
     parser_generate_graphs.add_argument(
-        "-p",
-        "--pvals",
-        help="Generator probability (determines sparsity of a graph)",
-        type=float,
-        nargs="+",
-        default=[0.5],
-    )
-    parser_generate_graphs.add_argument(
-        "-km",
         "--kmvals",
         help="Values k (for newman-watts-strogatz) and values m (for barabasi-albert and powerlaw-cluster).",
         type=int,

@@ -100,19 +100,20 @@ class DatasetPool:
             )
 
     @staticmethod
-    def generate_random_graphs(n_vals, p_vals, k_vals, out):
+    def generate_random_graphs(n_vals, k_vals, out):
         graphs = {}
+        p_vals = [k/(n-1) for k in k_vals]
         for n in n_vals:
             for p in p_vals:
-                graphs["erdos-renyi_n{}_p{}".format(n, p)] = nx.fast_gnp_random_graph(
+                graphs["erdos-renyi_n{}_p{}".format(n, round(p,2))] = nx.fast_gnp_random_graph(
                     n, p
                 )
                 for k in k_vals:
                     graphs[
-                        "newman-watts-strogatz_n{}_p{}_k{}".format(n, p, k)
+                        "newman-watts-strogatz_n{}_p{}_k{}".format(n, round(p,2), k)
                     ] = nx.newman_watts_strogatz_graph(n, k, p)
                     graphs[
-                        "powerlaw-cluster_n{}_m{}_p{}".format(n, p, k)
+                        "powerlaw-cluster_n{}_m{}_p{}".format(n, round(p,2), k)
                     ] = nx.powerlaw_cluster_graph(n, k, p)
                     name = "barabasi-albert_n{}_m{}".format(n, k)
                     if not name in graphs:
