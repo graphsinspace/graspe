@@ -102,8 +102,8 @@ class DatasetPool:
     @staticmethod
     def generate_random_graphs(n_vals, k_vals, out):
         graphs = {}
-        p_vals = [k/(n-1) for k in k_vals]
         for n in n_vals:
+            p_vals = [k/(n-1) for k in k_vals]
             for p in p_vals:
                 graphs["erdos-renyi_n{}_p{}".format(n, round(p,2))] = nx.fast_gnp_random_graph(
                     n, p
