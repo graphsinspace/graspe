@@ -32,7 +32,7 @@ def hubness_map_stats(emb_directory, d, out, hubness_func, g_name=None):
             e_name = emb_fact.get_full_name(g_name, i)
             base_filename = os.path.join(out, e_name)
             gr = e.reconstruct(g_edges_cnt)
-            g.map(gr)
+            map_avg = g.map(gr)
             map = g.get_map_per_node()
             hubness = hubness_func(g, e)
             avg_hubness = statistics.mean(hubness.values())
@@ -59,10 +59,11 @@ def hubness_map_stats(emb_directory, d, out, hubness_func, g_name=None):
             frac_hi = len(map_hi) / g_nodes_cnt
             frac_lo = len(map_lo) / g_nodes_cnt
             f = open(base_filename + ".txt", "w")
-            output = "Average hubness: {}\nFraction of nodes with low hubness: {}\nFraction of nodes with high hubness: {}\nAverage map for low hubness: {}\nAverage map for high hubness: {}\nMann Whitney U: {}\nProbability that low hubness points have greater map: {}\nProbability that high hubness points have greater map: {}\nPearson: {}\nSpearman: {}\nKendall: {}".format(
+            output = "Average hubness: {}\nFraction of nodes with low hubness: {}\nFraction of nodes with high hubness: {}\nAverage map: {}\nAverage map for low hubness: {}\nAverage map for high hubness: {}\nMann Whitney U: {}\nProbability that low hubness points have greater map: {}\nProbability that high hubness points have greater map: {}\nPearson: {}\nSpearman: {}\nKendall: {}".format(
                 avg_hubness,
                 frac_lo,
                 frac_hi,
+                map_avg,
                 map_lo_avg,
                 map_hi_avg,
                 pU,
