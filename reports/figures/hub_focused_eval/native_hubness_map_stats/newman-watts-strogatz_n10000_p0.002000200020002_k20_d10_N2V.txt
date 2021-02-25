@@ -1,0 +1,12 @@
+Average hubness: 20.0424
+Fraction of nodes with low hubness: 0.958
+Fraction of nodes with high hubness: 0.042
+Average map: 0.49360834997089825
+Average map for low hubness: 0.48760882457344346
+Average map for high hubness: 0.6304546673701938
+Mann Whitney U: 1.0730688275392055e-57
+Probability that low hubness points have greater map: 0.2413204592901879
+Probability that high hubness points have greater map: 0.6859931404712198
+Pearson: 0.3857494053738524
+Spearman: 0.15969349570515912
+Kendall: 0.14312016862946494
