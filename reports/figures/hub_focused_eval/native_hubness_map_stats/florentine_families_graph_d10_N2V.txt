@@ -1,6 +1,7 @@
 Average hubness: 2.6666666666666665
 Fraction of nodes with low hubness: 0.4
 Fraction of nodes with high hubness: 0.6
+Average map: 0.44222222222222224
 Average map for low hubness: 0.19444444444444445
 Average map for high hubness: 0.6074074074074074
 Mann Whitney U: 0.01592133794804015
