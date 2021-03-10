@@ -100,6 +100,7 @@ class Embedding(ABC):
             g.add_node(node, self._labels[node])
         for edge in heapq.nsmallest(k, dists):
             g.add_edge(edge[1], edge[2])
+            g.add_edge(edge[2], edge[1])
         return g
 
     def get_knng(self, k):

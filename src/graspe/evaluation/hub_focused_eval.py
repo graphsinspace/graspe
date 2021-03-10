@@ -24,16 +24,17 @@ def hubness_map_stats(emb_directory, d, out, hubness_func, g_name=None):
     datasets = DatasetPool.get_datasets() if g_name == None else [g_name]
     for g_name in datasets:
         g = DatasetPool.load(g_name)
+        g_undirected = g.to_undirected()
         g_nodes_cnt = len(g.nodes())
-        g_edges_cnt = len(g.edges())
+        g_edges_cnt = len(g_undirected.edges())
         emb_fact = FileEmbFactory(g_name, emb_directory, d, algs=["N2V"])
         for i in range(emb_fact.num_methods()):
             e = emb_fact.get_embedding(i)
             e_name = emb_fact.get_full_name(g_name, i)
             base_filename = os.path.join(out, e_name)
             gr = e.reconstruct(g_edges_cnt)
-            map_avg = g.map(gr)
-            map = g.get_map_per_node()
+            map_avg = g_undirected.map(gr)
+            map = g_undirected.get_map_per_node()
             hubness = hubness_func(g, e)
             avg_hubness = statistics.mean(hubness.values())
             pearson, spearman, kendall = create_correlation_figure(
@@ -91,13 +92,14 @@ def hubness_hubness_stats(emb_directory, d, out, hubness_func, g_name=None):
     datasets = DatasetPool.get_datasets() if g_name == None else [g_name]
     for g_name in datasets:
         g = DatasetPool.load(g_name)
-        g_edges_cnt = len(g.edges())
+        g_undirected = g.to_undirected()
+        g_edges_cnt = len(g_undirected.edges())
         emb_fact = FileEmbFactory(g_name, emb_directory, d, preset="N2V")
         for i in range(emb_fact.num_methods()):
             e = emb_fact.get_embedding(i)
             e_name = emb_fact.get_full_name(g_name, i)
             gr = e.reconstruct(g_edges_cnt)
-            g_hubness = g.get_hubness()
+            g_hubness = g_undirected.get_hubness()
             r_hubness = hubness_func(g, e)
             create_correlation_figure(
                 g_hubness,

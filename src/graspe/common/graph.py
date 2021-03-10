@@ -60,6 +60,12 @@ class Graph:
         """
         return len(self.__graph)
 
+    def edges_cnt(self):
+        """
+        Returns number of nodes in the graph.
+        """
+        return len(self.__graph.edges)
+
     def is_labeled(self):
         """
         Returns True if the graph is labeled, and False otherwise.
@@ -254,6 +260,44 @@ class Graph:
         precision per node. It should be called after map!
         """
         return self.map_dict
+
+    def recall(self, g):
+        """
+        Returns average recall and recall of each node.
+
+        Parameters
+        ----------
+        g : common.graph.Graph
+            A graph object.
+        """
+        s = 0
+        nodes_cnt = 0
+        recall_dict = dict()
+
+        for node in g.__graph.nodes:
+            predicted_edges = g.__graph.edges(node)
+
+            recall = 0
+            if len(predicted_edges) != 0:
+                real_edges = self.__graph.edges(node)
+                node_s = 0
+                for p_edge in predicted_edges:
+                    if p_edge in real_edges:
+                        node_s += 1
+
+                recall = node_s / len(real_edges)
+
+            nodes_cnt += 1
+            recall_dict[node] = recall
+            s += recall
+
+        return s / nodes_cnt, recall_dict
+
+    def to_undirected(self):
+        """
+        This method returns the undirected version of the graph.
+        """
+        return Graph(self.__graph.to_undirected())
 
     def to_networkx(self):
         """

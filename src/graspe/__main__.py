@@ -17,7 +17,25 @@ def load_graph(g):
 
 
 def list_datasets(args):
-    print(", ".join(DatasetPool.get_datasets()))
+    if args.detailed:
+        for dataset in DatasetPool.get_datasets():
+            g = DatasetPool.load(dataset)
+            nodes_cnt = g.nodes_cnt()
+            edges_cnt = g.edges_cnt()
+            density = edges_cnt/((nodes_cnt*(nodes_cnt-1))/2)
+            avg_h = edges_cnt / nodes_cnt
+            h = g.get_hubness()
+            max_h = h if h is int else max(h.values())
+            print("Name: {}".format(dataset))
+            print("Nodes count: {}".format(nodes_cnt))
+            print("Edges count: {}".format(edges_cnt))
+            print("Edges density: {}".format(density))
+            print("Avg hubness: {}".format(avg_h))
+            print("Max hubness: {}".format(max_h)) 
+            print("Max hubness (normalized): {}".format(max_h/avg_h))
+            print("=============================================")
+    else:
+        print(", ".join(DatasetPool.get_datasets()))
 
 
 def embed(args):
@@ -80,9 +98,12 @@ def embed(args):
     if embedding:
         embedding.embed()
         embedding.to_file(o)
-        reconstruction = embedding.reconstruct(len(g.edges()))
-        print("precission@k: " + str(g.link_precision(reconstruction)))
-        print("map: " + str(g.map(reconstruction)))
+        g_undirected = g.to_undirected()
+        reconstruction = embedding.reconstruct(len(g_undirected.edges()))
+        avg_recall, recalls = g_undirected.recall(reconstruction)
+        print("precission@k: " + str(g_undirected.link_precision(reconstruction)))
+        print("map: " + str(g_undirected.map(reconstruction)))
+        print("recall: " + str(avg_recall))
 
 
 def batch_embed(args):
@@ -247,6 +268,11 @@ if __name__ == "__main__":
     parser_list_datasets = subparsers.add_parser(
         "list_datasets", help="list_datasets help"
     )
+    parser_list_datasets.add_argument(
+        "-d",
+        "--detailed",
+        help="Detailed overview of available datasets.",
+        action='store_true')
 
     # Action: embed.
     parser_embed = subparsers.add_parser("embed", help="Embed a graph")
