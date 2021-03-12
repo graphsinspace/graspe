@@ -107,17 +107,18 @@ def embed(args):
 
 
 def batch_embed(args):
-    g = load_graph(args.graph)
-    for d in args.dimensions:
-        emb_factory = LazyEmbFactory(g, d, preset=args.preset)
-        for i in range(emb_factory.num_methods()):
-            embedding = emb_factory.get_embedding(i)
-            embedding.embed()
-            embedding.to_file(
-                os.path.join(
-                    args.out, emb_factory.get_full_name(args.graph, i) + ".embedding"
+    for g_name in args.graphs:
+        g = load_graph(g_name)
+        for d in args.dimensions:
+            emb_factory = LazyEmbFactory(g, d, preset=args.preset, algs=args.algs)
+            for i in range(emb_factory.num_methods()):
+                embedding = emb_factory.get_embedding(i)
+                embedding.embed()
+                embedding.to_file(
+                    os.path.join(
+                        args.out, emb_factory.get_full_name(g_name, i) + ".embedding"
+                    )
                 )
-            )
 
 
 def classify(args):
@@ -460,9 +461,10 @@ if __name__ == "__main__":
     )
     parser_batch_embed.add_argument(
         "-g",
-        "--graph",
-        help="Path to the graph, or name of the dataset from the dataset pool (e.g. "
+        "--graphs",
+        help="Path to the graphs, or names of the datasets from the dataset pool (e.g. "
         "karate_club_graph).",
+        nargs="+",
         required=True,
     )
     parser_batch_embed.add_argument(
@@ -475,6 +477,13 @@ if __name__ == "__main__":
     )
     parser_batch_embed.add_argument(
         "-p", "--preset", help="Algorithms preset name.", default="_"
+    )
+    parser_batch_embed.add_argument(
+        "-a",
+        "--algs",
+        help="Algorithms",
+        nargs="+",
+        default=None,
     )
     parser_batch_embed.add_argument(
         "-o", "--out", help="Output directory.", required=True
