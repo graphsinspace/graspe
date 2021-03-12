@@ -48,11 +48,11 @@ class Graph:
         """
         return list(self.__graph.nodes(data=True))
 
-    def edges(self, node=None):
+    def edges(self, node=None, data=False):
         """
         Returns edges of the graph.
         """
-        return list(self.__graph.edges if node == None else self.__graph.edges[node])
+        return list(self.__graph.edges(data=data) if node == None else self.__graph.edges(node, data=data))
 
     def nodes_cnt(self):
         """
