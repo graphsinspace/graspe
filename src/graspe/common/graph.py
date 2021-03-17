@@ -280,12 +280,15 @@ class Graph:
             recall = 0
             if len(predicted_edges) != 0:
                 real_edges = self.__graph.edges(node)
-                node_s = 0
-                for p_edge in predicted_edges:
-                    if p_edge in real_edges:
-                        node_s += 1
+                num_real_edges = len(real_edges)
+                
+                if num_real_edges != 0:
+                    node_s = 0
+                    for p_edge in predicted_edges:
+                        if p_edge in real_edges:
+                            node_s += 1
 
-                recall = node_s / len(real_edges)
+                    recall = node_s / len(real_edges)
 
             nodes_cnt += 1
             recall_dict[node] = recall
