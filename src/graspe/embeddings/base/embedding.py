@@ -35,6 +35,7 @@ class Embedding(ABC):
         self._d = d
         self._embedding = None
         self._labels = {x[0]: g.get_label(x[0]) for x in g.nodes()}
+        self._dists = {}
 
     def __getitem__(self, node):
         """
@@ -66,8 +67,20 @@ class Embedding(ABC):
         Determines if the algorithm requires labels or not.
         """
         pass
+    
+    def get_dist(self, node1, node2, save=False):
+        if node1 > node2:
+            node1, node2 = node2, node1
+        if node1 in self._dists and node2 in self._dists[node1]:
+            return self._dists[node1][node2]
+        dist = np.linalg.norm(self._embedding[node1] - self._embedding[node2])
+        if save:
+            if not node1 in self._dists:
+                self._dists[node1] = {}
+            self._dists[node1][node2] = dist
+        return dist
 
-    def reconstruct(self, k):
+    def reconstruct(self, k, cache_dists=False):
         """
         Reconstructs the graph from its embedding.
 
@@ -75,20 +88,26 @@ class Embedding(ABC):
         ----------
         k : int
             The number of the links in the resulting graph reconstruction.
+            Must be an even number (the reconstruction algorithm cannot create a graph with odd number of links).
+        cache_dists : boolean
+            If true, the pairwise distances will be cached for later use.
 
         Returns
         ----------
         - common.graph.Graph - Graph reconstruction.
         """
+        if k % 2 == 1:
+            raise ValueError("k must be an even number")
         nodes = list(self._embedding.keys())
         dists = []
         for i in range(len(nodes)):
             node1 = nodes[i]
             for j in range(i + 1, len(nodes)):
                 node2 = nodes[j]
+                dist = self.get_dist(node1, node2, cache_dists)
                 dists.append(
                     (
-                        np.linalg.norm(self._embedding[node1] - self._embedding[node2]),
+                        dist,
                         node1,
                         node2,
                     )
@@ -98,14 +117,18 @@ class Embedding(ABC):
         g = Graph()
         for node in nodes:
             g.add_node(node, self._labels[node])
-        for edge in heapq.nsmallest(k, dists):
+        for edge in heapq.nsmallest(k//2, dists):
             g.add_edge(edge[1], edge[2])
             g.add_edge(edge[2], edge[1])
         return g
 
-    def get_knng(self, k):
+    def get_knng(self, k, cache_dists=False):
         """
         Returns k-NN graph based on the embedding.
+        
+        k : int
+        cache_dists : boolean
+            If true, the pairwise distances will be cached for later use.
         """
         nodes = list(self._embedding.keys())
         if len(nodes) < k + 1:
@@ -116,22 +139,23 @@ class Embedding(ABC):
             node1 = nodes[i]
             for j in range(i + 1, len(nodes)):
                 node2 = nodes[j]
+                dist = self.get_dist(node1, node2, cache_dists)
                 bisect.insort(
                     dists[node1],
                     (
-                        np.linalg.norm(self._embedding[node1] - self._embedding[node2]),
+                        dist,
                         node2,
                     ),
                 )
                 bisect.insort(
                     dists[node2],
                     (
-                        np.linalg.norm(self._embedding[node1] - self._embedding[node2]),
+                        dist,
                         node1,
                     ),
                 )
-                dists[node1] = dists[node1][:k]
-                dists[node2] = dists[node2][:k]
+                dists[node1] = dists[node1][:int(k)]
+                dists[node2] = dists[node2][:int(k)]
 
         g = Graph()
         for node in nodes:
@@ -200,6 +224,7 @@ class Embedding(ABC):
         e = DummyEmbedding()
         e._embedding = {}
         e._labels = {}
+        e._dists = {}
         try:
             f = open(path, "r")
         except:

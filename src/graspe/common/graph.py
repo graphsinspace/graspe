@@ -48,11 +48,11 @@ class Graph:
         """
         return list(self.__graph.nodes(data=True))
 
-    def edges(self, node=None):
+    def edges(self, node=None, data=False):
         """
         Returns edges of the graph.
         """
-        return list(self.__graph.edges if node == None else self.__graph.edges[node])
+        return list(self.__graph.edges(data=data) if node == None else self.__graph.edges(node, data=data))
 
     def nodes_cnt(self):
         """
@@ -222,7 +222,7 @@ class Graph:
 
         return cnt / len(g.__graph.edges)
 
-    def map(self, g):
+    def map_value(self, g):
         """
         MAP estimates precision for every node and computes the average over all nodes.
 
@@ -233,7 +233,7 @@ class Graph:
         """
         s = 0
         nodes_cnt = 0
-        self.map_dict = dict()
+        map_dict = dict()
 
         for node in g.__graph.nodes:
             predicted_edges = g.__graph.edges(node)
@@ -249,17 +249,10 @@ class Graph:
                 mpn = node_s / len(predicted_edges)
 
             nodes_cnt += 1
-            self.map_dict[node] = mpn
+            map_dict[node] = mpn
             s += mpn
 
-        return s / nodes_cnt
-
-    def get_map_per_node(self):
-        """
-        This method returns a dictionary containing
-        precision per node. It should be called after map!
-        """
-        return self.map_dict
+        return s / nodes_cnt, map_dict
 
     def recall(self, g):
         """
@@ -280,12 +273,15 @@ class Graph:
             recall = 0
             if len(predicted_edges) != 0:
                 real_edges = self.__graph.edges(node)
-                node_s = 0
-                for p_edge in predicted_edges:
-                    if p_edge in real_edges:
-                        node_s += 1
+                num_real_edges = len(real_edges)
+                
+                if num_real_edges != 0:
+                    node_s = 0
+                    for p_edge in predicted_edges:
+                        if p_edge in real_edges:
+                            node_s += 1
 
-                recall = node_s / len(real_edges)
+                    recall = node_s / num_real_edges
 
             nodes_cnt += 1
             recall_dict[node] = recall
