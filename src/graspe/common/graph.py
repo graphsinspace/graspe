@@ -288,7 +288,7 @@ class Graph:
                         if p_edge in real_edges:
                             node_s += 1
 
-                    recall = node_s / len(real_edges)
+                    recall = node_s / num_real_edges
 
             nodes_cnt += 1
             recall_dict[node] = recall
