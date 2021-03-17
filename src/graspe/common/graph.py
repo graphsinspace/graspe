@@ -222,7 +222,7 @@ class Graph:
 
         return cnt / len(g.__graph.edges)
 
-    def map(self, g):
+    def map_value(self, g):
         """
         MAP estimates precision for every node and computes the average over all nodes.
 
@@ -233,7 +233,7 @@ class Graph:
         """
         s = 0
         nodes_cnt = 0
-        self.map_dict = dict()
+        map_dict = dict()
 
         for node in g.__graph.nodes:
             predicted_edges = g.__graph.edges(node)
@@ -249,17 +249,10 @@ class Graph:
                 mpn = node_s / len(predicted_edges)
 
             nodes_cnt += 1
-            self.map_dict[node] = mpn
+            map_dict[node] = mpn
             s += mpn
 
-        return s / nodes_cnt
-
-    def get_map_per_node(self):
-        """
-        This method returns a dictionary containing
-        precision per node. It should be called after map!
-        """
-        return self.map_dict
+        return s / nodes_cnt, map_dict
 
     def recall(self, g):
         """
