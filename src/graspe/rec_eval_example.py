@@ -1,7 +1,8 @@
 from common.dataset_pool import DatasetPool
 from embeddings.embedding_node2vec import Node2VecEmbedding_Native
 
-graph = DatasetPool.load("cora_ml").to_undirected()
+# graph = DatasetPool.load("cora_ml")                    # first case
+graph = DatasetPool.load("cora_ml").to_undirected()      # second case
 emb_m = Node2VecEmbedding_Native(graph, 10, 1, 1)
 emb_m.embed()
 
