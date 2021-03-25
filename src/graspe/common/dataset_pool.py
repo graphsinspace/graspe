@@ -1,9 +1,11 @@
 import os
+
 import networkx as nx
 import numpy as np
 import scipy.sparse
-from common.graph_loaders import load_from_file
+
 from common.graph import Graph
+from common.graph_loaders import load_from_file
 
 
 class DatasetPool:
@@ -73,7 +75,7 @@ class DatasetPool:
         for f in os.listdir(base_path):
             path = os.path.join(base_path, f)
             if os.path.isfile(path) and f[0] != ".":
-                name, ext = os.path.splitext(f)
+                name, _ = os.path.splitext(f)
                 DatasetPool.__pool[name] = (
                     lambda x: load_from_file(
                         x,
@@ -103,7 +105,7 @@ class DatasetPool:
     def generate_random_graphs(n_vals, k_vals, out):
         graphs = {}
         for n in n_vals:
-            p_vals = [k/(n-1) for k in k_vals]
+            p_vals = [k / (n - 1) for k in k_vals]
             for p in p_vals:
                 graphs["erdos-renyi_n{}_p{}".format(n, p)] = nx.fast_gnp_random_graph(
                     n, p

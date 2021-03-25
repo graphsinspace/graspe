@@ -99,7 +99,7 @@ class UnsupervisedLinkPrediction:
                 p.get_node_pair() in self._hidden_edges,
             )
 
-    def get_precisionATk(self, k):
+    def get_precision_at_k(self, k):
         cnt = 0
         for i in range(0, k):
             if self._prediction[i] in self._hidden_edges:
@@ -109,7 +109,7 @@ class UnsupervisedLinkPrediction:
 
     def get_map(self, k):
         nodeset = self._graph.nodes()
-        sum = 0.0
+        map_sum = 0.0
         relevant_nodes = 0
 
         for node in nodeset:
@@ -129,6 +129,6 @@ class UnsupervisedLinkPrediction:
                 relevant_nodes += 1
                 score = float(prednode) / float(enode)
                 # print(node, " -- MAP = ", score)
-                sum += score
+                map_sum += score
 
-        return sum / float(relevant_nodes)
+        return map_sum / float(relevant_nodes)

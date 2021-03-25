@@ -1,14 +1,14 @@
-from embeddings.embedding_gcn import GCNEmbedding
-from embeddings.embedding_node2vec import Node2VecEmbedding
-from embeddings.embedding_gae import GAEEmbedding
-from embeddings.embedding_deepwalk import DeepWalkEmbedding
-from embeddings.embedding_sdne import SDNEEmbedding
-from embeddings.base.embedding import Embedding
-
 import os
 import sys
-from timeit import default_timer as timer
 from abc import ABC, abstractmethod
+from timeit import default_timer as timer
+
+from embeddings.base.embedding import Embedding
+from embeddings.embedding_deepwalk import DeepWalkEmbedding
+from embeddings.embedding_gae import GAEEmbedding
+from embeddings.embedding_gcn import GCNEmbedding
+from embeddings.embedding_node2vec import Node2VecEmbedding
+from embeddings.embedding_sdne import SDNEEmbedding
 
 
 class EmbFactory(ABC):
@@ -48,7 +48,7 @@ class EmbFactory(ABC):
         return self.get_embedding_by_name(self._ids[index])
 
     def get_embedding_by_name(self, name):
-        if not name in self._ems:
+        if name not in self._ems:
             print(
                 "[ERROR] Embedding id {} does not exist. Returning None.".format(name)
             )

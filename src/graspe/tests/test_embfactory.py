@@ -1,6 +1,7 @@
-from embeddings.embfactory import LazyEmbFactory, EagerEmbFactory, FileEmbFactory
-from common.dataset_pool import DatasetPool
 import os
+
+from common.dataset_pool import DatasetPool
+from embeddings.emb_factory import LazyEmbFactory, EagerEmbFactory, FileEmbFactory
 
 
 def test_lazy(g, dim):
@@ -21,7 +22,7 @@ def test_file(g, dim, directory):
 def test_factory(fact):
     print(".. Iterate over embeddings")
     for i in range(fact.num_methods()):
-        e = fact.get_embedding(i)
+        fact.get_embedding(i)
 
 
 if __name__ == "__main__":

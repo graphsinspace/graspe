@@ -1,17 +1,17 @@
 # Examples from @svc as tests
 
-from sklearn.cluster import KMeans
-
-from common.dataset_pool import DatasetPool
-from embeddings.embedding_gcn import GCNEmbedding
-from sklearn.model_selection import train_test_split
 from sklearn import ensemble
+from sklearn.cluster import KMeans
 from sklearn.metrics import (
     accuracy_score,
     precision_score,
     recall_score,
     completeness_score,
 )
+from sklearn.model_selection import train_test_split
+
+from common.dataset_pool import DatasetPool
+from embeddings.embedding_gcn import GCNEmbedding
 
 
 def test_classification():

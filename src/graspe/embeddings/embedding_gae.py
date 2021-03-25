@@ -1,11 +1,12 @@
+import os
+import random
+
+import numpy as np
 import torch
-import torch_geometric as tg
 import torch.nn.functional as F
+import torch_geometric as tg
 from torch_geometric.nn import GCNConv, GAE, VGAE
 from torch_geometric.utils import train_test_split_edges
-import numpy as np
-import random
-import os
 
 from embeddings.base.embedding import Embedding
 

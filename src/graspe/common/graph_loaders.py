@@ -1,9 +1,10 @@
 import os
-from common.graph import Graph
-import numpy as np
-import scipy
-import scipy.sparse as sp
+
 import networkx as nx
+import numpy as np
+import scipy.sparse as sp
+
+from common.graph import Graph
 
 
 def load_from_file(path, label, to_dense=False):
@@ -24,7 +25,7 @@ def load_from_file(path, label, to_dense=False):
     ----------
     - common.graph.Graph: A loaded graph.
     """
-    name, ext = os.path.splitext(path)
+    _, ext = os.path.splitext(path)
 
     if to_dense and ext[1:] == "csv":
         raise NotImplementedError
@@ -53,7 +54,6 @@ def load_csv(path, label):
     - common.graph.Graph: A loaded graph.
     """
     raise Exception("Not implemented")
-    return Graph()
 
 
 def load_npz(path, label="labels", to_dense=False):

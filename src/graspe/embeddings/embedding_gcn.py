@@ -1,12 +1,13 @@
+import itertools
+
+import dgl
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import itertools
-import numpy as np
-import dgl
+from dgl.nn.pytorch import GraphConv
 
 from embeddings.base.embedding import Embedding
-from dgl.nn.pytorch import GraphConv
 
 
 class GCN(nn.Module):
@@ -42,7 +43,7 @@ class GCNEmbedding(Embedding):
     - labels : labels for labeled_nodes (torch.tensor)
     """
 
-    def __init__(self, g, d, epochs, deterministic=False, add_self_loop=False):
+    def __init__(self, g, d, epochs, deterministic=False):
         """
         Parameters
         ----------
@@ -54,12 +55,14 @@ class GCNEmbedding(Embedding):
             Number of epochs.
         deterministic : bool
             Whether to try and run in deterministic mode
-        add_self_loop : bool
-            Whether to add self loop to the DGL dataset
         """
         super().__init__(g, d)
         self._epochs = epochs
-        self.add_self_loop = add_self_loop
+        self.dgl_g = self._g.to_dgl()
+
+        if (self.dgl_g.in_degrees() == 0).any():
+            self.dgl_g = dgl.add_self_loop(self.dgl_g)
+
         if deterministic:  # not thread-safe, beware if running multiple at once
             torch.set_deterministic(True)
             torch.manual_seed(0)
@@ -74,10 +77,7 @@ class GCNEmbedding(Embedding):
         num_nodes = len(nodes)
         labels = self._g.labels()
 
-        dgl_g = self._g.to_dgl()
-
-        if self.add_self_loop:
-            dgl_g = dgl.add_self_loop(dgl_g)
+        dgl_g = self.dgl_g
 
         e = nn.Embedding(num_nodes, self._d)
         dgl_g.ndata["feat"] = e.weight

@@ -6,17 +6,17 @@ LID-based evaluation
 author: svc@dmi.uns.ac.rs
 """
 
-import numpy as np
-import networkx as nx
 import heapq
-from statistics import mean
-from scipy.stats import kendalltau
 import random
-
 from abc import ABC, abstractmethod
+from statistics import mean
+
+import networkx as nx
+import numpy as np
+from scipy.stats import kendalltau
 
 
-class LID_Estimator(ABC):
+class LIDEstimator(ABC):
     """
     Base class for node LID estimators
     """
@@ -44,7 +44,7 @@ class LID_Estimator(ABC):
             print("Node ", d, "LID =", self.lid_values[d])
 
 
-class LID_MLE_Estimator(LID_Estimator):
+class LIDMLEEstimator(LIDEstimator):
     """
     Base class for node LID MLE estimators
     """
@@ -125,7 +125,7 @@ class LID_MLE_Estimator(LID_Estimator):
         return lid
 
 
-class EmbLID_MLE_Estimator(LID_MLE_Estimator):
+class EmbLIDMLEEstimator(LIDMLEEstimator):
     """
     MLE estimator for node LIDs in the embedded space
     """
@@ -146,7 +146,7 @@ def shortest_path_distance(nx_graph, src, dst):
         return nx_graph.number_of_nodes()
 
 
-class GLID_ShortestPath_MLE_Estimator(LID_MLE_Estimator):
+class GLIDShortestPathMLEEstimator(LIDMLEEstimator):
     """
     MLE estimator for node LIDs based on shortest path distance
     """
@@ -158,7 +158,7 @@ class GLID_ShortestPath_MLE_Estimator(LID_MLE_Estimator):
         return shortest_path_distance(self.nx_graph, src, dst)
 
 
-class GLID_SimRank_MLE_Estimator(LID_MLE_Estimator):
+class GLIDSimRankMLEEstimator(LIDMLEEstimator):
     """
     MLE estimator for node LIDs based on SimRank node similarity
     """
@@ -200,7 +200,7 @@ def adamic_adar_distance(nx_graph, src, dst):
     return 1 / aa if aa > 0 else 1
 
 
-class GLID_Jaccard_MLE_Estimator(LID_MLE_Estimator):
+class GLIDJaccardMLEEstimator(LIDMLEEstimator):
     """
     MLE estimator for node LIDs based on Jaccard node similarity
     """
@@ -212,7 +212,7 @@ class GLID_Jaccard_MLE_Estimator(LID_MLE_Estimator):
         return jaccard_distance(self.nx_graph, src, dst)
 
 
-class GLID_AdamicAdar_MLE_Estimator(LID_MLE_Estimator):
+class GLIDAdamicAdarMLEEstimator(LIDMLEEstimator):
     """
     MLE estimator for node LIDs based on Adamic-Adar node similarity
     """
@@ -235,6 +235,9 @@ class DistanceAnalyzer:
         self.embedding = embedding
         self.nx_graph = graph.to_networkx()
         self.node_vectors = [embedding[n[0]] for n in graph.nodes()]
+        self.emb_dist = []
+        self.sp_dist = []
+
         # print("Computing simrank matrix")
         # self.simrank = nx.simrank_similarity_numpy(graph.to_networkx())
         # self.compute_distances()
@@ -314,9 +317,7 @@ class DistanceAnalyzer:
         """
 
 
-###
-###  LID estimated using natural communities
-###
+#  LID estimated using natural communities
 
 
 class Community(object):
@@ -326,8 +327,8 @@ class Community(object):
         from Complex Networks. Applied Network Science Journal. 2019. DOI:10.1007/s41109-019-0165-9
     """
 
-    def __init__(self, G, alpha=1.0):
-        self.g = G
+    def __init__(self, g, alpha=1.0):
+        self.g = g
         self.alpha = alpha
         self.nodes = set()
         self.k_in = 0
@@ -391,18 +392,18 @@ class Community(object):
         return float(self.k_in) / ((self.k_in + self.k_out) ** self.alpha)
 
 
-class LFM_nx(object):
+class LFMnx:
     """
     Modified from https://github.com/GiulioRossetti/cdlib/blob/master/cdlib/algorithms/internal/lfm.py
     G. Rossetti, L. Milli, R. Cazabet. CDlib: a Python Library to Extract, Compare and Evaluate Communities
         from Complex Networks. Applied Network Science Journal. 2019. DOI:10.1007/s41109-019-0165-9
     """
 
-    def __init__(self, G, alpha=1.0):
-        if G.is_directed():
-            self.g = G.to_undirected()
+    def __init__(self, g, alpha=1.0):
+        if g.is_directed():
+            self.g = g.to_undirected()
         else:
-            self.g = G
+            self.g = g
         self.alpha = alpha
 
     def identify_natural_community(self, seed):
@@ -433,14 +434,14 @@ class LFM_nx(object):
         return list(c.nodes)
 
 
-class NLID_Estimator(LID_Estimator):
+class NLIDEstimator(LIDEstimator):
     """
     Base class for LID estimators based on natural communities
     """
 
     def __init__(self, estimator_name, graph):
         super().__init__(estimator_name, graph)
-        self.community_detector = LFM_nx(graph.to_networkx())
+        self.community_detector = LFMnx(graph.to_networkx())
 
     @abstractmethod
     def compute_distance(self, src, dst):
@@ -477,7 +478,7 @@ class NLID_Estimator(LID_Estimator):
                 self.lid_values[src] = -1.0 * np.log(len(src_community) / counter)
 
 
-class NLID_ShortestPath_Estimator(NLID_Estimator):
+class NLIDShortestPathEstimator(NLIDEstimator):
     """
     NLID estimated using shortest path distance
     """
@@ -489,7 +490,7 @@ class NLID_ShortestPath_Estimator(NLID_Estimator):
         return shortest_path_distance(self.nx_graph, src, dst)
 
 
-class NLID_SimRank_Estimator(NLID_Estimator):
+class NLIDSimRankEstimator(NLIDEstimator):
     """
     NLID estimated using SimRank
     """
@@ -503,7 +504,7 @@ class NLID_SimRank_Estimator(NLID_Estimator):
         return 1 if sr == 0 else 1 / sr
 
 
-class NLID_Jaccard_Estimator(NLID_Estimator):
+class NLIDJaccardEstimator(NLIDEstimator):
     """
     NLID estimated using Jaccard similarity
     """
@@ -515,7 +516,7 @@ class NLID_Jaccard_Estimator(NLID_Estimator):
         return jaccard_distance(self.nx_graph, src, dst)
 
 
-class NLID_AdamicAdar_Estimator(NLID_Estimator):
+class NLIDAdamicAdarEstimator(NLIDEstimator):
     """
     NLID estimated using AdamicAdar similarity
     """

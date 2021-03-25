@@ -1,9 +1,8 @@
+import numpy as np
 from deepwalk import graph as dwgraph
 from gensim.models import Word2Vec
-from common.graph import Graph
-from embeddings.base.embedding import Embedding
 
-import numpy as np
+from embeddings.base.embedding import Embedding
 
 
 class DeepWalkEmbedding(Embedding):

@@ -1,8 +1,10 @@
-import numpy as np
-from abc import ABC, abstractmethod
 import bisect
-from common.graph import Graph
 import heapq
+from abc import ABC, abstractmethod
+
+import numpy as np
+
+from common.graph import Graph
 
 
 class Embedding(ABC):
@@ -67,7 +69,7 @@ class Embedding(ABC):
         Determines if the algorithm requires labels or not.
         """
         pass
-    
+
     def get_dist(self, node1, node2, save=False):
         if node1 > node2:
             node1, node2 = node2, node1
@@ -117,7 +119,7 @@ class Embedding(ABC):
         g = Graph()
         for node in nodes:
             g.add_node(node, self._labels[node])
-        for edge in heapq.nsmallest(k//2, dists):
+        for edge in heapq.nsmallest(k // 2, dists):
             g.add_edge(edge[1], edge[2])
             g.add_edge(edge[2], edge[1])
         return g
@@ -125,7 +127,7 @@ class Embedding(ABC):
     def get_knng(self, k, cache_dists=False):
         """
         Returns k-NN graph based on the embedding.
-        
+
         k : int
         cache_dists : boolean
             If true, the pairwise distances will be cached for later use.
@@ -154,8 +156,8 @@ class Embedding(ABC):
                         node1,
                     ),
                 )
-                dists[node1] = dists[node1][:int(k)]
-                dists[node2] = dists[node2][:int(k)]
+                dists[node1] = dists[node1][: int(k)]
+                dists[node2] = dists[node2][: int(k)]
 
         g = Graph()
         for node in nodes:
@@ -220,14 +222,14 @@ class Embedding(ABC):
         f.close()
 
     @classmethod
-    def from_file(self, path):
+    def from_file(cls, path):
         e = DummyEmbedding()
         e._embedding = {}
         e._labels = {}
         e._dists = {}
         try:
             f = open(path, "r")
-        except:
+        except OSError:
             print("Unexisting file " + path)
             return None
         try:
@@ -237,13 +239,16 @@ class Embedding(ABC):
                 try:
                     node_id = int(node_id)
                 except:
-                    pass
+                    print(
+                        f"WARN: cannot convert node_id '{node_id}' to a numerical value."
+                    )
                 node_label = line_s[1] if line_s[1] != "" else None
                 node_embedding = [float(x) for x in line_s[2].split(",")]
                 e._embedding[node_id] = np.array(node_embedding)
                 e._labels[node_id] = node_label
-        except:
+        except Exception as e:
             print("Invalid file format.")
+            print(e)
             return None
         f.close()
         return e

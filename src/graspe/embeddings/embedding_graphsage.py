@@ -1,17 +1,13 @@
 import time
 
+import dgl
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import itertools
-import numpy as np
-import dgl
-from dgl.data import load_data
-from dgl.data.citation_graph import load_cora
+from dgl.nn.pytorch import SAGEConv
 
-from common.dataset_pool import DatasetPool
 from embeddings.base.embedding import Embedding
-from dgl.nn.pytorch import GraphConv, SAGEConv
 
 
 class GraphSAGE(nn.Module):
@@ -34,7 +30,7 @@ class GraphSAGE(nn.Module):
         # input layer
         self.layers.append(SAGEConv(in_feats, n_hidden, aggregator_type))
         # hidden layers
-        for i in range(n_layers - 1):
+        for _ in range(n_layers - 1):
             self.layers.append(SAGEConv(n_hidden, n_hidden, aggregator_type))
         # output layer
         self.layers.append(

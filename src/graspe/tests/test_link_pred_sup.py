@@ -1,14 +1,17 @@
-from common.dataset_pool import DatasetPool
-from embeddings.embedding_node2vec import Node2VecEmbedding
+import time
 
 import networkx as nx
 import numpy as np
-import time
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_score, recall_score
+from sklearn.model_selection import train_test_split
 
-if __name__ == "__main__":
+from common.dataset_pool import DatasetPool
+from embeddings.embedding_node2vec import Node2VecEmbedding
+
+
+def test_link_pred_supervised():
+    # TODO: da li je u redu ime funkcije?
     graph = DatasetPool.load("cora_ml")
     embedding = Node2VecEmbedding(graph, 10, 0.1, 0.5)
     start_time = time.time()

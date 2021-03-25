@@ -1,16 +1,10 @@
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
-
-import torch
-
-
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, precision_score, recall_score
-
 import numpy as np
+import torch
+import torch.nn as nn
+from sklearn.metrics import precision_score, recall_score
+from sklearn.model_selection import train_test_split
 
-from classifications.base.classifier import Classifier
+from evaluation.classifications.base.classifier import Classifier
 
 
 class Net(nn.Module):
@@ -74,9 +68,6 @@ class NeuralNetworkClassification(Classifier):
 
         print("Finished Training")
 
-        correct = 0
-        total = 0
-        pred_labels = []
         with torch.no_grad():
             predicted = np.argmax(net(test_data), axis=1)
 

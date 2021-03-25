@@ -1,7 +1,7 @@
+import random
+
 import dgl
 import networkx as nx
-import numpy as np
-import random
 
 
 class Graph:
@@ -52,7 +52,11 @@ class Graph:
         """
         Returns edges of the graph.
         """
-        return list(self.__graph.edges(data=data) if node == None else self.__graph.edges(node, data=data))
+        return list(
+            self.__graph.edges(data=data)
+            if node == None
+            else self.__graph.edges(node, data=data)
+        )
 
     def nodes_cnt(self):
         """
@@ -114,6 +118,7 @@ class Graph:
         or a number if a single node is specified.
         """
         h = self.__graph.in_degree(nodes)
+        # TODO: ovde javlja int nije callable?
         if h is int:
             return h
         return {n: n_h for n, n_h in h}
@@ -274,7 +279,7 @@ class Graph:
             if len(predicted_edges) != 0:
                 real_edges = self.__graph.edges(node)
                 num_real_edges = len(real_edges)
-                
+
                 if num_real_edges != 0:
                     node_s = 0
                     for p_edge in predicted_edges:
