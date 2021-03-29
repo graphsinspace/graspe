@@ -41,10 +41,12 @@ class Classifier:
     def precision(self):
         prec = precision_score(self.test_labels, self.predicted_labels, average=None)
         print("Precision: ", prec)
+        return prec
 
     def recall(self):
-        prec = recall_score(self.test_labels, self.predicted_labels, average=None)
-        print("Precision: ", prec)
+        recall = recall_score(self.test_labels, self.predicted_labels, average=None)
+        print("Recall: ", recall)
+        return recall
 
     # Override this for custom non-sklearn methods:
     def classify(self):
