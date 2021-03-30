@@ -1,0 +1,40 @@
+Average hubness: 5.96827726349063
+Fraction of nodes with low hubness: 0.6778053736735155
+Fraction of nodes with high hubness: 0.32219462632648455
+Average map: 0.22984448881684366
+Average map for low hubness: 0.21659085818884583
+Average map for high hubness: 0.2577263382528954
+Mann Whitney U for map values of two groups of nodes 1) nodes with low hubness, 2) nodes with high hubness: 0.010992101450685954
+Probability that low hubness points have greater map: 0.22078438305787265
+Probability that high hubness points have greater map: 0.23779018554320477
+Average recall: 0.17010585189580457
+Average recall for low hubness: 0.23458805240950478
+Average recall for high hubness: 0.034453738411482
+Mann Whitney U for recall values of two groups of nodes 1) nodes with low hubness, 2) nodes with high hubness: 3.4986149782828317e-28
+Probability that low hubness points have greater recall: 0.2916237487318662
+Probability that high hubness points have greater recall: 0.21001955832294938
+Average f1 for low hubness: 0.1900103052683073
+Average f1 for high hubness: 0.057246004980661305
+Mann Whitney U for f1 values of two groups of nodes 1) nodes with low hubness, 2) nodes with high hubness: 1.285776641619739e-16
+Probability that low hubness points have greater f1: 0.28130208510840937
+Probability that high hubness points have greater f1: 0.2201338152514068
+Average knng map: 0.3332354933392988
+Average knng recall: 0.5235816892478027
+Correlation between native hubness and reconstructed hubness (pearson, spearman, kendall): -0.07195713539540272, -0.3086994745057199, -0.24914854232582775
+Correlation between native hubness and knng hubness (k=5) (pearson, spearman, kendall): 0.1753431198626142, 0.0923724058528378, 0.06777843561483358
+Correlation between native hubness and knng hubness (k=auto) (pearson, spearman, kendall): 0.1753431198626142, 0.0923724058528378, 0.06777843561483358
+Correlation between reconstructed hubness and knng hubness (k=5) (pearson, spearman, kendall): 0.05159394014820895, 0.29344676925039753, 0.23853729298259987
+Correlation between reconstructed hubness and knng hubness (k=auto) (pearson, spearman, kendall): 0.05159394014820895, 0.29344676925039753, 0.23853729298259987
+Correlation between knng hubness (k=5) and knng hubness (k=auto) (pearson, spearman, kendall): 0.9999999999999998, 1.0, 1.0
+Correlation between native hubness and map (pearson, spearman, kendall): 0.09002706476059744, -0.09076456610513156, -0.07803641750599762
+Correlation between reconstructed hubness and map (pearson, spearman, kendall): -0.06936418623313069, 0.6251929504386441, 0.5175404361417179
+Correlation between knng hubness (k=5) and map (pearson, spearman, kendall): 0.034275688967386905, 0.07940360326120596, 0.06538299491237944
+Correlation between knng hubness (k=auto) and map (pearson, spearman, kendall): 0.034275688967386905, 0.07940360326120596, 0.06538299491237944
+Correlation between native hubness and recall (pearson, spearman, kendall): -0.20926721291569209, -0.226912955992415, -0.18842271861053866
+Correlation between reconstructed hubness and recall (pearson, spearman, kendall): 0.3282343801070501, 0.6637200886814606, 0.5926591283027619
+Correlation between knng hubness (k=5) and recall (pearson, spearman, kendall): 0.0077510726940883965, 0.07752857443027167, 0.06288885471537012
+Correlation between knng hubness (k=auto) and recall (pearson, spearman, kendall): 0.0077510726940883965, 0.07752857443027167, 0.06288885471537012
+Correlation between native hubness and f1 (pearson, spearman, kendall): -0.1620253419041453, -0.19170657580281936, -0.15772986507161132
+Correlation between reconstructed hubness and f1 (pearson, spearman, kendall): -0.0563716997046124, 0.6347226009560044, 0.5292704082849019
+Correlation between knng hubness (k=5) and f1 (pearson, spearman, kendall): -0.040596608678811305, 0.06614071577375437, 0.052586382491733565
+Correlation between knng hubness (k=auto) and f1 (pearson, spearman, kendall): -0.040596608678811305, 0.06614071577375437, 0.052586382491733565

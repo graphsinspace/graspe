@@ -1,0 +1,40 @@
+Average hubness: 20.884889470622454
+Fraction of nodes with low hubness: 0.7764688772542175
+Fraction of nodes with high hubness: 0.22353112274578243
+Average map: 0.19442116888111763
+Average map for low hubness: 0.13744138935717853
+Average map for high hubness: 0.3923489781708498
+Mann Whitney U for map values of two groups of nodes 1) nodes with low hubness, 2) nodes with high hubness: 4.9912273407443414e-48
+Probability that low hubness points have greater map: 0.2691881458578757
+Probability that high hubness points have greater map: 0.42736407791185105
+Average recall: 0.0696859660330096
+Average recall for low hubness: 0.08350608763217948
+Average recall for high hubness: 0.021679701089636114
+Mann Whitney U for recall values of two groups of nodes 1) nodes with low hubness, 2) nodes with high hubness: 1.8280272049227553e-49
+Probability that low hubness points have greater recall: 0.4405120714088386
+Probability that high hubness points have greater recall: 0.2796950369380224
+Average f1 for low hubness: 0.0639079005351641
+Average f1 for high hubness: 0.037107819741840666
+Mann Whitney U for f1 values of two groups of nodes 1) nodes with low hubness, 2) nodes with high hubness: 9.663325996977266e-08
+Probability that low hubness points have greater f1: 0.3885846991052813
+Probability that high hubness points have greater f1: 0.3317821695548025
+Average knng map: 0.15545011634670858
+Average knng recall: 0.1858779539190343
+Correlation between native hubness and reconstructed hubness (pearson, spearman, kendall): -0.13631105200087554, -0.6005712965171555, -0.43397385985751746
+Correlation between native hubness and knng hubness (k=5) (pearson, spearman, kendall): 0.060459852235613086, -0.06638660602713763, -0.04774425311280489
+Correlation between native hubness and knng hubness (k=auto) (pearson, spearman, kendall): 0.03918782515937023, -0.13407907280985465, -0.09298369290509398
+Correlation between reconstructed hubness and knng hubness (k=5) (pearson, spearman, kendall): 0.2078588984782531, 0.36296005715780466, 0.268618078209288
+Correlation between reconstructed hubness and knng hubness (k=auto) (pearson, spearman, kendall): 0.32251224248417776, 0.4992115483209839, 0.3627096893645025
+Correlation between knng hubness (k=5) and knng hubness (k=auto) (pearson, spearman, kendall): 0.7311894179564394, 0.7246240148198324, 0.5619264814498777
+Correlation between native hubness and map (pearson, spearman, kendall): 0.2404732223063142, 0.22336740407846686, 0.18617385028670183
+Correlation between reconstructed hubness and map (pearson, spearman, kendall): -0.25009979356882245, 0.20812905708332333, 0.0794481843429262
+Correlation between knng hubness (k=5) and map (pearson, spearman, kendall): 0.1349503738276512, 0.27494808354410144, 0.20814297182616803
+Correlation between knng hubness (k=auto) and map (pearson, spearman, kendall): 0.04245278917744341, 0.24440985104351523, 0.17626799590653386
+Correlation between native hubness and recall (pearson, spearman, kendall): -0.09029211286878741, -0.03456760417079339, -0.03125983067096391
+Correlation between reconstructed hubness and recall (pearson, spearman, kendall): 0.07042740669868121, 0.42947564140294353, 0.34362608450737664
+Correlation between knng hubness (k=5) and recall (pearson, spearman, kendall): 0.1417519729537566, 0.2931491484634116, 0.22307130427302563
+Correlation between knng hubness (k=auto) and recall (pearson, spearman, kendall): 0.1347838729353592, 0.3082873329723109, 0.2288004846802586
+Correlation between native hubness and f1 (pearson, spearman, kendall): -0.04804771829753797, 0.08623753480765928, 0.06674469323694279
+Correlation between reconstructed hubness and f1 (pearson, spearman, kendall): -0.12513303211871693, 0.30973475520447846, 0.2127908897522951
+Correlation between knng hubness (k=5) and f1 (pearson, spearman, kendall): 0.11118638851433936, 0.28269469008756365, 0.21316699131737105
+Correlation between knng hubness (k=auto) and f1 (pearson, spearman, kendall): 0.036268641891526295, 0.26631233925559217, 0.1930757063143751
