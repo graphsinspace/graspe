@@ -12,7 +12,7 @@ d = 10
 organized_results = {}
 for result in results:
     if result.d != d:
-        continue 
+        continue
     for correl in result.correls:
         if not correl in organized_results:
             organized_results[correl] = {}
@@ -31,17 +31,21 @@ for correl in organized_results:
         stds = []
         for dataset in organized_results[correl][stat]:
             stds.append(statistics.stdev(organized_results[correl][stat][dataset]))
-        overall_chart_data.append([correl.replace("Correlation between", ""), stat, statistics.mean(stds)])
+        overall_chart_data.append(
+            [correl.replace("Correlation between", ""), stat, statistics.mean(stds)]
+        )
 
 fig, ax = plt.subplots(figsize=[12, 6])
-f_data = pd.DataFrame(data=overall_chart_data, columns=["correlation variables", "measures", "std"])
+f_data = pd.DataFrame(
+    data=overall_chart_data, columns=["correlation variables", "measures", "std"]
+)
 f = sns.barplot(ax=ax, x="correlation variables", y="std", hue="measures", data=f_data)
 f.set_xlabel("")
 plt.xticks(
-    fontsize="small", 
-    fontweight='light',
+    fontsize="small",
+    fontweight="light",
     rotation=30,
-    horizontalalignment='right',
+    horizontalalignment="right",
 )
 plt.tight_layout()
 plt.savefig("../figures/n2v_variants_std.png")

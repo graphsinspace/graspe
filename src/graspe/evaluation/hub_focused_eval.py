@@ -21,12 +21,13 @@ def hubness_stats(emb_directory, d, out, g_name=None, preset="_", algs=None, k=5
             e = emb_fact.get_embedding(i)
             e_name = emb_fact.get_full_name(g_name, i)
             base_filename = os.path.join(out, e_name)
-
-            recg = e.reconstruct(g_undirected.edges_cnt())
+            
+            reck = g_undirected.edges_cnt()
+            if reck % 2 == 1:
+                reck -= 1
+            recg = e.reconstruct(reck)
             knng_k = e.get_knng(k)
             knng_auto = e.get_knng(g.edges_cnt() / g.nodes_cnt())
-            if knng_auto % 2 == 1:
-                knng_auto -= 1
 
             recg_avg_map, recg_maps = g_undirected.map_value(recg)
             recg_avg_recall, recg_recalls = g_undirected.recall(recg)

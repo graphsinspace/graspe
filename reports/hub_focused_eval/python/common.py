@@ -1,8 +1,9 @@
 import os
 import re
 
+
 class Result:
-    
+
     stats = [
         "pearson",
         "spearman",
@@ -43,7 +44,6 @@ class Result:
         self.algorithm = splt[1]
         self.parse()
 
-    
     def parse(self):
         self.titles = {}
         self.correls = {}
@@ -58,15 +58,20 @@ class Result:
             for i in range(len(Result.properties), len(lines)):
                 correl_name = lines[i][0].replace(" (pearson, spearman, kendall)", "")
                 correl_vals = [float(x) for x in lines[i][1].split(", ")]
-                self.correls[correl_name] = {"pearson": correl_vals[0], "spearman": correl_vals[1], "kendall": correl_vals[2]}
+                self.correls[correl_name] = {
+                    "pearson": correl_vals[0],
+                    "spearman": correl_vals[1],
+                    "kendall": correl_vals[2],
+                }
 
 
 def get_result_files(path):
     files = []
     for filename in os.listdir(path):
         if filename.endswith(".txt"):
-            files.append(Result(os.path.join(path,filename)))
+            files.append(Result(os.path.join(path, filename)))
     return files
+
 
 # Correlation between native hubness and reconstructed hubness (pearson, spearman, kendall): -0.13791170390388646, -0.6172889163579542, -0.4477484640559191
 # Correlation between native hubness and knng hubness (k=5) (pearson, spearman, kendall): 0.04445359703441836, -0.08685370827756446, -0.062321189033560466
