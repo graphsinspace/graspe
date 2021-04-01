@@ -227,16 +227,16 @@ def argparse_n2v(subparsers_embed):
         "-o", "--out", help="Output file.", default="out.embedding"
     )
     parser_embed_node2vec.add_argument(
-        "-walk_length", "--walk_length", help="Length of random walks.", default=10
+        "-walk_length", "--walk_length", help="Length of random walks.", default=80
     )
     parser_embed_node2vec.add_argument(
-        "-num_walks", "--num_walks", help="Number of random walks.", default=200
+        "-num_walks", "--num_walks", help="Number of random walks.", default=10
     )
     parser_embed_node2vec.add_argument(
         "-workers",
         "--workers",
         help="Number of workers for parallel execution.",
-        default=1,
+        default=10,
     )
 
 

@@ -4,62 +4,62 @@ import statistics
 import math
 import seaborn as sns
 import matplotlib.pyplot as plt
+import common as cmn
 
 sns.set_theme()
 
+results = cmn.get_result_files("..")
+d = 10
+algorithm = "N2V"
 
-def read_file(filename):
-    with open(filename, "r") as f:
-        lines = f.readlines()
-    d = {}
-    d["map_l"] = float(lines[4].strip().split(": ")[1])
-    d["map_h"] = float(lines[5].strip().split(": ")[1])
-    d["mwu"] = float(lines[6].strip().split(": ")[1])
-    d["prob_l"] = float(lines[7].strip().split(": ")[1])
-    d["prob_h"] = float(lines[8].strip().split(": ")[1])
-    return d
-
-
-directory = "native_hubness_map_stats"
-datasets = [
-    "cora",
-    "cora_ml",
-    "karate_club_graph",
-    "dblp",
-    "les_miserables_graph",
-    "citeseer",
-    "amazon_electronics_photo",
-    "amazon_electronics_computers",
-    "pubmed",
-    "florentine_families_graph",
-]
-
-data_map_prob = []
+data_prob = []
 data_mwu = []
-for dataset in datasets:
-    stats = read_file(os.path.join(directory, dataset + "_d10_N2V.txt"))
-    data_map_prob.append([dataset, "map", "low-hubness points", stats["map_l"]])
-    data_map_prob.append([dataset, "map", "high-hubness points", stats["map_h"]])
-    data_map_prob.append(
-        [
-            dataset,
-            "probability of having higher map",
-            "low-hubness points",
-            stats["prob_l"],
-        ]
-    )
-    data_map_prob.append(
-        [
-            dataset,
-            "probability of having higher map",
-            "high-hubness points",
-            stats["prob_h"],
-        ]
-    )
-    data_mwu.append([dataset, "mwu", stats["mwu"]])
+for measure in ["map", "recall", "f1"]:
+    for result in results:
+        if result.d != d or result.algorithm != algorithm:
+            continue
+        data_prob.append(
+            [
+                result.dataset,
+                measure,
+                "low-hubness points",
+                getattr(result, "avg_{}_low_hubness".format(measure)),
+            ]
+        )
+        data_prob.append(
+            [
+                result.dataset,
+                measure,
+                "high-hubness points",
+                getattr(result, "avg_{}_high_hubness".format(measure)),
+            ]
+        )
+        data_prob.append(
+            [
+                result.dataset,
+                "probability of having higher {}".format(measure),
+                "low-hubness points",
+                getattr(result, "s_prob_{}_low_hubness".format(measure)),
+            ]
+        )
+        data_prob.append(
+            [
+                result.dataset,
+                "probability of having higher {}".format(measure),
+                "high-hubness points",
+                getattr(result, "s_prob_{}_high_hubness".format(measure)),
+            ]
+        )
+        data_mwu.append(
+            [
+                result.dataset,
+                "mwu for {}".format(measure),
+                getattr(result, "mwu_{}_low_high_hubness".format(measure)),
+            ]
+        )
 
 f_data = pd.DataFrame(
-    data=data_map_prob, columns=["dataset", "type", "sub-type", "value"]
+    data=data_prob, columns=["dataset", "type", "sub-type", "value"]
 )
 g = sns.FacetGrid(f_data, row="type", height=2, aspect=4, sharey=False)
 g.map_dataframe(
@@ -67,19 +67,7 @@ g.map_dataframe(
     x="dataset",
     y="value",
     hue="sub-type",
-    palette=sns.color_palette("tab10"),
-    order=[
-        "cora",
-        "cora_ml",
-        "karate_club_graph",
-        "dblp",
-        "les_miserables_graph",
-        "citeseer",
-        "amazon_electronics_photo",
-        "amazon_electronics_computers",
-        "pubmed",
-        "florentine_families_graph",
-    ],
+    palette=sns.color_palette("tab20"),
 )
 plt.xticks(
     fontweight="light",
@@ -88,19 +76,22 @@ plt.xticks(
 )
 plt.tight_layout()
 g.add_legend()
-plt.savefig("low-high_hubness-map-prob.png")
+plt.savefig("../figures/low-high_hubness-prob.png")
 plt.close()
 
 fig, ax = plt.subplots(figsize=[6, 3])
 f_data = pd.DataFrame(data=data_mwu, columns=["dataset", "mwu", "p-value"])
-f = sns.barplot(ax=ax, x="dataset", y="p-value", hue="mwu", data=f_data)
-f.get_legend().remove()
-f.set_xlabel("")
+g = sns.FacetGrid(f_data, row="mwu", height=2, aspect=4, sharey=False)
+g.map_dataframe(
+    sns.barplot,
+    x="dataset",
+    y="p-value",
+)
 plt.xticks(
     fontweight="light",
     rotation=30,
     horizontalalignment="right",
 )
 plt.tight_layout()
-plt.savefig("low-high_hubness-mwu.png")
+plt.savefig("../figures/low-high_hubness-mwu.png")
 plt.close()

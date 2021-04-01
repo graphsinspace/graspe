@@ -193,7 +193,7 @@ class Node2VecEmbeddingBase(Embedding):
 
 class Node2VecEmbedding(Node2VecEmbeddingBase):
     def __init__(
-        self, g, d, p=1, q=1, walk_length=80, num_walks=10, workers=4, seed=42
+        self, g, d, p=1, q=1, walk_length=80, num_walks=10, workers=10, seed=42
     ):
         super().__init__(g, d, walk_length, num_walks, workers, seed)
         self._p = p
