@@ -63,6 +63,7 @@ class Result:
                     "spearman": correl_vals[1],
                     "kendall": correl_vals[2],
                 }
+            self.avg_f1 = (2 * self.avg_map * self.avg_recall) / (self.avg_map + self.avg_recall) if self.avg_map + self.avg_recall != 0 else 0
 
 
 def get_result_files(path):

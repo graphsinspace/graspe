@@ -1,0 +1,40 @@
+Average hubness: 1.2666666666666666
+Fraction of nodes with low hubness: 0.791725768321513
+Fraction of nodes with high hubness: 0.208274231678487
+Average map: 0.0003734613189858971
+Average map for low hubness: 0.00032240710042112414
+Average map for high hubness: 0.0005675368898978433
+Mann Whitney U for map values of two groups of nodes 1) nodes with low hubness, 2) nodes with high hubness: 0.4185590660315057
+Probability that low hubness points have greater map: 0.0008951119296627079
+Probability that high hubness points have greater map: 0.0011347348506288322
+Average recall: 0.0007092198581560284
+Average recall for low hubness: 0.000746491489997014
+Average recall for high hubness: 0.0005675368898978433
+Mann Whitney U for recall values of two groups of nodes 1) nodes with low hubness, 2) nodes with high hubness: 0.4189003127671554
+Probability that low hubness points have greater recall: 0.0008954508588295624
+Probability that high hubness points have greater recall: 0.0011340569922951233
+Average f1 for low hubness: 0.0002443153271349483
+Average f1 for high hubness: 0.0005675368898978433
+Mann Whitney U for f1 values of two groups of nodes 1) nodes with low hubness, 2) nodes with high hubness: 0.4185590660315057
+Probability that low hubness points have greater f1: 0.0008951119296627079
+Probability that high hubness points have greater f1: 0.0011347348506288322
+Average knng map: 0.019148936170212766
+Average knng recall: 0.012517730496453905
+Correlation between native hubness and reconstructed hubness (pearson, spearman, kendall): -0.11544415721265404, -0.22331190445042925, -0.19453386328286196
+Correlation between native hubness and knng hubness (k=5) (pearson, spearman, kendall): -0.09335845648359162, -0.09351571069699684, -0.07439552842340673
+Correlation between native hubness and knng hubness (k=auto) (pearson, spearman, kendall): -0.04332264355208251, -0.03855446949061106, -0.0334068248946338
+Correlation between reconstructed hubness and knng hubness (k=5) (pearson, spearman, kendall): 0.4792458658831813, 0.3901342363077941, 0.31625431848858954
+Correlation between reconstructed hubness and knng hubness (k=auto) (pearson, spearman, kendall): 0.2503054927304095, 0.28029836551936826, 0.24171108996827145
+Correlation between knng hubness (k=5) and knng hubness (k=auto) (pearson, spearman, kendall): 0.5151863461118568, 0.50313954673137, 0.4115804475401575
+Correlation between native hubness and map (pearson, spearman, kendall): 0.00022900170876582711, 0.01774191573722314, 0.016586984470035347
+Correlation between reconstructed hubness and map (pearson, spearman, kendall): 3.0374356561958972e-05, 0.04270147503949766, 0.03934773975595763
+Correlation between knng hubness (k=5) and map (pearson, spearman, kendall): 0.005728073487910613, 0.02740084774105609, 0.02336381164352185
+Correlation between knng hubness (k=auto) and map (pearson, spearman, kendall): 0.026478021780526842, 0.03238053206734041, 0.030015038289943737
+Correlation between native hubness and recall (pearson, spearman, kendall): -0.0034296062661009533, 0.01772487802435413, 0.01656743155925625
+Correlation between reconstructed hubness and recall (pearson, spearman, kendall): 0.10689865934275115, 0.04271773581461241, 0.03938362767875936
+Correlation between knng hubness (k=5) and recall (pearson, spearman, kendall): 0.027905438770164884, 0.027414460897107643, 0.02338138551784112
+Correlation between knng hubness (k=auto) and recall (pearson, spearman, kendall): 0.023246865005626942, 0.03237282823465584, 0.03000446845712483
+Correlation between native hubness and f1 (pearson, spearman, kendall): 0.0005673600824138507, 0.01774191573722314, 0.016586984470035347
+Correlation between reconstructed hubness and f1 (pearson, spearman, kendall): 0.006464885748844065, 0.04270147503949766, 0.03934773975595763
+Correlation between knng hubness (k=5) and f1 (pearson, spearman, kendall): 0.007666365512534459, 0.02740084774105609, 0.02336381164352185
+Correlation between knng hubness (k=auto) and f1 (pearson, spearman, kendall): 0.029680580951775365, 0.03238053206734041, 0.030015038289943737

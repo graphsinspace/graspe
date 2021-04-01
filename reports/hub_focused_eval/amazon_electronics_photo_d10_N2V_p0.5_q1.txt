@@ -1,0 +1,40 @@
+Average hubness: 18.779477124183007
+Fraction of nodes with low hubness: 0.7498039215686274
+Fraction of nodes with high hubness: 0.25019607843137254
+Average map: 0.3221367127972533
+Average map for low hubness: 0.22853944007713742
+Average map for high hubness: 0.6026351225791746
+Mann Whitney U for map values of two groups of nodes 1) nodes with low hubness, 2) nodes with high hubness: 2.201152710450139e-163
+Probability that low hubness points have greater map: 0.22306886131550682
+Probability that high hubness points have greater map: 0.6269768271373379
+Average recall: 0.11187098640698995
+Average recall for low hubness: 0.12205939745280044
+Average recall for high hubness: 0.08133769186218097
+Mann Whitney U for recall values of two groups of nodes 1) nodes with low hubness, 2) nodes with high hubness: 0.0011264691888984686
+Probability that low hubness points have greater recall: 0.47135171874567344
+Probability that high hubness points have greater recall: 0.42586319842487785
+Average f1 for low hubness: 0.10659761150562871
+Average f1 for high hubness: 0.12626832704832233
+Mann Whitney U for f1 values of two groups of nodes 1) nodes with low hubness, 2) nodes with high hubness: 1.3569920114061607e-23
+Probability that low hubness points have greater f1: 0.37503087796155177
+Probability that high hubness points have greater f1: 0.5230945291903306
+Average knng map: 0.2287872185911432
+Average knng recall: 0.2830669875644842
+Correlation between native hubness and reconstructed hubness (pearson, spearman, kendall): -0.16537772845242252, -0.4531297920527711, -0.3128805322050653
+Correlation between native hubness and knng hubness (k=5) (pearson, spearman, kendall): 0.10704063639057479, 0.02222461761574092, 0.015693129360051804
+Correlation between native hubness and knng hubness (k=auto) (pearson, spearman, kendall): 0.13517068517304484, 0.026914635195881866, 0.019821584006387147
+Correlation between reconstructed hubness and knng hubness (k=5) (pearson, spearman, kendall): 0.18992956409294492, 0.38203880882478164, 0.2841663548046828
+Correlation between reconstructed hubness and knng hubness (k=auto) (pearson, spearman, kendall): 0.30408063121070805, 0.48597834138782686, 0.3512122719868435
+Correlation between knng hubness (k=5) and knng hubness (k=auto) (pearson, spearman, kendall): 0.7010392454614399, 0.6876008803391686, 0.5284471659506322
+Correlation between native hubness and map (pearson, spearman, kendall): 0.30519554838367824, 0.44582995940189396, 0.351273101379644
+Correlation between reconstructed hubness and map (pearson, spearman, kendall): -0.37682842705970715, -0.04435618964959703, -0.11222578209084748
+Correlation between knng hubness (k=5) and map (pearson, spearman, kendall): 0.1316639255846574, 0.21932216343045263, 0.16159298865906846
+Correlation between knng hubness (k=auto) and map (pearson, spearman, kendall): 0.04411487966694303, 0.14577363861111473, 0.10301467746887745
+Correlation between native hubness and recall (pearson, spearman, kendall): -0.08826290316382483, 0.07722901144133663, 0.045741828016526286
+Correlation between reconstructed hubness and recall (pearson, spearman, kendall): 0.07578118673239399, 0.35408524615180625, 0.2770143128022938
+Correlation between knng hubness (k=5) and recall (pearson, spearman, kendall): 0.19204073258864054, 0.3108391123296318, 0.231706222685896
+Correlation between knng hubness (k=auto) and recall (pearson, spearman, kendall): 0.12600307552507484, 0.2619396000987111, 0.19010988360405218
+Correlation between native hubness and f1 (pearson, spearman, kendall): -0.0023989470185887714, 0.27851314720312204, 0.20083546157415438
+Correlation between reconstructed hubness and f1 (pearson, spearman, kendall): -0.2094307016414276, 0.13646481354092607, 0.08371302524493607
+Correlation between knng hubness (k=5) and f1 (pearson, spearman, kendall): 0.2031516664062258, 0.2988269358675353, 0.22104208159578156
+Correlation between knng hubness (k=auto) and f1 (pearson, spearman, kendall): 0.08879230754854572, 0.21999804904935424, 0.1577722672911664
