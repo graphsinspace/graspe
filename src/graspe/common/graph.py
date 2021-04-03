@@ -118,8 +118,7 @@ class Graph:
         or a number if a single node is specified.
         """
         h = self.__graph.in_degree(nodes)
-        # TODO: ovde javlja int nije callable?
-        if h is int:
+        if isinstance(h, int):
             return h
         return {n: n_h for n, n_h in h}
 

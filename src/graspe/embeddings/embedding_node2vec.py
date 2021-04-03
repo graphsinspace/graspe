@@ -9,10 +9,8 @@ from embeddings.base.embedding import Embedding
 
 
 class Node2VecEmbeddingBase(Embedding):
-    def __init__(self, g, d, walk_length=80, num_walks=10, workers=4, seed=42):
+    def __init__(self, g, d, workers=4, seed=42):
         super().__init__(g, d)
-        self._walk_length = walk_length
-        self._num_walks = num_walks
         self._workers = workers
         self._seed = seed
         self.alias_nodes = {}
@@ -228,7 +226,7 @@ class Node2VecEmbeddingFastBase(Node2VecEmbeddingBase):
 
 class Node2VecEmbeddingSlowBase(Node2VecEmbeddingBase):
     """
-    Node2Vec version without preprocessing step, which makes this Node2Vec version slower.
+    Node2Vec version without preprocessing step, i.e. slower Node2Vec version.
     Inherit this class ONLY if p and q values depend on walks' start nodes.
     """
 
@@ -251,9 +249,11 @@ class Node2VecEmbedding(Node2VecEmbeddingFastBase):
     def __init__(
         self, g, d, p=1, q=1, walk_length=80, num_walks=10, workers=10, seed=42
     ):
-        super().__init__(g, d, walk_length, num_walks, workers, seed)
+        super().__init__(g, d, workers, seed)
         self._p = p
         self._q = q
+        self._walk_length = walk_length
+        self._num_walks = num_walks
 
     def p_value(self, node1, node2):
         return self._p
