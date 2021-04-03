@@ -18,18 +18,41 @@ class Node2VecEmbeddingBase(Embedding):
         self.alias_nodes = {}
         self.alias_edges = {}
 
-    def get_alias_edge(self, node1, node2):
+    def init_p_q_values(self):
+        self._p_node = {}
+        self._q_node = {}
+        self._p_edge = {}
+        self._q_edge = {}
+
+        self._preprocess = True
+        for node in self._g.nodes():
+            node_id = node[0]
+            p = self.p_value_node(node_id)
+            q = self.q_value_node(node_id)
+            if p != 1 or q != 1:
+                self._preprocess = False
+            self._p_node[node_id] = p
+            self._q_node[node_id] = q
+
+        for edge in self._g.edges():
+            self._p_edge[edge] = self.p_value_edge(edge[0], edge[1])
+            self._q_edge[edge] = self.q_value_edge(edge[0], edge[1])
+
+    def get_alias_edge(self, edge, p_start_node=1, q_start_node=1):
         """
         Get the alias edge setup lists for a given edge.
         """
         G = self._g
-        p = self.p_value(node1, node2)
-        q = self.q_value(node1, node2)
+        p = self._p_edge[edge] * p_start_node
+        q = self._q_edge[edge] * q_start_node
+
+        node1 = edge[0]
+        node2 = edge[1]
 
         unnormalized_probs = []
-        for edge in sorted(G.edges(node2, data=True)):
-            dst_nbr = edge[1]
-            weight = edge[2]["w"] if "w" in edge[2] else 1
+        for e in sorted(G.edges(node2, data=True)):
+            dst_nbr = e[1]
+            weight = e[2]["w"] if "w" in e[2] else 1
             if dst_nbr == node1:
                 unnormalized_probs.append(weight / p)
             elif G.has_edge(dst_nbr, node1):
@@ -41,15 +64,14 @@ class Node2VecEmbeddingBase(Embedding):
 
         return Node2VecEmbeddingBase.alias_setup(normalized_probs)
 
-    def preprocess_transition_probs(self):
+    def preprocess_transition_probs_nodes(self):
         """
         Preprocessing of transition probabilities for guiding the random walks.
         """
-        G = self._g
-        alias_nodes = {}
-        for node in G.nodes():
+        self.alias_nodes = {}
+        for node in self._g.nodes():
             node_id = node[0]
-            node_edges = sorted(G.edges(node[0], data=True))
+            node_edges = sorted(self._g.edges(node[0], data=True))
             unnormalized_probs = [
                 (edge[2]["w"] if "w" in edge[2] else 1) for edge in node_edges
             ]
@@ -57,16 +79,17 @@ class Node2VecEmbeddingBase(Embedding):
             normalized_probs = [
                 float(u_prob) / norm_const for u_prob in unnormalized_probs
             ]
-            alias_nodes[node_id] = Node2VecEmbeddingBase.alias_setup(normalized_probs)
+            self.alias_nodes[node_id] = Node2VecEmbeddingBase.alias_setup(
+                normalized_probs
+            )
 
-        alias_edges = {}
-        # triads = {}
-
-        for edge in G.edges():
-            alias_edges[edge] = self.get_alias_edge(edge[0], edge[1])
-
-        self.alias_nodes = alias_nodes
-        self.alias_edges = alias_edges
+    def preprocess_transition_probs_edges(self):
+        """
+        Preprocessing of transition probabilities for guiding the random walks.
+        """
+        self.alias_edges = {}
+        for edge in self._g.edges():
+            self.alias_edges[edge] = self.get_alias_edge(edge)
 
     def node2vec_walk(self, walk_length, start_node):
         """
@@ -74,7 +97,6 @@ class Node2VecEmbeddingBase(Embedding):
         """
         G = self._g
         alias_nodes = self.alias_nodes
-        alias_edges = self.alias_edges
 
         walk = [start_node]
 
@@ -92,10 +114,13 @@ class Node2VecEmbeddingBase(Embedding):
                     )
                 else:
                     prev = walk[-2]
+                    alias_edges = (
+                        self.alias_edges[(prev, cur)]
+                        if self._preprocess
+                        else self.get_alias_edge((prev, cur))
+                    )
                     next_walk = cur_nbrs[
-                        Node2VecEmbeddingBase.alias_draw(
-                            alias_edges[(prev, cur)][0], alias_edges[(prev, cur)][1]
-                        )
+                        Node2VecEmbeddingBase.alias_draw(alias_edges[0], alias_edges[1])
                     ]
                     walk.append(next_walk)
             else:
@@ -103,19 +128,19 @@ class Node2VecEmbeddingBase(Embedding):
 
         return walk
 
-    def simulate_walks(self, num_walks, walk_length):
+    def simulate_walks(self):
         """
         Repeatedly simulate random walks from each node.
         """
         G = self._g
         walks = []
-        nodes = list(G.nodes())
-        for _ in range(num_walks):
-            random.shuffle(nodes)
-            for node in nodes:
-                walks.append(
-                    self.node2vec_walk(walk_length=walk_length, start_node=node[0])
-                )
+        for node in list(G.nodes()):
+            n = node[0]
+            num_walks = self.num_walks(n)
+            walk_length = self.walk_length(n)
+            for _ in range(num_walks):
+                walks.append(self.node2vec_walk(walk_length=walk_length, start_node=n))
+        random.shuffle(walks)
         return walks
 
     @staticmethod
@@ -164,8 +189,11 @@ class Node2VecEmbeddingBase(Embedding):
 
     def embed(self):
         super().embed()
-        self.preprocess_transition_probs()
-        walks = self.simulate_walks(self._num_walks, self._walk_length)
+        self.init_p_q_values()
+        self.preprocess_transition_probs_nodes()
+        if self._preprocess:
+            self.preprocess_transition_probs_edges()
+        walks = self.simulate_walks()
         walks = [list(map(str, walk)) for walk in walks]
         model = Word2Vec(
             walks,
@@ -182,12 +210,25 @@ class Node2VecEmbeddingBase(Embedding):
     def requires_labels(self):
         return False
 
+    def p_value_node(self, start_node):
+        return 1
+
     @abstractmethod
-    def p_value(self, node1, node2):
+    def p_value_edge(self, node1, node2):
+        pass
+
+    def q_value_node(self, start_node):
+        return 1
+
+    @abstractmethod
+    def q_value_edge(self, node1, node2):
         pass
 
     @abstractmethod
-    def q_value(self, node1, node2):
+    def num_walks(self, node):
+        pass
+
+    def walk_length(self, node):
         pass
 
 
@@ -199,11 +240,17 @@ class Node2VecEmbedding(Node2VecEmbeddingBase):
         self._p = p
         self._q = q
 
-    def p_value(self, node1, node2):
+    def p_value_edge(self, node1, node2):
         return self._p
 
-    def q_value(self, node1, node2):
+    def q_value_edge(self, node1, node2):
         return self._q
+
+    def num_walks(self, node):
+        return self._num_walks
+
+    def walk_length(self, node):
+        return self._walk_length
 
 
 class Node2VecEmbeddingNative(Embedding):
