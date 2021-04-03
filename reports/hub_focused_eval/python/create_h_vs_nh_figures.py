@@ -58,9 +58,7 @@ for measure in ["map", "recall", "f1"]:
             ]
         )
 
-f_data = pd.DataFrame(
-    data=data_prob, columns=["dataset", "type", "sub-type", "value"]
-)
+f_data = pd.DataFrame(data=data_prob, columns=["dataset", "type", "sub-type", "value"])
 g = sns.FacetGrid(f_data, row="type", height=2, aspect=4, sharey=False)
 g.map_dataframe(
     sns.barplot,

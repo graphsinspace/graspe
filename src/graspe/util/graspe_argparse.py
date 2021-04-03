@@ -121,6 +121,7 @@ def build_argparser():
         nargs="+",
         default=None,
     )
+
     # Action: generate_graphs
     parser_generate_graphs = subparsers.add_parser(
         "generate_graphs", help="generate_graphs help"
@@ -141,6 +142,43 @@ def build_argparser():
         default=[5],
     )
     parser_generate_graphs.add_argument("-o", "--out", help="Output directory.")
+
+    # Action: experimenter
+    parser_experimenter = subparsers.add_parser(
+        "experimenter", help="experimenter help"
+    )
+    parser_experimenter.add_argument(
+        "-g",
+        "--graphs",
+        help="Name of the datasets from the dataset pool",
+        nargs="+",
+    )
+    parser_experimenter.add_argument(
+        "-d",
+        "--dimension",
+        help="Dimension of the embedding.",
+        required=True,
+        type=int,
+    )
+    parser_experimenter.add_argument(
+        "-o",
+        "--out",
+        help="Output path. If not given, the results will be printed only in the standard output.",
+        default=None,
+    )
+    parser_experimenter.add_argument(
+        "-c", "--cache", help="Directory where the embeddings are stored.", default=None
+    )
+    parser_experimenter.add_argument(
+        "-p", "--preset", help="Algorithms preset name.", default="_"
+    )
+    parser_experimenter.add_argument(
+        "-a",
+        "--algs",
+        help="Algorithms",
+        nargs="+",
+        default=None,
+    )
 
     return parser
 

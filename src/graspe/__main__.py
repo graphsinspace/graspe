@@ -196,6 +196,15 @@ def generate_graphs(args):
     DatasetPool.generate_random_graphs(args.nvals, args.kmvals, out)
 
 
+def experimenter(args):
+    from evaluation.experimenter import Experimenter
+
+    experimenter = Experimenter(
+        args.graphs, args.dimension, args.preset, args.algs, args.cache
+    )
+    print(experimenter.run(args.out))
+
+
 if __name__ == "__main__":
     parser = build_argparser()
 
