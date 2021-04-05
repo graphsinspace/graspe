@@ -13,6 +13,14 @@ from embeddings.embedding_ha_node2vec import (
     HANode2VecNumWalksHubsMoreEmbedding,
     HANode2VecNumWalksHubsLessLogEmbedding,
     HANode2VecNumWalksHubsMoreLogEmbedding,
+    HANode2VecLoPLoQEmbedding,
+    HANode2VecLoPHiQEmbedding,
+    HANode2VecHiPLoQEmbedding,
+    HANode2VecHiPHiQEmbedding,
+    HANode2VecLoPLoQLogEmbedding,
+    HANode2VecLoPHiQLogEmbedding,
+    HANode2VecHiPLoQLogEmbedding,
+    HANode2VecHiPHiQLogEmbedding,
 )
 from embeddings.embedding_sdne import SDNEEmbedding
 
@@ -28,6 +36,14 @@ class EmbFactory(ABC):
                 "HA_N2V_NumWalks_HubsMore",
                 "HA_N2V_NumWalks_HubsLess_Log",
                 "HA_N2V_NumWalks_HubsMore_Log",
+                "HA_N2V_LoP_LoQ",
+                "HA_N2V_LoP_HiQ",
+                "HA_N2V_HiP_LoQ",
+                "HA_N2V_HiP_HiQ",
+                "HA_N2V_LoP_LoQ_Log",
+                "HA_N2V_LoP_HiQ_Log",
+                "HA_N2V_HiP_LoQ_Log",
+                "HA_N2V_HiP_HiQ_Log",
             ],
         }
 
@@ -116,6 +132,14 @@ class LazyEmbFactory(EmbFactory):
             "HA_N2V_NumWalks_HubsMore_Log": HANode2VecNumWalksHubsMoreLogEmbedding(
                 self._graph, self._dim
             ),
+            "HA_N2V_LoP_LoQ": HANode2VecLoPLoQEmbedding(self._graph, self._dim),
+            "HA_N2V_LoP_HiQ": HANode2VecLoPHiQEmbedding(self._graph, self._dim),
+            "HA_N2V_HiP_LoQ": HANode2VecHiPLoQEmbedding(self._graph, self._dim),
+            "HA_N2V_HiP_HiQ": HANode2VecHiPHiQEmbedding(self._graph, self._dim),
+            "HA_N2V_LoP_LoQ_Log": HANode2VecLoPLoQLogEmbedding(self._graph, self._dim),
+            "HA_N2V_LoP_HiQ_Log": HANode2VecLoPHiQLogEmbedding(self._graph, self._dim),
+            "HA_N2V_HiP_LoQ_Log": HANode2VecHiPLoQLogEmbedding(self._graph, self._dim),
+            "HA_N2V_HiP_HiQ_Log": HANode2VecHiPHiQLogEmbedding(self._graph, self._dim),
         }
 
     def get_embedding_by_name(self, name):
