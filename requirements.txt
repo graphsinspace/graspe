@@ -1,5 +1,5 @@
 dgl==0.5.3
-karateclub==1.0.22
+gensim==3.8.3
 Keras==2.0.2
 networkx==2.5
 numpy==1.19.4

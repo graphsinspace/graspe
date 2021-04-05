@@ -8,6 +8,12 @@ from embeddings.embedding_deepwalk import DeepWalkEmbedding
 from embeddings.embedding_gae import GAEEmbedding
 from embeddings.embedding_gcn import GCNEmbedding
 from embeddings.embedding_node2vec import Node2VecEmbedding
+from embeddings.embedding_ha_node2vec import (
+    HANode2VecNumWalksHubsLessEmbedding,
+    HANode2VecNumWalksHubsMoreEmbedding,
+    HANode2VecNumWalksHubsLessLogEmbedding,
+    HANode2VecNumWalksHubsMoreLogEmbedding,
+)
 from embeddings.embedding_sdne import SDNEEmbedding
 
 
@@ -16,6 +22,13 @@ class EmbFactory(ABC):
         presets = {
             "_": ["GCN", "GAE", "SDNE", "DW", "N2V"],
             "N2V": ["N2V", "N2V_p1_q0.5", "N2V_p1_q2", "N2V_p0.5_q1", "N2V_p2_q1"],
+            "HA_N2V": [
+                "N2V",
+                "HA_N2V_NumWalks_HubsLess",
+                "HA_N2V_NumWalks_HubsMore",
+                "HA_N2V_NumWalks_HubsLess_Log",
+                "HA_N2V_NumWalks_HubsMore_Log",
+            ],
         }
 
         self._dim = dim
@@ -91,6 +104,18 @@ class LazyEmbFactory(EmbFactory):
             "N2V_p1_q2": Node2VecEmbedding(self._graph, self._dim, p=1, q=2),
             "N2V_p0.5_q1": Node2VecEmbedding(self._graph, self._dim, p=0.5, q=1),
             "N2V_p2_q1": Node2VecEmbedding(self._graph, self._dim, p=2, q=1),
+            "HA_N2V_NumWalks_HubsLess": HANode2VecNumWalksHubsLessEmbedding(
+                self._graph, self._dim
+            ),
+            "HA_N2V_NumWalks_HubsMore": HANode2VecNumWalksHubsMoreEmbedding(
+                self._graph, self._dim
+            ),
+            "HA_N2V_NumWalks_HubsLess_Log": HANode2VecNumWalksHubsLessLogEmbedding(
+                self._graph, self._dim
+            ),
+            "HA_N2V_NumWalks_HubsMore_Log": HANode2VecNumWalksHubsMoreLogEmbedding(
+                self._graph, self._dim
+            ),
         }
 
     def get_embedding_by_name(self, name):
@@ -109,8 +134,10 @@ class LazyEmbFactory(EmbFactory):
             if not self._quiet:
                 print("* ", name, "embedding created, time = ", t, "[s]")
         except:
-            if not self._quiet:
-                print("[WARNING]", id, "not working for given graph", sys.exc_info()[0])
+            import traceback
+
+            traceback.print_exc()
+            print("[ERROR]", name, "not working for given graph", sys.exc_info()[0])
             return None
 
         return e
