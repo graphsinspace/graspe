@@ -29,7 +29,8 @@ class HANode2VecFastEmbedding(Node2VecEmbeddingFastBase):
             node: self._max_hubness - self._hubness[node] for node in self._hubness
         }
         self._inverse_log_hubness = {
-            node: self._max_log_hubness - self._log_hubness[node] for node in self._log_hubness
+            node: self._max_log_hubness - self._log_hubness[node]
+            for node in self._log_hubness
         }
 
 
@@ -55,7 +56,8 @@ class HANode2VecSlowEmbedding(Node2VecEmbeddingSlowBase):
             node: self._max_hubness - self._hubness[node] for node in self._hubness
         }
         self._inverse_log_hubness = {
-            node: self._max_log_hubness - self._log_hubness[node] for node in self._log_hubness
+            node: self._max_log_hubness - self._log_hubness[node]
+            for node in self._log_hubness
         }
 
 
@@ -68,7 +70,12 @@ class HANode2VecNumWalksEmbedding(HANode2VecFastEmbedding):
         # print("Total num walks {}, real num walks {}".format(num_walks * g.nodes_cnt(), sum(self._node_num_walks.values())))
 
     def num_walks(self, node):
-        # print("Num walks for node {}, with hubness {}, is {}".format(node, self._hubness[node], self._node_num_walks[node]))
+        if self._node_num_walks[node] == 0:
+            print(
+                "Num walks for node {}, with hubness {}, is {}".format(
+                    node, self._hubness[node], self._node_num_walks[node]
+                )
+            )
         return self._node_num_walks[node]
 
     def walk_length(self, node):
@@ -90,6 +97,8 @@ class HANode2VecNumWalksEmbedding(HANode2VecFastEmbedding):
         values_norm = {node: values[node] / values_sum for node in values}
         return {
             node: int(round(num_walks_total * values_norm[node]))
+            if int(round(num_walks_total * values_norm[node])) > 0
+            else 1
             for node in values_norm
         }
 
@@ -123,9 +132,7 @@ class HANode2VecNumWalksHubsMoreLogEmbedding(HANode2VecNumWalksEmbedding):
 
 
 class HANode2VecPQEmbedding(HANode2VecSlowEmbedding):
-    def __init__(
-        self, g, d, walk_length=80, num_walks=10, workers=10, seed=42
-    ):
+    def __init__(self, g, d, walk_length=80, num_walks=10, workers=10, seed=42):
         super().__init__(g, d, 1, 1, walk_length, num_walks, workers, seed)
         self._p_values = self.get_p_vals()
         self._q_values = self.get_q_vals()
@@ -138,7 +145,7 @@ class HANode2VecPQEmbedding(HANode2VecSlowEmbedding):
 
     def walk_length(self, node):
         return self._walk_length
-    
+
     def p_value(self, start_node, node1, node2):
         return self._p_values[start_node]
 
@@ -155,68 +162,95 @@ class HANode2VecPQEmbedding(HANode2VecSlowEmbedding):
 
     @staticmethod
     def normalize_values(values, max_value):
-        return {node: (values[node] if values[node] > 0 else 1)/max_value for node in values}
+        return {
+            node: (values[node] if values[node] > 0 else 1) / max_value
+            for node in values
+        }
+
 
 class HANode2VecLoPLoQEmbedding(HANode2VecPQEmbedding):
-
     def get_p_vals(self):
-        return HANode2VecPQEmbedding.normalize_values(self._inverse_hubness, self._max_hubness)
+        return HANode2VecPQEmbedding.normalize_values(
+            self._inverse_hubness, self._max_hubness
+        )
 
     def get_q_vals(self):
-        return HANode2VecPQEmbedding.normalize_values(self._inverse_hubness, self._max_hubness)
+        return HANode2VecPQEmbedding.normalize_values(
+            self._inverse_hubness, self._max_hubness
+        )
+
 
 class HANode2VecLoPHiQEmbedding(HANode2VecPQEmbedding):
-
     def get_p_vals(self):
-        return HANode2VecPQEmbedding.normalize_values(self._inverse_hubness, self._max_hubness)
+        return HANode2VecPQEmbedding.normalize_values(
+            self._inverse_hubness, self._max_hubness
+        )
 
     def get_q_vals(self):
         return HANode2VecPQEmbedding.normalize_values(self._hubness, self._max_hubness)
+
 
 class HANode2VecHiPLoQEmbedding(HANode2VecPQEmbedding):
-
     def get_p_vals(self):
         return HANode2VecPQEmbedding.normalize_values(self._hubness, self._max_hubness)
 
     def get_q_vals(self):
-        return HANode2VecPQEmbedding.normalize_values(self._inverse_hubness, self._max_hubness)
+        return HANode2VecPQEmbedding.normalize_values(
+            self._inverse_hubness, self._max_hubness
+        )
+
 
 class HANode2VecHiPHiQEmbedding(HANode2VecPQEmbedding):
-
     def get_p_vals(self):
         return HANode2VecPQEmbedding.normalize_values(self._hubness, self._max_hubness)
 
     def get_q_vals(self):
         return HANode2VecPQEmbedding.normalize_values(self._hubness, self._max_hubness)
+
 
 class HANode2VecLoPLoQLogEmbedding(HANode2VecPQEmbedding):
-
     def get_p_vals(self):
-        return HANode2VecPQEmbedding.normalize_values(self._inverse_log_hubness, self._max_log_hubness)
+        return HANode2VecPQEmbedding.normalize_values(
+            self._inverse_log_hubness, self._max_log_hubness
+        )
 
     def get_q_vals(self):
-        return HANode2VecPQEmbedding.normalize_values(self._inverse_log_hubness, self._max_log_hubness)
+        return HANode2VecPQEmbedding.normalize_values(
+            self._inverse_log_hubness, self._max_log_hubness
+        )
+
 
 class HANode2VecLoPHiQLogEmbedding(HANode2VecPQEmbedding):
-
     def get_p_vals(self):
-        return HANode2VecPQEmbedding.normalize_values(self._inverse_log_hubness, self._max_log_hubness)
+        return HANode2VecPQEmbedding.normalize_values(
+            self._inverse_log_hubness, self._max_log_hubness
+        )
 
     def get_q_vals(self):
-        return HANode2VecPQEmbedding.normalize_values(self._log_hubness, self._max_log_hubness)
+        return HANode2VecPQEmbedding.normalize_values(
+            self._log_hubness, self._max_log_hubness
+        )
+
 
 class HANode2VecHiPLoQLogEmbedding(HANode2VecPQEmbedding):
-
     def get_p_vals(self):
-        return HANode2VecPQEmbedding.normalize_values(self._log_hubness, self._max_log_hubness)
+        return HANode2VecPQEmbedding.normalize_values(
+            self._log_hubness, self._max_log_hubness
+        )
 
     def get_q_vals(self):
-        return HANode2VecPQEmbedding.normalize_values(self._inverse_log_hubness, self._max_log_hubness)
+        return HANode2VecPQEmbedding.normalize_values(
+            self._inverse_log_hubness, self._max_log_hubness
+        )
+
 
 class HANode2VecHiPHiQLogEmbedding(HANode2VecPQEmbedding):
-
     def get_p_vals(self):
-        return HANode2VecPQEmbedding.normalize_values(self._log_hubness, self._max_log_hubness)
+        return HANode2VecPQEmbedding.normalize_values(
+            self._log_hubness, self._max_log_hubness
+        )
 
     def get_q_vals(self):
-        return HANode2VecPQEmbedding.normalize_values(self._log_hubness, self._max_log_hubness)
+        return HANode2VecPQEmbedding.normalize_values(
+            self._log_hubness, self._max_log_hubness
+        )

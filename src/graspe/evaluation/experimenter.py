@@ -40,7 +40,11 @@ class Experimenter:
                 e_name = factory.get_name(i)
                 if e_name in results[graph]:
                     results[graph][e_name] = old_results[graph][e_name]
-                    print("Results for graph {} and embedding {} already exist.".format(graph, e_name))
+                    print(
+                        "Results for graph {} and embedding {} already exist.".format(
+                            graph, e_name
+                        )
+                    )
                     continue
                 e = factory.get_embedding(i)
                 recg = e.reconstruct(g_undirected.edges_cnt())
