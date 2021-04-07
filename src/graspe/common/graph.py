@@ -163,6 +163,12 @@ class Graph:
         """
         return self.__graph.has_edge(node1, node2)
 
+    def remove_selfloop_edges(self):
+        """
+        Removes selfloop edges from the graph.
+        """
+        self.__graph.remove_edges_from(nx.selfloop_edges(self.__graph))
+
     def induce_by_random_nodes(self, p):
         """
         Generates a graph induced by p*|N| randomly selected nodes.

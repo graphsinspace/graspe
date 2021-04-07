@@ -33,6 +33,7 @@ class Experimenter:
         for graph in self._factories:
             g = DatasetPool.load(graph)
             g_undirected = g.to_undirected()
+            g_undirected.remove_selfloop_edges()
             factory = self._factories[graph]
             if not graph in results:
                 results[graph] = {}
