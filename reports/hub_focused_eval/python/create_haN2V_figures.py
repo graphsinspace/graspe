@@ -10,7 +10,7 @@ sns.set_theme()
 
 data = []
 algorithms = set()
-with open("../ha_n2v_experiments.json") as json_file:
+with open("../ha_n2v_experiments_pq0-4.json") as json_file:
     json_data = json.load(json_file)
     for dataset in json_data:
         for algorithm in json_data[dataset]:
@@ -31,7 +31,6 @@ g.map_dataframe(
 )
 plt.xticks(
     fontweight="light",
-    rotation=90,
     horizontalalignment="right",
 )
 plt.tight_layout()
