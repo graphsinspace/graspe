@@ -1,4 +1,5 @@
 import torch
+import torch.nn as nn
 import torch_geometric as tg
 import torch.nn.functional as F
 from torch_geometric.nn import GCNConv, GAE, VGAE
@@ -11,14 +12,20 @@ from embeddings.base.embedding import Embedding
 
 
 class GCNEncoder(torch.nn.Module):
-    def __init__(self, in_channels, out_channels):
+    def __init__(self, in_channels, out_channels, hidden_size=None, n_hidden=1):
         super(GCNEncoder, self).__init__()
-        self.conv1 = GCNConv(in_channels, 2 * out_channels, cached=True)
-        self.conv2 = GCNConv(2 * out_channels, out_channels, cached=True)
+        if hidden_size is None:
+            hidden_size = 2 * out_channels
+        self.layers = nn.ModuleList()
+        self.layers.append(GCNConv(in_channels, hidden_size, activation=nn.ReLU(),  cached=True))
+        for _ in range(n_hidden - 1):
+            self.layers.append(GCNConv(hidden_size, hidden_size, activation=nn.ReLU(), cached=True))
+        self.layers.append(GCNConv(hidden_size, out_channels, cached=True))
 
     def forward(self, x, edge_index):
-        x = self.conv1(x, edge_index).relu()
-        return self.conv2(x, edge_index)
+        for layer in self.layers:
+            x = layer(x, edge_index)
+        return x
 
 
 class VariationalGCNEncoder(torch.nn.Module):

@@ -14,15 +14,21 @@ class GCN(nn.Module):
     Example Graph-Convolutional neural network implementation. Single hidden layer.
     """
 
-    def __init__(self, in_feats, hidden_size, num_classes):
+    def __init__(self, in_feats, hidden_size, num_classes, n_layers, dropout):
         super(GCN, self).__init__()
-        self.conv1 = GraphConv(in_feats, hidden_size)
-        self.conv2 = GraphConv(hidden_size, num_classes)
+        self.layers = nn.ModuleList()
+        self.dropout = nn.Dropout(dropout)
+        self.layers.append(GraphConv(in_feats, hidden_size, activation=nn.ReLU()))
+        for _ in range(n_layers-1):
+            self.layers.append(GraphConv(hidden_size, hidden_size, activation=nn.ReLU()))
+        self.layers.append(GraphConv(hidden_size, num_classes))
 
     def forward(self, g, inputs):
-        h = self.conv1(g, inputs)
-        h = torch.relu(h)
-        h = self.conv2(g, h)
+        h = self.dropout(inputs)
+        for i, layer in enumerate(self.layers):
+            h = layer(g, h)
+            if i != len(self.layers) - 1:
+                h = self.dropout(h)
         return h
 
 
@@ -38,11 +44,13 @@ class GCNEmbedding(Embedding):
     Necessarry args:
 
     - epochs : number of epochs for training (int)
-    - labeles_nodes : torch.tensor with id's of nodes with labels
+    - n_layers : number of hidden layer in the GCN
+    - dropout : probability of a dropout in hidden layers of the GCN
+    - labeled_nodes : torch.tensor with id's of nodes with labels
     - labels : labels for labeled_nodes (torch.tensor)
     """
 
-    def __init__(self, g, d, epochs, deterministic=False, add_self_loop=False):
+    def __init__(self, g, d, epochs, n_layers=1, dropout=.0, deterministic=False, add_self_loop=False):
         """
         Parameters
         ----------
@@ -52,6 +60,10 @@ class GCNEmbedding(Embedding):
             Dimensionality of the embedding.
         epochs : int
             Number of epochs.
+        n_layers: int
+            Number of hidden layers
+        dropout: float \in [0, 1]
+            Probability of applying dropout in hidden layers of the GCN
         deterministic : bool
             Whether to try and run in deterministic mode
         add_self_loop : bool
@@ -61,6 +73,8 @@ class GCNEmbedding(Embedding):
         if not g.labels():
             raise Exception("GCNEmbedding works only with labeled graphs.")
         self._epochs = epochs
+        self._n_layers = n_layers
+        self._dropout = dropout
         self.add_self_loop = add_self_loop
         if deterministic:  # not thread-safe, beware if running multiple at once
             torch.set_deterministic(True)
@@ -81,7 +95,7 @@ class GCNEmbedding(Embedding):
 
         e = nn.Embedding(num_nodes, self._d)
         dgl_g.ndata["feat"] = e.weight
-        net = GCN(self._d, self._d, len(labels))
+        net = GCN(self._d, self._d, len(labels), self._n_layers, self._dropout)
 
         inputs = e.weight
         labeled_nodes = []
