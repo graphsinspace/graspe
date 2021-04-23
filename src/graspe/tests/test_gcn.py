@@ -13,7 +13,7 @@ def test_gcn_citeseer():
 
 def test_gcn_all():
     datasets = DatasetPool.get_datasets()
-    needs_self_loop = ["amazon_electronics_computers", "amazon_electronics_photo"]
+
     print(datasets)
     for dataset_name in datasets:
         if dataset_name in [
@@ -24,9 +24,7 @@ def test_gcn_all():
             continue
         print(dataset_name)
         g = DatasetPool.load(dataset_name)
-        e = GCNEmbedding(
-            g, d=1, epochs=1, add_self_loop=dataset_name in needs_self_loop
-        )
+        e = GCNEmbedding(g, d=1, epochs=1)
         e.embed()
         assert e._embedding is not None
 

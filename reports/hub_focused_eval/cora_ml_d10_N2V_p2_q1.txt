@@ -1,0 +1,40 @@
+Average hubness: 2.810016694490818
+Fraction of nodes with low hubness: 0.7181969949916528
+Fraction of nodes with high hubness: 0.28180300500834726
+Average map: 0.01113721465614873
+Average map for low hubness: 0.01069280130090501
+Average map for high hubness: 0.012269836844690483
+Mann Whitney U for map values of two groups of nodes 1) nodes with low hubness, 2) nodes with high hubness: 0.02305112954306239
+Probability that low hubness points have greater map: 0.029332769283987828
+Probability that high hubness points have greater map: 0.016426835528939476
+Average recall: 0.012897697004253908
+Average recall for low hubness: 0.016130203543034783
+Average recall for high hubness: 0.004659401311223504
+Mann Whitney U for recall values of two groups of nodes 1) nodes with low hubness, 2) nodes with high hubness: 0.019029538423185822
+Probability that low hubness points have greater recall: 0.02962195473944666
+Probability that high hubness points have greater recall: 0.016199893800084166
+Average f1 for low hubness: 0.007300212486106545
+Average f1 for high hubness: 0.0051469166694285175
+Mann Whitney U for f1 values of two groups of nodes 1) nodes with low hubness, 2) nodes with high hubness: 0.02225486057831723
+Probability that low hubness points have greater f1: 0.0294209019942229
+Probability that high hubness points have greater f1: 0.01641912391679391
+Average knng map: 0.09332220367278798
+Average knng recall: 0.08092677505672057
+Correlation between native hubness and reconstructed hubness (pearson, spearman, kendall): -0.09209682929646575, -0.3180640119076356, -0.2636235342857796
+Correlation between native hubness and knng hubness (k=5) (pearson, spearman, kendall): -0.1239667527209432, -0.18951100480838304, -0.14609937180028207
+Correlation between native hubness and knng hubness (k=auto) (pearson, spearman, kendall): -0.09443549363391482, -0.11943422550466617, -0.0959436193098628
+Correlation between reconstructed hubness and knng hubness (k=5) (pearson, spearman, kendall): 0.29645280394896756, 0.27342652414405016, 0.2214394562570062
+Correlation between reconstructed hubness and knng hubness (k=auto) (pearson, spearman, kendall): 0.21524353551582825, 0.1986025000659595, 0.1670049054120806
+Correlation between knng hubness (k=5) and knng hubness (k=auto) (pearson, spearman, kendall): 0.6803232635660413, 0.6437980136907638, 0.5280375499252361
+Correlation between native hubness and map (pearson, spearman, kendall): -0.008009571237051724, 0.003129968273586769, 0.002959729104445418
+Correlation between reconstructed hubness and map (pearson, spearman, kendall): -0.017850979877281813, 0.25278403670281474, 0.23234131156517973
+Correlation between knng hubness (k=5) and map (pearson, spearman, kendall): 0.04515535588239284, 0.12554385661155443, 0.10648477952560018
+Correlation between knng hubness (k=auto) and map (pearson, spearman, kendall): 0.024490503948649874, 0.08620029174207233, 0.076336096164277
+Correlation between native hubness and recall (pearson, spearman, kendall): -0.029137583864576676, 0.0019336405255680144, 0.00155185202156767
+Correlation between reconstructed hubness and recall (pearson, spearman, kendall): 0.31510275696597473, 0.2543248675140204, 0.23735062623932682
+Correlation between knng hubness (k=5) and recall (pearson, spearman, kendall): 0.16873355803181694, 0.1269412103182958, 0.10830213637444368
+Correlation between knng hubness (k=auto) and recall (pearson, spearman, kendall): 0.09989354013564515, 0.08705281032685384, 0.07728308540154315
+Correlation between native hubness and f1 (pearson, spearman, kendall): -0.015446407503162216, 0.003048931213397035, 0.0027973145546319692
+Correlation between reconstructed hubness and f1 (pearson, spearman, kendall): 0.0008430689707356888, 0.25289168102507653, 0.2327100500676315
+Correlation between knng hubness (k=5) and f1 (pearson, spearman, kendall): 0.06775121223734618, 0.12567491420457813, 0.10659841325448208
+Correlation between knng hubness (k=auto) and f1 (pearson, spearman, kendall): 0.034230643388501215, 0.0863196360785659, 0.07637356208651265

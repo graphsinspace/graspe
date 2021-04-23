@@ -1,0 +1,40 @@
+Average hubness: 4.496018664096972
+Fraction of nodes with low hubness: 0.7581782218390222
+Fraction of nodes with high hubness: 0.24182177816097783
+Average map: 0.2212737096680799
+Average map for low hubness: 0.1408374613506286
+Average map for high hubness: 0.4734636165677446
+Mann Whitney U for map values of two groups of nodes 1) nodes with low hubness, 2) nodes with high hubness: 3.05811031282592e-278
+Probability that low hubness points have greater map: 0.2225969582935448
+Probability that high hubness points have greater map: 0.5435705531918141
+Average recall: 0.37447257585135824
+Average recall for low hubness: 0.4529344214774678
+Average recall for high hubness: 0.12847296799383756
+Mann Whitney U for recall values of two groups of nodes 1) nodes with low hubness, 2) nodes with high hubness: 1.1668330185444823e-87
+Probability that low hubness points have greater recall: 0.48123614697129075
+Probability that high hubness points have greater recall: 0.3059751589408463
+Average f1 for low hubness: 0.18139096074857414
+Average f1 for high hubness: 0.18702683133741538
+Mann Whitney U for f1 values of two groups of nodes 1) nodes with low hubness, 2) nodes with high hubness: 4.403341180309478e-15
+Probability that low hubness points have greater f1: 0.3556163242496524
+Probability that high hubness points have greater f1: 0.4255674691041263
+Average knng map: 0.2361287214079221
+Average knng recall: 0.32350396234893986
+Correlation between native hubness and reconstructed hubness (pearson, spearman, kendall): -0.017881565717644213, -0.42508767193792096, -0.3159283337934238
+Correlation between native hubness and knng hubness (k=5) (pearson, spearman, kendall): 0.02672036500178686, -0.2372784842429905, -0.18093993732063768
+Correlation between native hubness and knng hubness (k=auto) (pearson, spearman, kendall): -0.002917123405228656, -0.2704206981067241, -0.2073671733496815
+Correlation between reconstructed hubness and knng hubness (k=5) (pearson, spearman, kendall): 0.3693001030919644, 0.5607810506725148, 0.44224377049514185
+Correlation between reconstructed hubness and knng hubness (k=auto) (pearson, spearman, kendall): 0.33700845520805356, 0.5318118231896695, 0.4214649969773754
+Correlation between knng hubness (k=5) and knng hubness (k=auto) (pearson, spearman, kendall): 0.9012675441067595, 0.895541055049322, 0.8035190879026334
+Correlation between native hubness and map (pearson, spearman, kendall): 0.4300633475284667, 0.04117651873452927, 0.0039064505011305725
+Correlation between reconstructed hubness and map (pearson, spearman, kendall): -0.07122773497925536, 0.33588497512384496, 0.16303561369350286
+Correlation between knng hubness (k=5) and map (pearson, spearman, kendall): 0.060116479031174834, 0.25092765835750325, 0.18030587825310607
+Correlation between knng hubness (k=auto) and map (pearson, spearman, kendall): 0.06864974241478614, 0.27261214941563666, 0.1986140450173356
+Correlation between native hubness and recall (pearson, spearman, kendall): -0.24839681382380827, -0.41512057923452056, -0.32036588947045525
+Correlation between reconstructed hubness and recall (pearson, spearman, kendall): 0.376087599666562, 0.5606533290400127, 0.46536791390142274
+Correlation between knng hubness (k=5) and recall (pearson, spearman, kendall): 0.31830021484216225, 0.3616385756179107, 0.2879805702138961
+Correlation between knng hubness (k=auto) and recall (pearson, spearman, kendall): 0.3420481901628026, 0.38339510478103755, 0.30838661790380123
+Correlation between native hubness and f1 (pearson, spearman, kendall): 0.03142605814724225, -0.17061019903843533, -0.13327368995019354
+Correlation between reconstructed hubness and f1 (pearson, spearman, kendall): 0.00645420752419932, 0.37758254401602376, 0.21616577379967303
+Correlation between knng hubness (k=5) and f1 (pearson, spearman, kendall): 0.12406574199385961, 0.2608867480261478, 0.18663724192878345
+Correlation between knng hubness (k=auto) and f1 (pearson, spearman, kendall): 0.15573521187179754, 0.29312121236200483, 0.21431557744520785

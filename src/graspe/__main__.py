@@ -1,22 +1,40 @@
-import argparse
 import os
-import torch
 
 from common.dataset_pool import DatasetPool
 from common.graph_loaders import load_from_file
+from embeddings.emb_factory import LazyEmbFactory
+from util.graspe_argparse import build_argparser
 
 
 def load_graph(g):
     graph = DatasetPool.load(g)
-    if graph == None:
-        graph = load_from_file(g)
-    if graph == None:
+    if not graph:
+        graph = load_from_file(g, "")
+    if not graph:
         raise Exception("invalid graph")
     return graph
 
 
 def list_datasets(args):
-    print(", ".join(DatasetPool.get_datasets()))
+    if args.detailed:
+        for dataset in DatasetPool.get_datasets():
+            g = DatasetPool.load(dataset)
+            nodes_cnt = g.nodes_cnt()
+            edges_cnt = g.edges_cnt()
+            density = edges_cnt / ((nodes_cnt * (nodes_cnt - 1)) / 2)
+            avg_h = edges_cnt / nodes_cnt
+            h = g.get_hubness()
+            max_h = h if h is int else max(h.values())
+            print("Name: {}".format(dataset))
+            print("Nodes count: {}".format(nodes_cnt))
+            print("Edges count: {}".format(edges_cnt))
+            print("Edges density: {}".format(density))
+            print("Avg hubness: {}".format(avg_h))
+            print("Max hubness: {}".format(max_h))
+            print("Max hubness (normalized): {}".format(max_h / avg_h))
+            print("=============================================")
+    else:
+        print(", ".join(DatasetPool.get_datasets()))
 
 
 def embed(args):
@@ -79,35 +97,62 @@ def embed(args):
     if embedding:
         embedding.embed()
         embedding.to_file(o)
-        reconstruction = embedding.reconstruct(len(g.edges()))
-        print("precission@k: " + str(g.link_precision(reconstruction)))
-        print("map: " + str(g.map(reconstruction)))
+        g_undirected = g.to_undirected()
+        reconstruction = embedding.reconstruct(len(g_undirected.edges()))
+        avg_map, maps = g_undirected.map_value(reconstruction)
+        avg_recall, recalls = g_undirected.recall(reconstruction)
+        print("precission@k: " + str(g_undirected.link_precision(reconstruction)))
+        print("map: " + str(avg_map))
+        print("recall: " + str(avg_recall))
+
+
+def batch_embed(args):
+    for g_name in args.graphs:
+        g = load_graph(g_name)
+        for d in args.dimensions:
+            emb_factory = LazyEmbFactory(g, d, preset=args.preset, algs=args.algs)
+            for i in range(emb_factory.num_methods()):
+                embedding = emb_factory.get_embedding(i)
+                embedding.embed()
+                embedding.to_file(
+                    os.path.join(
+                        args.out, emb_factory.get_full_name(g_name, i) + ".embedding"
+                    )
+                )
 
 
 def classify(args):
     classes = None
     if args.classify == "kNN":
-        from classifications.k_nearest_neighbors import KNN
+        from evaluation.classifications.skl_classifiers import KNN
+
         classes = KNN(args.embedding, int(args.k_neighbors))
 
     elif args.classify == "rf":
-        from classifications.random_forest import RandomForest
+        from evaluation.classifications.skl_classifiers import RandomForest
+
         classes = RandomForest(args.embedding, int(args.n_estimators))
 
     elif args.classify == "svm":
-        from classifications.support_vector_machines import SVM
+        from evaluation.classifications.skl_classifiers import SVM
+
         classes = SVM(args.embedding)
 
     elif args.classify == "nb":
-        from classifications.naive_bayes import NaiveBayes
+        from evaluation.classifications.skl_classifiers import NaiveBayes
+
         classes = NaiveBayes(args.embedding)
 
     elif args.classify == "dt":
-        from classifications.decision_tree import DecisionTree
+        from evaluation.classifications.skl_classifiers import DecisionTree
+
         classes = DecisionTree(args.embedding)
 
     elif args.classify == "nn":
-        from classifications.neural_network import NeuralNetworkClassification
+        from evaluation.classifications.neural_network import (
+            NeuralNetworkClassification,
+        )
+
         classes = NeuralNetworkClassification(args.embedding, int(args.epochs))
 
     if classes:
@@ -117,297 +162,51 @@ def classify(args):
 def hub_eval(args):
     import evaluation.hub_focused_eval as he
 
-    out = args.out
-    if not out:
-        out = os.path.join(
+    output_path = args.out
+    if not output_path:
+        output_path = os.path.join(
             os.path.dirname(__file__),
             "..",
             "..",
             "reports",
-            "figures",
             "hub_focused_eval",
         )
-    he.eval(args.dimensions, out, args.graph)
+    input_path = args.input
+    if not input_path:
+        input_path = os.path.join(
+            os.path.dirname(__file__), "..", "..", "data", "embeddings"
+        )
+    he.hubness_stats(
+        input_path,
+        args.dimensions,
+        output_path,
+        args.graph,
+        args.preset,
+        args.algs,
+        args.k,
+    )
+
+
+def generate_graphs(args):
+    out = (
+        args.out
+        if args.out
+        else os.path.join(os.path.dirname(__file__), "..", "..", "data")
+    )
+    DatasetPool.generate_random_graphs(args.nvals, args.kmvals, out)
+
+
+def experimenter(args):
+    from evaluation.experimenter import Experimenter
+
+    experimenter = Experimenter(
+        args.graphs, args.dimension, args.preset, args.algs, args.cache
+    )
+    print(experimenter.run(args.out))
 
 
 if __name__ == "__main__":
-    # Parsing arguments.
-    parser = argparse.ArgumentParser(
-        description="Graphs in Space: Graph Embeddings for Machine Learning on Complex Data -- Evaluation."
-    )
-    subparsers = parser.add_subparsers(
-        title="actions", description="available actions", dest="action", required=True
-    )
-
-    # Action: list_datasets.
-    parser_list_datasets = subparsers.add_parser(
-        "list_datasets", help="list_datasets help"
-    )
-
-    # Action: embed.
-    parser_embed = subparsers.add_parser("embed", help="list_datasets help")
-    subparsers_embed = parser_embed.add_subparsers(
-        title="algorithm",
-        description="embedding algorithm",
-        dest="algorithm",
-        required=True,
-    )
-
-    # --- Embedding algorithms:
-
-    # --- GCN
-    parser_embed_gcn = subparsers_embed.add_parser("gcn", help="GCN embedding")
-    # --- GCN arguments:
-    # ------ Mutual arguments:
-    parser_embed_gcn.add_argument(
-        "-g",
-        "--graph",
-        help="Path to the graph, or name of the dataset from the dataset pool (e.g. "
-        "karate_club_graph).",
-        required=True,
-    )
-    parser_embed_gcn.add_argument(
-        "-d", "--dimensions", help="Dimensions of the embedding.", required=True
-    )
-    parser_embed_gcn.add_argument(
-        "-o", "--out", help="Output file.", default="out.embedding"
-    )
-    # ------ GCN-specific arguments:
-    parser_embed_gcn.add_argument(
-        "-e", "--epochs", help="Number of epochs.", default=50
-    )
-
-    # --- SDNE
-    parser_embed_sdne = subparsers_embed.add_parser("sdne", help="SDNE embedding")
-    # --- SDNE arguments:
-    # ------ Mutual arguments:
-    parser_embed_sdne.add_argument(
-        "-g",
-        "--graph",
-        help="Path to the graph, or name of the dataset from the dataset pool (e.g. "
-        "karate_club_graph).",
-        required=True,
-    )
-    parser_embed_sdne.add_argument(
-        "-d", "--dimensions", help="Dimensions of the embedding.", required=True
-    )
-    parser_embed_sdne.add_argument(
-        "-o", "--out", help="Output file.", default="out.embedding"
-    )
-    # ------ SDNE-specific arguments:
-    parser_embed_sdne.add_argument(
-        "-l", "--layers", type=int, nargs="+", help="Layers structure.", default=[]
-    )
-    parser_embed_sdne.add_argument(
-        "-a", "--alpha", type=float, help="Alpha parameter.", default=1
-    )
-    parser_embed_sdne.add_argument(
-        "-b", "--beta", type=float, help="Beta parameter.", default=5.0
-    )
-    parser_embed_sdne.add_argument(
-        "--nu1", type=float, help="nu1 parameter.", default=1e-6
-    )
-    parser_embed_sdne.add_argument(
-        "--nu2", type=float, help="nu2 parameter.", default=1e-6
-    )
-    parser_embed_sdne.add_argument(
-        "--bs", type=int, help="Batch size (not yet implemented).", default=1024
-    )
-    parser_embed_sdne.add_argument(
-        "-e", "--epochs", type=int, help="Number of epochs.", default=50
-    )
-    parser_embed_sdne.add_argument(
-        "-v", "--verbose", type=int, help="Verbose.", default=0
-    )
-
-    # --- GAE
-    parser_embed_gae = subparsers_embed.add_parser("gae", help="GAE embedding")
-    # --- GAE arguments:
-    # ------ Mutual arguments:
-    parser_embed_gae.add_argument(
-        "-g",
-        "--graph",
-        help="Path to the graph, or name of the dataset from the dataset pool (e.g. "
-        "karate_club_graph).",
-        required=True,
-    )
-    parser_embed_gae.add_argument(
-        "-d", "--dimensions", help="Dimensions of the embedding.", required=True
-    )
-    parser_embed_gae.add_argument(
-        "-o", "--out", help="Output file.", default="out.embedding"
-    )
-    # ------ GAE-specific arguments:
-    parser_embed_gae.add_argument(
-        "-e", "--epochs", help="Number of epochs.", default=50
-    )
-
-    parser_embed_gae.add_argument(
-        "-v",
-        "--variational",
-        action="store_true",
-        help="Whether to use variational AEs",
-        default=False,
-    )
-
-    parser_embed_gae.add_argument(
-        "-l",
-        "--linear",
-        action="store_true",
-        help="Whether to use linear encoders",
-        default=False,
-    )
-
-    # --- DeepWalk
-    parser_embed_deep_walk = subparsers_embed.add_parser(
-        "deep_walk", help="DeepWalk embedding"
-    )
-
-    parser_embed_deep_walk.add_argument(
-        "-g",
-        "--graph",
-        help="Path to the graph, or name of the dataset from the dataset pool (e.g. "
-        "karate_club_graph).",
-        required=True,
-    )
-    parser_embed_deep_walk.add_argument(
-        "-d", "--dimensions", help="Dimensions of the embedding.", required=True
-    )
-    parser_embed_deep_walk.add_argument(
-        "-o", "--out", help="Output file.", default="out.embedding"
-    )
-    parser_embed_deep_walk.add_argument(
-        "--path_number", help="Number of random path.", default=10
-    )
-    parser_embed_deep_walk.add_argument(
-        "--path_length", help="Length of random path.", default=80
-    )
-    parser_embed_deep_walk.add_argument("--workers", help="Number of cores.", default=4)
-    parser_embed_deep_walk.add_argument(
-        "--window_size", help="Matrix power order.", default=5
-    )
-
-    # -------- Node2Vec
-    parser_embed_node2vec = subparsers_embed.add_parser(
-        "node2vec", help="Node2Vec embedding"
-    )
-    parser_embed_node2vec.add_argument(
-        "-g",
-        "--graph",
-        help="Path to the graph, or name of the dataset from the dataset pool (e.g. "
-        "karate_club_graph).",
-        required=True,
-    )
-    parser_embed_node2vec.add_argument(
-        "-p", "--p", help="Return hyper parameter.", required=True
-    )
-    parser_embed_node2vec.add_argument(
-        "-q", "--q", help="Inout hyper parameter.", required=True
-    )
-    parser_embed_node2vec.add_argument(
-        "-d", "--dimensions", help="Dimensions of the embedding.", required=True
-    )
-    parser_embed_node2vec.add_argument(
-        "-o", "--out", help="Output file.", default="out.embedding"
-    )
-    parser_embed_node2vec.add_argument(
-        "-walk_length", "--walk_length", help="Length of random walks.", default=10
-    )
-    parser_embed_node2vec.add_argument(
-        "-num_walks", "--num_walks", help="Number of random walks.", default=200
-    )
-    parser_embed_node2vec.add_argument(
-        "-workers",
-        "--workers",
-        help="Number of workers for parallel execution.",
-        default=1,
-    )
-
-    # Action: classify.
-    parser_classify = subparsers.add_parser("classify", help="Do classification")
-    subparsers_classify = parser_classify.add_subparsers(
-        title="classify",
-        dest="classify",
-        required=True,
-    )
-
-    # kNN
-    parser_classify_knn = subparsers_classify.add_parser(
-        "kNN", help="k Nearest Neighbors classification."
-    )
-    parser_classify_knn.add_argument(
-        "-e", "--embedding", help="Path to the embedding file.", required=True
-    )
-    parser_classify_knn.add_argument(
-        "-k",
-        "--k_neighbors",
-        help="Number of neighbors to use by default for kneighbors queries.",
-        required=True,
-    )
-
-    # RandomForest
-    parser_classify_rf = subparsers_classify.add_parser(
-        "rf", help="Random Forest classification."
-    )
-    parser_classify_rf.add_argument(
-        "-e", "--embedding", help="Path to the embedding file.", required=True
-    )
-    parser_classify_rf.add_argument(
-        "-n", "--n_estimators", help="The number of trees in the forest.", required=True
-    )
-
-    # SVM
-    parser_classify_svm = subparsers_classify.add_parser(
-        "svm", help="Support Vector Machines classification."
-    )
-    parser_classify_svm.add_argument(
-        "-e", "--embedding", help="Path to the embedding file.", required=True
-    )
-
-    # NaiveBayes
-    parser_classify_nb = subparsers_classify.add_parser(
-        "nb", help="Naive Bayes classification (Gaussian)."
-    )
-    parser_classify_nb.add_argument(
-        "-e", "--embedding", help="Path to the embedding file.", required=True
-    )
-
-    # DecisionTree
-    parser_classify_dt = subparsers_classify.add_parser(
-        "dt", help="Decision Tree classification."
-    )
-    parser_classify_dt.add_argument(
-        "-e", "--embedding", help="Path to the embedding file.", required=True
-    )
-
-    # NeuralNetwork
-    parser_classify_nn = subparsers_classify.add_parser(
-        "nn", help="Neural Network classification."
-    )
-    parser_classify_nn.add_argument(
-        "-em", "--embedding", help="Path to the embedding file.", required=True
-    )
-    parser_classify_nn.add_argument(
-        "-ep", "--epochs", help="Number of epochs.", required=True
-    )
-
-    # Action: hub_eval.
-    parser_hub_eval = subparsers.add_parser("hub_eval", help="hub_eval help")
-    parser_hub_eval.add_argument(
-        "-g",
-        "--graph",
-        help="Path to the graph, or name of the dataset from the dataset pool (e.g. "
-        "karate_club_graph).",
-        default=None,
-    )
-    parser_hub_eval.add_argument(
-        "-d",
-        "--dimensions",
-        help="Dimensions of the embedding.",
-        required=True,
-        type=int,
-    )
-    parser_hub_eval.add_argument("-o", "--out", help="Directory for the figures.")
+    parser = build_argparser()
 
     # Execute the action.
     args = parser.parse_args()

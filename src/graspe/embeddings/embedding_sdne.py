@@ -1,12 +1,10 @@
-# """
-# This module originates from library GraphEmbedding (https://github.com/shenweichen/GraphEmbedding)
-# """
+"""
+This module originates from library GraphEmbedding (https://github.com/shenweichen/GraphEmbedding)
+"""
 
-import numpy as np
 import scipy.sparse as sp
 import tensorflow as tf
 from tensorflow.python.keras import backend as K
-from tensorflow.python.keras.callbacks import History
 from tensorflow.python.keras.layers import Dense, Input
 from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.regularizers import l1_l2
@@ -125,6 +123,8 @@ class SDNEEmbedding(Embedding):
         self.inputs = [self.A, self.A]
 
     def embed(self):
+        super().embed()
+
         self.model, self.emb_model = create_model(
             self.node_size, hidden_size=self.hidden_size, l1=self.nu1, l2=self.nu2
         )
@@ -194,3 +194,6 @@ class SDNEEmbedding(Embedding):
             (A_data, (A_row_index, A_col_index)), shape=(node_size, node_size)
         )
         return A
+
+    def requires_labels(self):
+        return False

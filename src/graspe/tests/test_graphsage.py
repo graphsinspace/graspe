@@ -1,5 +1,4 @@
 from common.dataset_pool import DatasetPool
-from embeddings.embedding_gcn import GCNEmbedding
 from embeddings.embedding_graphsage import GraphSageEmbedding
 
 
@@ -13,7 +12,6 @@ def test_graphsage():
 
 def test_graphsage_all():
     datasets = DatasetPool.get_datasets()
-    needs_self_loop = ["amazon_electronics_computers", "amazon_electronics_photo"]
     print(datasets)
     for dataset_name in datasets:
         if dataset_name in [

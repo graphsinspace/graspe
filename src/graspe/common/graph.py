@@ -1,7 +1,7 @@
+import random
+
 import dgl
 import networkx as nx
-import numpy as np
-import random
 
 
 class Graph:
@@ -48,17 +48,43 @@ class Graph:
         """
         return list(self.__graph.nodes(data=True))
 
-    def edges(self, node=None):
+    def edges(self, node=None, data=False):
         """
         Returns edges of the graph.
         """
-        return list(self.__graph.edges if node == None else self.__graph.edges[node])
+        return list(
+            self.__graph.edges(data=data)
+            if node == None
+            else self.__graph.edges(node, data=data)
+        )
 
     def nodes_cnt(self):
         """
         Returns number of nodes in the graph.
         """
         return len(self.__graph)
+
+    def edges_cnt(self):
+        """
+        Returns number of nodes in the graph.
+        """
+        return len(self.__graph.edges)
+
+    def is_labeled(self):
+        """
+        Returns True if the graph is labeled, and False otherwise.
+        """
+        return len(self.labels()) > 0
+
+    def labels(self):
+        """
+        Returns set of all possible node labels.
+        """
+        l = set()
+        for node in self.nodes():
+            if "label" in node[1]:
+                l.add(node[1]["label"])
+        return l
 
     def get_label(self, node):
         """
@@ -92,19 +118,9 @@ class Graph:
         or a number if a single node is specified.
         """
         h = self.__graph.in_degree(nodes)
-        if h is int:
+        if isinstance(h, int):
             return h
         return {n: n_h for n, n_h in h}
-
-    def labels(self):
-        """
-        Returns set of all possible node labels.
-        """
-        l = set()
-        for node in self.nodes():
-            if "label" in node[1]:
-                l.add(node[1]["label"])
-        return l
 
     def add_node(self, id, label=""):
         """
@@ -146,6 +162,12 @@ class Graph:
             Identifier of the edge's ending node.
         """
         return self.__graph.has_edge(node1, node2)
+
+    def remove_selfloop_edges(self):
+        """
+        Removes selfloop edges from the graph.
+        """
+        self.__graph.remove_edges_from(nx.selfloop_edges(self.__graph))
 
     def induce_by_random_nodes(self, p):
         """
@@ -210,7 +232,7 @@ class Graph:
 
         return cnt / len(g.__graph.edges)
 
-    def map(self, g):
+    def map_value(self, g):
         """
         MAP estimates precision for every node and computes the average over all nodes.
 
@@ -221,7 +243,7 @@ class Graph:
         """
         s = 0
         nodes_cnt = 0
-        self.map_dict = dict()
+        map_dict = dict()
 
         for node in g.__graph.nodes:
             predicted_edges = g.__graph.edges(node)
@@ -237,17 +259,51 @@ class Graph:
                 mpn = node_s / len(predicted_edges)
 
             nodes_cnt += 1
-            self.map_dict[node] = mpn
+            map_dict[node] = mpn
             s += mpn
 
-        return s / nodes_cnt
+        return s / nodes_cnt, map_dict
 
-    def get_map_per_node(self):
+    def recall(self, g):
         """
-        This method returns a dictionary containing
-        precision per node. It should be called after map!
+        Returns average recall and recall of each node.
+
+        Parameters
+        ----------
+        g : common.graph.Graph
+            A graph object.
         """
-        return self.map_dict
+        s = 0
+        nodes_cnt = 0
+        recall_dict = dict()
+
+        for node in g.__graph.nodes:
+            predicted_edges = g.__graph.edges(node)
+
+            recall = 0
+            if len(predicted_edges) != 0:
+                real_edges = self.__graph.edges(node)
+                num_real_edges = len(real_edges)
+
+                if num_real_edges != 0:
+                    node_s = 0
+                    for p_edge in predicted_edges:
+                        if p_edge in real_edges:
+                            node_s += 1
+
+                    recall = node_s / num_real_edges
+
+            nodes_cnt += 1
+            recall_dict[node] = recall
+            s += recall
+
+        return s / nodes_cnt, recall_dict
+
+    def to_undirected(self):
+        """
+        This method returns the undirected version of the graph.
+        """
+        return Graph(self.__graph.to_undirected())
 
     def to_networkx(self):
         """

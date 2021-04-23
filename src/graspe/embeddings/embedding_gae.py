@@ -1,12 +1,17 @@
+import os
+import random
+
+import numpy as np
 import torch
+<<<<<<< HEAD
 import torch.nn as nn
 import torch_geometric as tg
+=======
+>>>>>>> origin/main
 import torch.nn.functional as F
+import torch_geometric as tg
 from torch_geometric.nn import GCNConv, GAE, VGAE
 from torch_geometric.utils import train_test_split_edges
-import numpy as np
-import random
-import os
 
 from embeddings.base.embedding import Embedding
 
@@ -128,6 +133,8 @@ class GAEEmbedding(Embedding):
         return model.test(z, pos_edge_index, neg_edge_index)
 
     def embed(self):
+        super().embed()
+
         # TODO: this seems like extra work to me, since pytorch_geometric already has
         # TODO: datasets ready to use...
         data = tg.utils.from_networkx(self._g.to_networkx())
@@ -180,3 +187,6 @@ class GAEEmbedding(Embedding):
             encoded = model.encode(x, train_pos_edge_index).numpy()
             for i in range(num_nodes):
                 self._embedding[i] = encoded[i, :]
+
+    def requires_labels(self):
+        return False
