@@ -3,11 +3,7 @@ import random
 
 import numpy as np
 import torch
-<<<<<<< HEAD
 import torch.nn as nn
-import torch_geometric as tg
-=======
->>>>>>> origin/main
 import torch.nn.functional as F
 import torch_geometric as tg
 from torch_geometric.nn import GCNConv, GAE, VGAE

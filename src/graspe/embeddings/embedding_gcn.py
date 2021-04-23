@@ -50,12 +50,7 @@ class GCNEmbedding(Embedding):
     - labeled_nodes : torch.tensor with id's of nodes with labels
     - labels : labels for labeled_nodes (torch.tensor)
     """
-
-<<<<<<< HEAD
     def __init__(self, g, d, epochs, n_layers=1, dropout=.0, deterministic=False, add_self_loop=False):
-=======
-    def __init__(self, g, d, epochs, deterministic=False):
->>>>>>> origin/main
         """
         Parameters
         ----------
@@ -74,17 +69,13 @@ class GCNEmbedding(Embedding):
         """
         super().__init__(g, d)
         self._epochs = epochs
-<<<<<<< HEAD
         self._n_layers = n_layers
         self._dropout = dropout
-        self.add_self_loop = add_self_loop
-=======
         self.dgl_g = self._g.to_dgl()
 
         if (self.dgl_g.in_degrees() == 0).any():
             self.dgl_g = dgl.add_self_loop(self.dgl_g)
 
->>>>>>> origin/main
         if deterministic:  # not thread-safe, beware if running multiple at once
             torch.set_deterministic(True)
             torch.manual_seed(0)
