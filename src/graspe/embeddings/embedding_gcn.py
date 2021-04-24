@@ -50,7 +50,7 @@ class GCNEmbedding(Embedding):
     - labeled_nodes : torch.tensor with id's of nodes with labels
     - labels : labels for labeled_nodes (torch.tensor)
     """
-    def __init__(self, g, d, epochs, n_layers=1, dropout=.0, deterministic=False, add_self_loop=False):
+    def __init__(self, g, d, epochs, n_layers=1, dropout=0.0, deterministic=False, add_self_loop=False):
         """
         Parameters
         ----------
