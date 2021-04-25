@@ -1,6 +1,3 @@
-import sys
-sys.path.append('../')
-
 from common.dataset_pool import DatasetPool
 from embeddings.embedding_gcn import GCNEmbedding
 
