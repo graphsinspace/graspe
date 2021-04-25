@@ -1,6 +1,8 @@
 from common.dataset_pool import DatasetPool
 from embeddings.embedding_gcn import GCNEmbedding
 
+import sys
+sys.path.append('../')
 
 def test_reconstuction_evaluation():
     dataset = 'cora_ml'
