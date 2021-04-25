@@ -12,7 +12,7 @@ def test_reconstuction_evaluation():
         for epochs in [10, 50, 100, 200]:
             for n_layers in [1, 2, 3, 4]:
                 for dropout in [0.0, 0.1, 0.2, 0.3]:
-                    print('...starting to work on iter {} out of {}... '.format(iter, 4*4*4*3))
+                    print('...starting to work on iter {} out of {}... '.format(iter, 4*4*4*4))
                     graph = DatasetPool.load(dataset).to_undirected()
                     emb_m = GCNEmbedding(graph, d=d, epochs=epochs, n_layers=n_layers, dropout=dropout)
                     emb_m.embed()
@@ -45,6 +45,7 @@ def test_reconstuction_evaluation():
                             f1_val))
 
                     iter += 1
+
 
 if __name__ == '__main__':
     test_reconstuction_evaluation()
