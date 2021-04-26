@@ -3,8 +3,8 @@ from embeddings.embedding_gcn import GCNEmbedding
 
 
 def gcn_tuning():
-    for dataset in ['amazon_electronics_computers', 'amazon_electronics_photo','citeseer', 'cora','dblp','pubmed',
-                    'karate_club_graph', 'davis_southern_women_graph', 'florentine_families_graph',
+    for dataset in ['cora_ml, amazon_electronics_computers', 'amazon_electronics_photo','citeseer', 'cora', 'dblp',
+                    'pubmed', 'karate_club_graph', 'davis_southern_women_graph', 'florentine_families_graph',
                     'les_miserables_graph']:
         iter = 1
         with open('/home/dusan/graspe_gcn_res/{}.csv'.format(dataset), 'w') as file:
@@ -12,7 +12,7 @@ def gcn_tuning():
         graph = DatasetPool.load(dataset).to_undirected()
         print('... WORKING ON {} ...'.format(dataset.upper()))
         for d in [10, 25, 50, 100, 200]:
-            for epochs in [10, 50, 100, 200]:
+            for epochs in [50, 100, 200, 400]:
                 for n_layers in [1, 2, 3, 4]:
                     for dropout in [0.0, 0.1, 0.2, 0.3]:
                         print('... starting to work on iter {} out of {} ... '.format(iter, 320))
@@ -36,7 +36,7 @@ def gcn_tuning():
                         print('PRECISION@K = ', precision_val, 'MAP = ', map_val,
                               ', RECALL = ', recall_val, ', F1 = ', f1_val)
                         with open('./{}_results.csv'.format(dataset), 'a') as file:
-                            file.write('d={}_epochs={}_n_layers={}_dropout={},{},{},{}.{}\n'.format(
+                            file.write('d={}_epochs={}_n_layers={}_dropout={},{},{},{},{}\n'.format(
                                 d,
                                 epochs,
                                 n_layers,
