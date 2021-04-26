@@ -10,11 +10,12 @@ def gcn_tuning():
         with open('/home/dusan/graspe_gcn_res/{}.csv'.format(dataset), 'w') as file:
             file.write('PARAMS,PRECISION@K,MAP,RECALL,F1\n')
         graph = DatasetPool.load(dataset).to_undirected()
+        print('... WORKING ON {} ...'.format(dataset.upper()))
         for d in [10, 25, 50, 100, 200]:
             for epochs in [10, 50, 100, 200]:
                 for n_layers in [1, 2, 3, 4]:
                     for dropout in [0.0, 0.1, 0.2, 0.3]:
-                        print('...starting to work on iter {} out of {}... '.format(iter, 320))
+                        print('... starting to work on iter {} out of {} ... '.format(iter, 320))
                         emb_m = GCNEmbedding(graph, d=d, epochs=epochs, n_layers=n_layers, dropout=dropout)
                         emb_m.embed()
 
