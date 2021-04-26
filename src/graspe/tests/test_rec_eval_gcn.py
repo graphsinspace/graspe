@@ -35,7 +35,7 @@ def gcn_tuning():
                         f1_val = (2 * precision_val * recall_val) / (precision_val + recall_val)
                         print('PRECISION@K = ', precision_val, 'MAP = ', map_val,
                               ', RECALL = ', recall_val, ', F1 = ', f1_val)
-                        with open('./{}_results.csv'.format(dataset), 'a') as file:
+                        with open('/home/dusan/graspe_gcn_res/{}.csv'.format(dataset), 'a') as file:
                             file.write('d={}_epochs={}_n_layers={}_dropout={},{},{},{},{}\n'.format(
                                 d,
                                 epochs,
