@@ -3,7 +3,7 @@ from embeddings.embedding_gcn import GCNEmbedding
 
 
 def gcn_tuning():
-    for dataset in ['cora_ml, amazon_electronics_computers', 'amazon_electronics_photo','citeseer', 'cora', 'dblp',
+    for dataset in ['cora_ml', 'amazon_electronics_computers', 'amazon_electronics_photo','citeseer', 'cora', 'dblp',
                     'pubmed', 'karate_club_graph', 'davis_southern_women_graph', 'florentine_families_graph',
                     'les_miserables_graph']:
         iter = 1
