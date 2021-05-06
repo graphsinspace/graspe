@@ -59,6 +59,18 @@ class DatasetPool:
             "cora": "labels",
             "dblp": "labels",
             "pubmed": "labels",
+            "ca-AstroPh-undirected": "label",
+            "blog-catalog-undirected": "label",
+            "ca-CondMat-undirected": "label",
+            "ca-GrQc-undirected": "label",
+            "ca-HepPh-undirected": "label",
+            "cit-HepPh": "label",
+            "cit-HepTh": "label",
+            "facebook-ego-undirected": "label",
+            "facebook-wall": "label",
+            "flickr-undirected": "label",
+            "youtube-undirected": "",
+            "ppi": "label"
         }
         file_dataset_needs_dense = [
             "cora_ml",
