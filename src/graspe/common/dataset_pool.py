@@ -70,7 +70,7 @@ class DatasetPool:
             "facebook-wall": "label",
             "flickr-undirected": "label",
             "youtube-undirected": "",
-            "ppi": "label"
+            "ppi": "label",
         }
         file_dataset_needs_dense = [
             "cora_ml",

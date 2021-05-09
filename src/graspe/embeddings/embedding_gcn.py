@@ -9,21 +9,36 @@ from dgl.nn.pytorch import GraphConv
 
 from embeddings.base.embedding import Embedding
 
+device = "cuda" if torch.cuda.is_available() else "cpu"
+
 
 class GCN(nn.Module):
     """
-    Example Graph-Convolutional neural network implementation. Single hidden layer.
+    Example Graph-Convolutional neural network implementation. Single or multiple hidden layer.
     """
 
-    def __init__(self, in_feats, hidden_size, num_classes):
+    def __init__(self, in_feats, num_classes, configuration=(128,), act_fn=torch.relu):
         super(GCN, self).__init__()
-        self.conv1 = GraphConv(in_feats, hidden_size)
-        self.conv2 = GraphConv(hidden_size, num_classes)
+        self.act_fn = act_fn
+        self.input = GraphConv(in_feats, configuration[0])
+        self.hidden = []
+        last_hidden_size = configuration[0]
+
+        for layer_size in configuration[1:]:
+            layer = GraphConv(last_hidden_size, layer_size).to(device)
+            self.hidden.append(layer)
+            last_hidden_size = layer_size
+
+        self.output = GraphConv(last_hidden_size, num_classes)
 
     def forward(self, g, inputs):
-        h = self.conv1(g, inputs)
-        h = torch.relu(h)
-        h = self.conv2(g, h)
+        h = self.act_fn(self.input(g, inputs))
+
+        for layer in self.hidden:
+            h = self.act_fn(layer(g, h))
+
+        h = self.output(g, h)
+
         return h
 
 
@@ -43,7 +58,16 @@ class GCNEmbedding(Embedding):
     - labels : labels for labeled_nodes (torch.tensor)
     """
 
-    def __init__(self, g, d, epochs, deterministic=False):
+    def __init__(
+        self,
+        g,
+        d,
+        epochs,
+        deterministic=False,
+        lr=0.01,
+        layer_configuration=(128,),
+        act_fn="relu",
+    ):
         """
         Parameters
         ----------
@@ -55,9 +79,18 @@ class GCNEmbedding(Embedding):
             Number of epochs.
         deterministic : bool
             Whether to try and run in deterministic mode
+        lr : float
+            Learning rate for the optimizer
+        layer_configuration : tuple[int]
+            Hidden layer configuration, tuple length is depth, values are hidden sizes
+        act_fn : str
+            Activation function to be used, support for relu, tanh, sigmoid
         """
         super().__init__(g, d)
-        self._epochs = epochs
+        self.epochs = epochs
+        self.lr = lr
+        self.layer_configuration = layer_configuration
+        self.act_fn = act_fn
         self.dgl_g = self._g.to_dgl()
 
         if (self.dgl_g.in_degrees() == 0).any():
@@ -77,11 +110,26 @@ class GCNEmbedding(Embedding):
         num_nodes = len(nodes)
         labels = self._g.labels()
 
-        dgl_g = self.dgl_g
+        dgl_g = self.dgl_g.to(device)
 
-        e = nn.Embedding(num_nodes, self._d)
+        e = nn.Embedding(num_nodes, self._d).to(device)
         dgl_g.ndata["feat"] = e.weight
-        net = GCN(self._d, self._d, len(labels))
+
+        if self.act_fn == "relu":
+            self.act_fn = torch.relu
+        elif self.act_fn == "tanh":
+            self.act_fn = torch.tanh
+        elif self.act_fn == "sigmoid":
+            self.act_fn = torch.sigmoid
+
+        net = GCN(
+            self._d,
+            len(labels),
+            act_fn=self.act_fn,
+            configuration=self.layer_configuration,
+        )
+
+        net = net.to(device)
 
         inputs = e.weight
         labeled_nodes = []
@@ -90,13 +138,13 @@ class GCNEmbedding(Embedding):
             if "label" in node[1]:
                 labeled_nodes.append(node[0])
                 labels.append(node[1]["label"])
-        labels = torch.tensor(labels)
+        labels = torch.tensor(labels).to(device)
 
         optimizer = torch.optim.Adam(
-            itertools.chain(net.parameters(), e.parameters()), lr=0.01
+            itertools.chain(net.parameters(), e.parameters()), lr=self.lr
         )
-        for epoch in range(self._epochs):
-            logits = net(dgl_g, inputs)
+        for epoch in range(self.epochs):
+            logits = net(dgl_g.to(device), inputs.to(device)).to(device)
             logp = F.log_softmax(logits, 1)
             loss = F.nll_loss(logp[labeled_nodes], labels)
             optimizer.zero_grad()

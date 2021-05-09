@@ -4,7 +4,9 @@ from embeddings.embedding_gcn import GCNEmbedding
 
 def test_gcn_citeseer():
     g = DatasetPool.load("citeseer")
-    e = GCNEmbedding(g, d=10, epochs=1)
+    e = GCNEmbedding(
+        g, d=100, epochs=1, lr=0.05, layer_configuration=(128, 256, 128), act_fn="tanh"
+    )
     e.embed()
     assert e._embedding is not None
     for i in range(34):
@@ -31,4 +33,4 @@ def test_gcn_all():
 
 if __name__ == "__main__":
     test_gcn_citeseer()
-    test_gcn_all()
+    # test_gcn_all()

@@ -16,11 +16,16 @@ with open("../ha_n2v_experiments_pq0-4.json") as json_file:
         for algorithm in json_data[dataset]:
             algorithms.add(algorithm)
             for measure in json_data[dataset][algorithm]:
-                data.append([dataset, algorithm, measure, json_data[dataset][algorithm][measure]])
+                data.append(
+                    [
+                        dataset,
+                        algorithm,
+                        measure,
+                        json_data[dataset][algorithm][measure],
+                    ]
+                )
 
-f_data = pd.DataFrame(
-    data=data, columns=["dataset", "algorithm", "measure", "value"]
-)
+f_data = pd.DataFrame(data=data, columns=["dataset", "algorithm", "measure", "value"])
 g = sns.FacetGrid(f_data, row="dataset", height=1.5, aspect=4, sharey=False)
 g.map_dataframe(
     sns.barplot,

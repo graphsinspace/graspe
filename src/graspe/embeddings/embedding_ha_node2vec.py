@@ -132,7 +132,9 @@ class HANode2VecNumWalksHubsMoreLogEmbedding(HANode2VecNumWalksEmbedding):
 
 
 class HANode2VecPQEmbedding(HANode2VecSlowEmbedding):
-    def __init__(self, g, d, max_p=4, max_q=4, walk_length=80, num_walks=10, workers=10, seed=42):
+    def __init__(
+        self, g, d, max_p=4, max_q=4, walk_length=80, num_walks=10, workers=10, seed=42
+    ):
         super().__init__(g, d, 1, 1, walk_length, num_walks, workers, seed)
         self._max_p = max_p
         self._max_q = max_q
@@ -164,28 +166,23 @@ class HANode2VecPQEmbedding(HANode2VecSlowEmbedding):
 
     def interpolate(self, values, max_value, interpolation_limit):
         return {
-            node: ((values[node] if values[node] > 0 else 1) / max_value) * interpolation_limit
+            node: ((values[node] if values[node] > 0 else 1) / max_value)
+            * interpolation_limit
             for node in values
         }
 
 
 class HANode2VecLoPLoQEmbedding(HANode2VecPQEmbedding):
     def get_p_vals(self):
-        return self.interpolate(
-            self._inverse_hubness, self._max_hubness, self._max_p
-        )
+        return self.interpolate(self._inverse_hubness, self._max_hubness, self._max_p)
 
     def get_q_vals(self):
-        return self.interpolate(
-            self._inverse_hubness, self._max_hubness, self._max_q
-        )
+        return self.interpolate(self._inverse_hubness, self._max_hubness, self._max_q)
 
 
 class HANode2VecLoPHiQEmbedding(HANode2VecPQEmbedding):
     def get_p_vals(self):
-        return self.interpolate(
-            self._inverse_hubness, self._max_hubness, self._max_p
-        )
+        return self.interpolate(self._inverse_hubness, self._max_hubness, self._max_p)
 
     def get_q_vals(self):
         return self.interpolate(self._hubness, self._max_hubness, self._max_q)
@@ -196,9 +193,7 @@ class HANode2VecHiPLoQEmbedding(HANode2VecPQEmbedding):
         return self.interpolate(self._hubness, self._max_hubness, self._max_p)
 
     def get_q_vals(self):
-        return self.interpolate(
-            self._inverse_hubness, self._max_hubness, self._max_q
-        )
+        return self.interpolate(self._inverse_hubness, self._max_hubness, self._max_q)
 
 
 class HANode2VecHiPHiQEmbedding(HANode2VecPQEmbedding):
@@ -228,16 +223,12 @@ class HANode2VecLoPHiQLogEmbedding(HANode2VecPQEmbedding):
         )
 
     def get_q_vals(self):
-        return self.interpolate(
-            self._log_hubness, self._max_log_hubness, self._max_q
-        )
+        return self.interpolate(self._log_hubness, self._max_log_hubness, self._max_q)
 
 
 class HANode2VecHiPLoQLogEmbedding(HANode2VecPQEmbedding):
     def get_p_vals(self):
-        return self.interpolate(
-            self._log_hubness, self._max_log_hubness, self._max_p
-        )
+        return self.interpolate(self._log_hubness, self._max_log_hubness, self._max_p)
 
     def get_q_vals(self):
         return self.interpolate(
@@ -247,11 +238,7 @@ class HANode2VecHiPLoQLogEmbedding(HANode2VecPQEmbedding):
 
 class HANode2VecHiPHiQLogEmbedding(HANode2VecPQEmbedding):
     def get_p_vals(self):
-        return self.interpolate(
-            self._log_hubness, self._max_log_hubness, self._max_p
-        )
+        return self.interpolate(self._log_hubness, self._max_log_hubness, self._max_p)
 
     def get_q_vals(self):
-        return self.interpolate(
-            self._log_hubness, self._max_log_hubness, self._max_q
-        )
+        return self.interpolate(self._log_hubness, self._max_log_hubness, self._max_q)

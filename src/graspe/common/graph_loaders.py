@@ -86,7 +86,9 @@ def load_npz(path, label="label", to_dense=False, undirectedGraph=False):
         #     (loader["attr_data"], loader["attr_indices"], loader["attr_indptr"]),
         #     shape=loader["attr_shape"],
         # )
-        nx_graph = nx.from_scipy_sparse_matrix(adj_matrix, create_using=nx.DiGraph if not undirectedGraph else nx.Graph)
+        nx_graph = nx.from_scipy_sparse_matrix(
+            adj_matrix, create_using=nx.DiGraph if not undirectedGraph else nx.Graph
+        )
         # get labels first
         node_attrs = {}
         try:
@@ -95,7 +97,6 @@ def load_npz(path, label="label", to_dense=False, undirectedGraph=False):
 
         except:
             print("WARNING: Labels do not exist for this dataset")
-
 
         # node_attrs = {i: {"label": i} for i in range(1,16)}
         # For now we do not need attributes.
