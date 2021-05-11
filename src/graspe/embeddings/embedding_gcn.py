@@ -29,6 +29,8 @@ class GCN(nn.Module):
             self.hidden.append(layer)
             last_hidden_size = layer_size
 
+        self.hidden = nn.Sequential(*self.hidden)  # Module registration
+
         self.output = GraphConv(last_hidden_size, num_classes)
 
     def forward(self, g, inputs):
