@@ -43,11 +43,12 @@ def graphsage_tuning():
                             print('PRECISION@K = ', precision_val, 'MAP = ', map_val,
                                   ', RECALL = ', recall_val, ', F1 = ', f1_val)
                             with open('/home/dusan/graspe_gcn_res/{}.csv'.format(dataset), 'a') as file:
-                                file.write('d={}_epochs={}_n_layers={}_dropout={},{},{},{},{}\n'.format(
+                                file.write('d={}_epochs={}_n_layers={}_dropout={}_hidden={},{},{},{},{}\n'.format(
                                     d,
                                     epochs,
                                     n_layers,
                                     dropout,
+                                    hidden,
                                     precision_val,
                                     map_val,
                                     recall_val,
