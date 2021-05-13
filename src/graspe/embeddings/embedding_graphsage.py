@@ -67,6 +67,7 @@ class GraphSageEmbedding(Embedding):
         g,
         d,
         epochs,
+        dropout,
         train=0.8,
         val=0.1,
         test=0.1,
@@ -106,6 +107,7 @@ class GraphSageEmbedding(Embedding):
         self.test = test
         self.hidden = hidden
         self.layers = layers
+        self.dropout = dropout
         self.lr = lr
         if deterministic:  # not thread-safe, beware if running multiple at once
             torch.set_deterministic(True)
@@ -171,7 +173,7 @@ class GraphSageEmbedding(Embedding):
             n_classes,
             self.layers,
             F.relu,
-            0.5,
+            self.dropout,
             "gcn",
             fc_dim=self._d,
         )

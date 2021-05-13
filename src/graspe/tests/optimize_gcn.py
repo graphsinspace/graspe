@@ -19,14 +19,8 @@ def gcn_tuning():
                         emb_m = GCNEmbedding(graph, d=d, epochs=epochs, n_layers=n_layers, dropout=dropout)
                         emb_m.embed()
 
-                        # print("#nodes = ", graph.nodes_cnt())
-                        # print("#edges = ", graph.edges_cnt())
-
                         num_links = graph.edges_cnt()
-
                         reconstructed_graph = emb_m.reconstruct(num_links)
-                        # print("#nodes = ", reconstructed_graph.nodes_cnt())
-                        # print("#edges = ", reconstructed_graph.edges_cnt())
 
                         # graph reconstruction evaluation
                         precision_val = graph.link_precision(reconstructed_graph)
