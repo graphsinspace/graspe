@@ -56,7 +56,7 @@ def load_csv(path, label):
     raise Exception("Not implemented")
 
 
-def load_npz(path, label="labels", to_dense=False):
+def load_npz(path, label="label", to_dense=False, undirectedGraph=False):
     """
     Loads a graph from a npz file. For included npz files see:
     https://github.com/abojchevski/graph2gauss/blob/master/g2g/utils.py#L479
@@ -86,14 +86,19 @@ def load_npz(path, label="labels", to_dense=False):
         #     (loader["attr_data"], loader["attr_indices"], loader["attr_indptr"]),
         #     shape=loader["attr_shape"],
         # )
-
-        labels = loader.get(label)
-
-        nx_graph = nx.from_scipy_sparse_matrix(adj_matrix, create_using=nx.DiGraph)
-
+        nx_graph = nx.from_scipy_sparse_matrix(
+            adj_matrix, create_using=nx.DiGraph if not undirectedGraph else nx.Graph
+        )
         # get labels first
-        node_attrs = {i: {"label": label} for i, label in enumerate(labels)}
+        node_attrs = {}
+        try:
+            labels = loader.get(label, loader[label])
+            node_attrs = {i: {"label": label} for i, label in enumerate(labels)}
 
+        except:
+            print("WARNING: Labels do not exist for this dataset")
+
+        # node_attrs = {i: {"label": i} for i in range(1,16)}
         # For now we do not need attributes.
         # if not to_dense:
         #     try:

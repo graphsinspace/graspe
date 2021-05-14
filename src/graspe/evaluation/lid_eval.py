@@ -102,10 +102,10 @@ class EmbLIDMLEEstimator(LIDMLEEstimator):
     """
 
     def __init__(self, graph, embedding, k):
-        self.node_vectors = {}  #[embedding[n[0]] for n in graph.nodes()]
+        self.node_vectors = {}  # [embedding[n[0]] for n in graph.nodes()]
         for n in graph.nodes():
             self.node_vectors[n[0]] = embedding[n[0]]
-            
+
         super().__init__("EMB-LID", graph, k)
 
     def compute_distance(self, src, dst):
@@ -118,7 +118,6 @@ def shortest_path_distance(nx_graph, src, dst):
         return d
     except nx.NetworkXNoPath:
         return nx_graph.number_of_nodes()
-
 
 
 #  LID estimated using natural communities
@@ -262,20 +261,19 @@ class NCLIDEstimator(LIDEstimator):
 
         return maxd
 
-
     def count_nodes_at_distance(self, src, maxd):
         # count how many nodes are from src at maxd distance
-        counter = 1   # src counted
-                
+        counter = 1  # src counted
+
         queue = [(src, 0)]
         visited = set([src])
         while len(queue) > 0:
             curr = queue.pop(0)
             dst, depth = curr[0], curr[1]
-                    
+
             if depth >= maxd:
                 break
-                    
+
             cneis = nx.all_neighbors(self.nx_graph, dst)
 
             for c in cneis:
@@ -305,17 +303,14 @@ class NCLIDEstimator(LIDEstimator):
                 if len_src_community > self.max_nc_size:
                     self.max_nc_size = len_src_community
 
-
     def is_in_natural_community(self, seed_node, other_node):
         return other_node in self.natural_community[seed_node]
-
 
     def nc_size_distr(self, out_file):
         dstr = self.nc_size_distr_str()
         outf = open(out_file, "w")
         outf.write(dstr)
         outf.close()
-
 
     def nc_size_distr_str(self):
         distr = [0] * (self.max_nc_size + 1)
@@ -330,9 +325,8 @@ class NCLIDEstimator(LIDEstimator):
                 continue
 
             dstr += str(i) + "," + str(distr[i]) + "\n"
-            
-        return dstr
 
+        return dstr
 
     def nc_len(self, node):
         return self.nc_size[node]
