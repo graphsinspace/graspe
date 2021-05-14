@@ -9,7 +9,8 @@ from dgl.nn.pytorch import GraphConv
 
 from embeddings.base.embedding import Embedding
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
+#device = "cuda" if torch.cuda.is_available() else "cpu"
+device = "cpu"
 
 
 class GCN(nn.Module):
