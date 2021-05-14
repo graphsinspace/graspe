@@ -16,8 +16,6 @@ class GCN(nn.Module):
     """
     Example Graph-Convolutional neural network implementation. Single or multiple hidden layer.
     """
-
-
     def __init__(self, in_feats, num_classes, configuration=(128,), act_fn=torch.relu):
         super(GCN, self).__init__()
         self.act_fn = act_fn
@@ -81,10 +79,6 @@ class GCNEmbedding(Embedding):
             Dimensionality of the embedding.
         epochs : int
             Number of epochs.
-        n_layers: int
-            Number of hidden layers
-        dropout: float \in [0, 1]
-            Probability of applying dropout in hidden layers of the GCN
         deterministic : bool
             Whether to try and run in deterministic mode
         lr : float
@@ -122,7 +116,6 @@ class GCNEmbedding(Embedding):
 
         e = nn.Embedding(num_nodes, self._d).to(device)
         dgl_g.ndata["feat"] = e.weight
-        net = GCN(self._d, self._d, len(labels), self._n_layers, self._dropout)
 
         if self.act_fn == "relu":
             self.act_fn = torch.relu

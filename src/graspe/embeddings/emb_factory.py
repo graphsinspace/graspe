@@ -55,11 +55,12 @@ class EmbFactory(ABC):
                 ["GCN"],  # name
                 ["tanh", "relu"],  # act_fn
                 [0.01, 0.1],  # learning rate
+                [100, 200],  # epochs
                 [(128,), (128, 128), (256, 256), (256, 512, 256)],  # layer configs
             )
         )
         self.gcn_names = [
-            f"{a[0]}_{a[1]}_{a[2]}_{'_'.join(str(d) for d in a[3])}"
+            f"{a[0]}_{a[1]}_{a[2]}_{a[3]}_{'_'.join(str(d) for d in a[4])}"
             for a in self.gcn_algs
         ]
         presets["GCN"] = self.gcn_names
@@ -164,10 +165,10 @@ class LazyEmbFactory(EmbFactory):
             self._ems[name] = GCNEmbedding(
                 self._graph,
                 self._dim,
-                self._epochs,
+                epochs=config[3],
                 lr=config[2],
                 act_fn=config[1],
-                layer_configuration=config[3],
+                layer_configuration=config[4],
             )
 
     def get_embedding_by_name(self, name):
