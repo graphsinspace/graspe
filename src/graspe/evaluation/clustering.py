@@ -58,6 +58,31 @@ class ClusteringEval:
         self._calinski_harabasz_score = calinski_harabasz_score(self._embedding, clusters)
         self._davies_boldin_score = davies_bouldin_score(self._embedding, clusters)
 
+    def evaluate_extern_labels(self, clustering_type, labels):
+        no_clusters = len(labels)
+        function = self.__get_clustering_function(clustering_type)
+        clustering = function(no_clusters)
+        clusters = clustering.fit_predict(self._node_vectors)
+        self._ajusted_mutual_info_score = adjusted_mutual_info_score(
+            self._labels, clusters
+        )
+        self._adjusted_rand_score = adjusted_rand_score(self._labels, clusters)
+        self._completeness_score = completeness_score(self._labels, clusters)
+        self._fowlkes_mallows_score = fowlkes_mallows_score(self._labels, clusters)
+        self._homogeneity_score = homogeneity_score(self._labels, clusters)
+        self._mutual_info_score = mutual_info_score(self._labels, clusters)
+        self._normalized_mutual_info_score = normalized_mutual_info_score(
+            self._labels, clusters
+        )
+        self._rand_score = rand_score(self._labels, clusters)
+        self._v_measure_score = v_measure_score(self._labels, clusters)
+        self._silhouette_score = silhouette_score(self._embedding, clusters)
+        self._calinski_harabasz_score = calinski_harabasz_score(self._embedding, clusters)
+        self._davies_boldin_score = davies_bouldin_score(self._embedding, clusters)
+
+        return clusters
+
+
 
     def __get_clustering_function(self, clustering_type):
         cltype = clustering_type.lower()
