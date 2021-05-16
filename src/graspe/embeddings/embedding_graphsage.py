@@ -9,43 +9,40 @@ from dgl.nn.pytorch import SAGEConv
 
 from embeddings.base.embedding import Embedding
 
+#device = "cuda" if torch.cuda.is_available() else "cpu"
+device = "cpu"
+
 
 class GraphSAGE(nn.Module):
-    def __init__(
-        self,
-        in_feats,
-        n_hidden,
-        n_classes,
-        n_layers,
-        activation,
-        dropout,
-        aggregator_type,
-        fc_dim,
-    ):
+    def __init__(self, in_feats, num_classes, aggregator_type, configuration=(128, ), act_fn=torch.relu, dropout=0.0):
         super(GraphSAGE, self).__init__()
-        self.layers = nn.ModuleList()
+        self.hidden = nn.ModuleList()
         self.dropout = nn.Dropout(dropout)
-        self.activation = activation
+        self.act_fn = act_fn
+        last_hidden_size = configuration[0]
 
-        # input layer
-        self.layers.append(SAGEConv(in_feats, n_hidden, aggregator_type))
-        # hidden layers
-        for _ in range(n_layers - 1):
-            self.layers.append(SAGEConv(n_hidden, n_hidden, aggregator_type))
-        # output layer
-        self.layers.append(
-            SAGEConv(n_hidden, fc_dim, aggregator_type)
-        )  # activation None
+        self.input = SAGEConv(in_feats, configuration[0], aggregator_type).to(device)
+
+        for layer_size in configuration[1:]:
+            layer = SAGEConv(last_hidden_size, layer_size, aggregator_type).to(device)
+            self.hidden.append(layer)
+            last_hidden_size = layer_size
+
+        self.hidden = nn.Sequential(*self.hidden)  # Module registration
+
+        self.output = SAGEConv(last_hidden_size, configuration[0], aggregator_type).to(device)
+
         # idea for embedding extraction from: https://github.com/stellargraph/stellargraph/issues/1586
-        self.fc = nn.Linear(fc_dim, n_classes)
+        self.fc = nn.Linear(configuration[0], num_classes)
 
-    def forward(self, graph, inputs):
+    def forward(self, g, inputs):
         h = self.dropout(inputs)
-        for l, layer in enumerate(self.layers):
-            h = layer(graph, h)
-            if l != len(self.layers) - 1:
-                h = self.activation(h)
-                h = self.dropout(h)
+        h = self.act_fn(self.input(g, h))
+
+        for layer in self.hidden:
+            h = self.dropout(self.act_fn(layer(g, h)))
+
+        h = self.output(g, h)
         return self.fc(h), h
 
 
@@ -67,12 +64,12 @@ class GraphSageEmbedding(Embedding):
         g,
         d,
         epochs,
-        dropout,
+        dropout=0.0,
+        layer_configuration=(128, ),
+        act_fn="relu",
         train=0.8,
         val=0.1,
         test=0.1,
-        hidden=16,
-        layers=1,
         lr=1e-2,
         deterministic=False,
     ):
@@ -85,16 +82,18 @@ class GraphSageEmbedding(Embedding):
             Dimensionality of the embedding.
         epochs : int
             Number of epochs.
+        dropout : float
+            Probability of applying a dropout in hidden layers
+        layer_configuration : tuple[int]
+            Hidden layer configuration, tuple length is depth, values are hidden sizes
+        act_fn : str
+            Activation function to be used, support for relu, tanh, sigmoid
         train : float
             Percentage of data to be used for training.
         val : float
             Percentage of data to be used for validation.
         test : float
             Percentage of data to be used for testing.
-        hidden : int
-            Number of hidden neurons in a SageConv layer
-        layers : int
-            Number of SageConv layers
         lr : float
             Learning rate
         deterministic : bool
@@ -102,11 +101,11 @@ class GraphSageEmbedding(Embedding):
         """
         super().__init__(g, d)
         self._epochs = epochs
+        self.layer_configuration = layer_configuration
+        self.act_fn = act_fn
         self.train = train
         self.val = val
         self.test = test
-        self.hidden = hidden
-        self.layers = layers
         self.dropout = dropout
         self.lr = lr
         if deterministic:  # not thread-safe, beware if running multiple at once
@@ -130,6 +129,13 @@ class GraphSageEmbedding(Embedding):
         super().embed()
 
         g = self._g.to_dgl()
+
+        if self.act_fn == "relu":
+            self.act_fn = torch.relu
+        elif self.act_fn == "tanh":
+            self.act_fn = torch.tanh
+        elif self.act_fn == "sigmoid":
+            self.act_fn = torch.sigmoid
 
         num_nodes = len(g)
 
@@ -169,13 +175,11 @@ class GraphSageEmbedding(Embedding):
         # create GraphSAGE model
         model = GraphSAGE(
             in_feats,
-            self.hidden,
             n_classes,
-            self.layers,
-            F.relu,
-            self.dropout,
             "gcn",
-            fc_dim=self._d,
+            configuration=self.layer_configuration,
+            act_fn=torch.relu,
+            dropout=self.dropout,
         )
 
         # use optimizer
