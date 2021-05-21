@@ -5,7 +5,7 @@ sys.path.append('/s01/dmi/lucy/graspe/src/graspe')
 from common.dataset_pool import DatasetPool
 from embeddings.embedding_node2vec import Node2VecEmbedding
 from embeddings.embedding_gae import GAEEmbedding
-from embeddings.embedding_graphsage import GraphSage
+from embeddings.embedding_graphsage import GraphSageEmbedding
 from evaluation.clustering import ClusteringEval
 
 
@@ -60,7 +60,7 @@ def test_clustering():
 
         #graphsage
         f.write("graph sage\n")
-        embedding = GraphSage(graph, 10, 20)
+        embedding = GraphSageEmbedding(graph, 10, 20)
         embedding.embed()
 
         clustering_eval = ClusteringEval(graph, embedding, "kmeans")
