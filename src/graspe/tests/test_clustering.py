@@ -11,7 +11,7 @@ from evaluation.clustering import ClusteringEval
 
 def test_clustering():
     f = open("test_cl.txt", "w")
-    ds_names = DatasetPool.get_datasets
+    ds_names = DatasetPool.get_datasets()
     for name in ds_names:
         f.write("dateset = %s\n".format(name))
         graph = DatasetPool.load(name)
