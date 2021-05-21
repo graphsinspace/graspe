@@ -82,4 +82,6 @@ def test_clustering():
     f.close()
     assert clustering_eval
 
+print("pokusavam da poteram test")
 test_clustering()
+print("poterao test")
