@@ -1,3 +1,7 @@
+import sys
+import os
+sys.path.append('/s01/dmi/lucy/graspe/src/graspe')
+
 from common.dataset_pool import DatasetPool
 from embeddings.embedding_node2vec import Node2VecEmbedding
 from embeddings.embedding_gae import GAEEmbedding
