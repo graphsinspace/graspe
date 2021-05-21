@@ -81,3 +81,5 @@ def test_clustering():
     f.flush()
     f.close()
     assert clustering_eval
+
+test_clustering()
