@@ -9,7 +9,7 @@ class Classifier:
     Represents a single classification algorithm with methods for fit, predict and metrics.
     """
 
-    def __init__(self, model, embedding):
+    def __init__(self, model, embedding, skip_split=False):
         self._data, self._labels = Embedding.from_file(embedding).get_dataset()
         self.model = model
         self.predicted_labels = None
@@ -19,7 +19,9 @@ class Classifier:
             self.test_data,
             self.train_labels,
             self.test_labels,
-        ) = train_test_split(self._data, self._labels, test_size=0.33)
+        ) = train_test_split(self._data, self._labels, test_size=0.33) \
+                if not skip_split else \
+                self._data, self._data, self._labels, self._labels
 
     def fit(self):
         self.model.fit(self.train_data, self.train_labels)

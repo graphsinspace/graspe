@@ -33,8 +33,9 @@ class NaiveBayes(Classifier):
 
 
 class RandomForest(Classifier):
-    def __init__(self, embedding, n_estimators):
+    def __init__(self, embedding, n_estimators, skip_split=False):
         super().__init__(
             model=ensemble.RandomForestClassifier(n_estimators=n_estimators),
             embedding=embedding,
+            skip_split=skip_split
         )
