@@ -145,6 +145,7 @@ class LazyEmbFactory(EmbFactory):
         self._ems = {
             "GCN": GCNEmbedding(self._graph, self._dim, self._epochs),
             "GAE": GAEEmbedding(self._graph, self._dim, epochs=self._epochs),
+            "GraphSAGE": GraphSageEmbedding(self._graph, self._dim, epochs=self._epochs),
             "SDNE": SDNEEmbedding(
                 self._graph, self._dim, epochs=self._epochs, verbose=0
             ),
