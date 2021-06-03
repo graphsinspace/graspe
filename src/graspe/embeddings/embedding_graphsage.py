@@ -173,26 +173,26 @@ class GraphSageEmbedding(Embedding):
         n_edges = g.number_of_edges()
 
         # create GraphSAGE model
-        model = GraphSAGE(
+        net = GraphSAGE(
             in_feats,
             n_classes,
             "gcn",
             configuration=self.layer_configuration,
-            act_fn=torch.relu,
+            act_fn=self.act_fn,
             dropout=self.dropout,
         )
 
         # use optimizer
-        optimizer = torch.optim.Adam(model.parameters(), lr=self.lr, weight_decay=5e-4)
+        optimizer = torch.optim.Adam(net.parameters(), lr=self.lr, weight_decay=5e-4)
 
         # initialize graph
         dur = []
         for epoch in range(self._epochs):
-            model.train()
+            net.train()
             if epoch >= 3:
                 t0 = time.time()
             # forward
-            logits, _ = model(g, features)
+            logits, _ = net(g, features)
             loss = F.cross_entropy(logits[train_nid], labels[train_nid])
 
             optimizer.zero_grad()
@@ -202,7 +202,7 @@ class GraphSageEmbedding(Embedding):
             if epoch >= 3:
                 dur.append(time.time() - t0)
 
-            acc = self._evaluate(model, g, features, labels, val_nid)
+            acc = self._evaluate(net, g, features, labels, val_nid)
             print(
                 "Epoch {:05d} | Time(s) {:.4f} | Loss {:.4f} | Accuracy {:.4f} | "
                 "ETputs(KTEPS) {:.2f}".format(
@@ -210,11 +210,11 @@ class GraphSageEmbedding(Embedding):
                 )
             )
 
-        acc = self._evaluate(model, g, features, labels, test_nid)
+        acc = self._evaluate(net, g, features, labels, test_nid)
         print("Test Accuracy {:.4f}".format(acc))
 
         with torch.no_grad():
-            _, embedding = model(g, features)
+            _, embedding = net(g, features)
             self._embedding = {}
 
             for i in range(len(embedding)):

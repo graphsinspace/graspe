@@ -9,6 +9,7 @@ from embeddings.base.embedding import Embedding
 from embeddings.embedding_deepwalk import DeepWalkEmbedding
 from embeddings.embedding_gae import GAEEmbedding
 from embeddings.embedding_gcn import GCNEmbedding
+from embeddings.embedding_graphsage import GraphSageEmbedding
 from embeddings.embedding_node2vec import Node2VecEmbedding
 from embeddings.embedding_ha_node2vec import (
     HANode2VecNumWalksHubsLessEmbedding,
@@ -66,6 +67,20 @@ class EmbFactory(ABC):
         presets["GCN"] = self.gcn_names
         # end GCN builder
 
+        self.graphsage_algs = list(
+            itertools.product(
+                ['GraphSAGE'],  # name
+                ['tanh', 'relu'],  # act_fn
+                [0.01, 0.1],  # learning rate
+                [100, 200],  # epochs
+                [(128,), (128, 128), (256, 256), (256, 512, 256)],  # layer configs
+            )
+        )
+        self.graphsage_names = [
+            f"{a[0]}_{a[1]}_{a[2]}_{a[3]}_{'_'.join(str(d) for d in a[4])}"
+            for a in self.graphsage_algs
+        ]
+        presets["GraphSAGE"] = self.gcn_names
         self._dim = dim
         self._quiet = quiet
 
@@ -163,6 +178,16 @@ class LazyEmbFactory(EmbFactory):
 
         for name, config in zip(self.gcn_names, self.gcn_algs):
             self._ems[name] = GCNEmbedding(
+                self._graph,
+                self._dim,
+                epochs=config[3],
+                lr=config[2],
+                act_fn=config[1],
+                layer_configuration=config[4],
+            )
+
+        for name, config in zip(self.graphsage_names, self.graphsage_algs):
+            self._ems[name] = GraphSageEmbedding(
                 self._graph,
                 self._dim,
                 epochs=config[3],
