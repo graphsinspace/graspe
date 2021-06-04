@@ -72,7 +72,6 @@ class GCNEmbedding(Embedding):
         act_fn="relu",
         lid_aware=False,
         lid_k=20,
-        lid_weight=1.0,
     ):
         """
         Parameters
