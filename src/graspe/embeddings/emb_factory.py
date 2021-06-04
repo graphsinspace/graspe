@@ -80,7 +80,7 @@ class EmbFactory(ABC):
             f"{a[0]}_{a[1]}_{a[2]}_{a[3]}_{'_'.join(str(d) for d in a[4])}"
             for a in self.graphsage_algs
         ]
-        presets["GraphSAGE"] = self.gcn_names
+        presets["GraphSAGE"] = self.graphsage_names
         self._dim = dim
         self._quiet = quiet
 
