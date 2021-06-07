@@ -5,6 +5,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 import torch_geometric as tg
+from torch.nn import Sequential
 from torch_geometric.nn import GCNConv, GAE, VGAE
 from torch_geometric.utils import train_test_split_edges
 
@@ -12,26 +13,55 @@ from embeddings.base.embedding import Embedding
 
 
 class GCNEncoder(torch.nn.Module):
-    def __init__(self, in_channels, out_channels):
+    def __init__(self, in_channels, out_channels, channel_configuration=(8,), act_fn=torch.relu):
         super(GCNEncoder, self).__init__()
-        self.conv1 = GCNConv(in_channels, 2 * out_channels, cached=True)
-        self.conv2 = GCNConv(2 * out_channels, out_channels, cached=True)
+        self.act_fn = act_fn
+        self.input = GCNConv(in_channels, channel_configuration[0], cached=True)
+        self.hidden = []
+        last_num_channels = channel_configuration[0]
+
+        for num_channels in channel_configuration[1:]:
+            layer = GCNConv(last_num_channels, num_channels, cached=True)
+            self.hidden.append(layer)
+            last_num_channels = num_channels
+
+        self.hidden = Sequential(*self.hidden)  # Module registration
+        self.output = GCNConv(last_num_channels, out_channels, cached=True)
 
     def forward(self, x, edge_index):
-        x = self.conv1(x, edge_index).relu()
-        return self.conv2(x, edge_index)
+        x = self.act_fn(self.input(x, edge_index))
+
+        for layer in self.hidden:
+            x = self.act_fn(layer(x, edge_index))
+
+        return self.output(x, edge_index)
 
 
 class VariationalGCNEncoder(torch.nn.Module):
-    def __init__(self, in_channels, out_channels):
+    def __init__(self, in_channels, out_channels, channel_configuration=(8,), act_fn=torch.relu):
         super(VariationalGCNEncoder, self).__init__()
-        self.conv1 = GCNConv(in_channels, 2 * out_channels, cached=True)
-        self.conv_mu = GCNConv(2 * out_channels, out_channels, cached=True)
-        self.conv_logstd = GCNConv(2 * out_channels, out_channels, cached=True)
+        self.act_fn = act_fn
+        self.input = GCNConv(in_channels, channel_configuration[0], cached=True)
+        self.hidden = []
+        last_num_channels = channel_configuration[0]
+
+        for num_channels in channel_configuration[1:]:
+            layer = GCNConv(last_num_channels, num_channels, cached=True)
+            self.hidden.append(layer)
+            last_num_channels = num_channels
+
+        self.hidden = Sequential(*self.hidden)  # Module registration
+
+        self.output_mu = GCNConv(last_num_channels, out_channels, cached=True)
+        self.output_logstd = GCNConv(last_num_channels, out_channels, cached=True)
 
     def forward(self, x, edge_index):
-        x = self.conv1(x, edge_index).relu()
-        return self.conv_mu(x, edge_index), self.conv_logstd(x, edge_index)
+        x = self.input(x, edge_index).relu()
+
+        for layer in self.hidden:
+            x = self.act_fn(layer(x, edge_index))
+
+        return self.output_mu(x, edge_index), self.output_logstd(x, edge_index)
 
 
 class LinearEncoder(torch.nn.Module):
@@ -66,7 +96,16 @@ class GAEEmbedding(Embedding):
     """
 
     def __init__(
-        self, g, d, epochs=500, variational=False, linear=False, deterministic=False
+        self,
+        g,
+        d,
+        epochs=500,
+        variational=False,
+        linear=False,
+        deterministic=False,
+        lr=0.01,
+        layer_configuration=(8,),
+        act_fn="relu",
     ):
         """
         Parameters
@@ -83,11 +122,20 @@ class GAEEmbedding(Embedding):
             Whether to use Linear Encoders for the autoencoder model
         deterministic : bool
             Whether to try and run in deterministic mode
+        lr : float
+            Learning rate for the optimizer
+        layer_configuration : tuple[int]
+            Hidden layer configuration, tuple length is depth, values are hidden sizes
+        act_fn : str
+            Activation function to be used, support for relu, tanh, sigmoid
         """
         super().__init__(g, d)
         self.epochs = epochs
         self.variational = variational
         self.linear = linear
+        self.lr = lr
+        self.layer_configuration = layer_configuration
+        self.act_fn = act_fn
         if deterministic:  # not thread-safe, beware if running multiple at once
             torch.set_deterministic(True)
             torch.manual_seed(0)
@@ -134,24 +182,47 @@ class GAEEmbedding(Embedding):
         data.x = F.one_hot(torch.arange(0, data.num_nodes) % data.num_nodes).float()
         data = train_test_split_edges(data)
 
+        if self.act_fn == "relu":
+            self.act_fn = torch.relu
+        elif self.act_fn == "tanh":
+            self.act_fn = torch.tanh
+        elif self.act_fn == "sigmoid":
+            self.act_fn = torch.sigmoid
+
         if self.variational:
             if self.linear:
-                encoder = VariationalLinearEncoder(num_features, out_channels)
+                encoder = VariationalLinearEncoder(
+                    num_features,
+                    out_channels
+                )
             else:
-                encoder = VariationalGCNEncoder(num_features, out_channels)
+                encoder = VariationalGCNEncoder(
+                    num_features,
+                    out_channels,
+                    channel_configuration=self.layer_configuration,
+                    act_fn=torch.relu
+                )
             model = VGAE(encoder)
         else:
             if self.linear:
-                encoder = LinearEncoder(num_features, out_channels)
+                encoder = LinearEncoder(
+                    num_features,
+                    out_channels
+                )
             else:
-                encoder = GCNEncoder(num_features, out_channels)
+                encoder = GCNEncoder(
+                    num_features,
+                    out_channels,
+                    channel_configuration=self.layer_configuration,
+                    act_fn=torch.relu
+                )
             model = GAE(encoder)
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         model = model.to(device)
         x = data.x.to(device)
         train_pos_edge_index = data.train_pos_edge_index.to(device)
-        optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+        optimizer = torch.optim.Adam(model.parameters(), lr=self.lr)
 
         loss = -1
         for epoch in range(1, self.epochs + 1):

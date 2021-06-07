@@ -5,7 +5,16 @@ g = DatasetPool.load("karate_club_graph")
 
 
 def test_gae_normal():
-    gae_embedding = GAEEmbedding(g, d=10, epochs=5, variational=False, linear=False)
+    gae_embedding = GAEEmbedding(
+        g,
+        d=10,
+        epochs=5,
+        variational=False,
+        linear=False,
+        lr=0.01,
+        layer_configuration=(8,),
+        act_fn='relu'
+    )
     gae_embedding.embed()
     assert gae_embedding._embedding is not None
     for i in range(34):
@@ -13,7 +22,16 @@ def test_gae_normal():
 
 
 def test_gae_variational():
-    gae_embedding = GAEEmbedding(g, d=10, epochs=5, variational=True, linear=False)
+    gae_embedding = GAEEmbedding(
+        g,
+        d=10,
+        epochs=5,
+        variational=True,
+        linear=False,
+        lr=0.01,
+        layer_configuration=(8,),
+        act_fn='relu'
+    )
     gae_embedding.embed()
     assert gae_embedding._embedding is not None
     for i in range(34):
@@ -21,7 +39,16 @@ def test_gae_variational():
 
 
 def test_gae_normal_linear():
-    gae_embedding = GAEEmbedding(g, d=10, epochs=5, variational=False, linear=True)
+    gae_embedding = GAEEmbedding(
+        g,
+        d=10,
+        epochs=5,
+        variational=False,
+        linear=True,
+        lr=0.01,
+        layer_configuration=(8,),
+        act_fn='relu'
+    )
     gae_embedding.embed()
     assert gae_embedding._embedding is not None
     for i in range(34):
@@ -29,7 +56,16 @@ def test_gae_normal_linear():
 
 
 def test_gae_variational_linear():
-    gae_embedding = GAEEmbedding(g, d=10, epochs=5, variational=True, linear=True)
+    gae_embedding = GAEEmbedding(
+        g,
+        d=10,
+        epochs=5,
+        variational=True,
+        linear=True,
+        lr=0.01,
+        layer_configuration=(8,),
+        act_fn='relu'
+    )
     gae_embedding.embed()
     assert gae_embedding._embedding is not None
     for i in range(34):
@@ -37,7 +73,16 @@ def test_gae_variational_linear():
 
 
 def test_gae_cora():
-    gae_embedding = GAEEmbedding(g, d=10, epochs=5, variational=False, linear=False)
+    gae_embedding = GAEEmbedding(
+        g,
+        d=10,
+        epochs=5,
+        variational=False,
+        linear=False,
+        lr=0.01,
+        layer_configuration=(8,),
+        act_fn='relu'
+    )
     gae_embedding.embed()
     assert gae_embedding._embedding is not None
     for i in range(34):
@@ -50,7 +95,16 @@ def test_gae_all():
     for dataset_name in datasets:
         print(dataset_name)
         g = DatasetPool.load(dataset_name)
-        gae_embedding = GAEEmbedding(g, d=1, epochs=1, variational=False, linear=False)
+        gae_embedding = GAEEmbedding(
+        g,
+        d=10,
+        epochs=5,
+        variational=False,
+        linear=False,
+        lr=0.01,
+        layer_configuration=(8,),
+        act_fn='relu'
+    )
         gae_embedding.embed()
         assert gae_embedding._embedding is not None
         for i in range(34):
