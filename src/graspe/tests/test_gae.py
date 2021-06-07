@@ -14,7 +14,7 @@ def test_gae_normal():
         linear=False,
         lr=0.01,
         layer_configuration=(8,),
-        act_fn='relu'
+        act_fn="relu",
     )
     gae_embedding.embed()
     assert gae_embedding._embedding is not None
@@ -31,7 +31,7 @@ def test_gae_variational():
         linear=False,
         lr=0.01,
         layer_configuration=(8,),
-        act_fn='relu'
+        act_fn="relu",
     )
     gae_embedding.embed()
     assert gae_embedding._embedding is not None
@@ -48,7 +48,7 @@ def test_gae_normal_linear():
         linear=True,
         lr=0.01,
         layer_configuration=(8,),
-        act_fn='relu'
+        act_fn="relu",
     )
     gae_embedding.embed()
     assert gae_embedding._embedding is not None
@@ -65,7 +65,7 @@ def test_gae_variational_linear():
         linear=True,
         lr=0.01,
         layer_configuration=(8,),
-        act_fn='relu'
+        act_fn="relu",
     )
     gae_embedding.embed()
     assert gae_embedding._embedding is not None
@@ -82,7 +82,7 @@ def test_gae_cora():
         linear=False,
         lr=0.01,
         layer_configuration=(8,),
-        act_fn='relu'
+        act_fn="relu",
     )
     gae_embedding.embed()
     assert gae_embedding._embedding is not None
@@ -97,15 +97,15 @@ def test_gae_all():
         print(dataset_name)
         g = DatasetPool.load(dataset_name)
         gae_embedding = GAEEmbedding(
-        g,
-        d=10,
-        epochs=5,
-        variational=False,
-        linear=False,
-        lr=0.01,
-        layer_configuration=(8,),
-        act_fn='relu'
-    )
+            g,
+            d=10,
+            epochs=5,
+            variational=False,
+            linear=False,
+            lr=0.01,
+            layer_configuration=(8,),
+            act_fn="relu",
+        )
         gae_embedding.embed()
         assert gae_embedding._embedding is not None
         for i in range(34):

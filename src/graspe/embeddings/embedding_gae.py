@@ -14,7 +14,9 @@ from evaluation.lid_eval import EmbLIDMLEEstimatorTorch
 
 
 class GCNEncoder(torch.nn.Module):
-    def __init__(self, in_channels, out_channels, channel_configuration=(8,), act_fn=torch.relu):
+    def __init__(
+        self, in_channels, out_channels, channel_configuration=(8,), act_fn=torch.relu
+    ):
         super(GCNEncoder, self).__init__()
         self.act_fn = act_fn
         self.input = GCNConv(in_channels, channel_configuration[0], cached=True)
@@ -39,7 +41,9 @@ class GCNEncoder(torch.nn.Module):
 
 
 class VariationalGCNEncoder(torch.nn.Module):
-    def __init__(self, in_channels, out_channels, channel_configuration=(8,), act_fn=torch.relu):
+    def __init__(
+        self, in_channels, out_channels, channel_configuration=(8,), act_fn=torch.relu
+    ):
         super(VariationalGCNEncoder, self).__init__()
         self.act_fn = act_fn
         self.input = GCNConv(in_channels, channel_configuration[0], cached=True)
@@ -215,30 +219,24 @@ class GAEEmbedding(Embedding):
 
         if self.variational:
             if self.linear:
-                encoder = VariationalLinearEncoder(
-                    num_features,
-                    out_channels
-                )
+                encoder = VariationalLinearEncoder(num_features, out_channels)
             else:
                 encoder = VariationalGCNEncoder(
                     num_features,
                     out_channels,
                     channel_configuration=self.layer_configuration,
-                    act_fn=torch.relu
+                    act_fn=torch.relu,
                 )
             model = VGAE(encoder)
         else:
             if self.linear:
-                encoder = LinearEncoder(
-                    num_features,
-                    out_channels
-                )
+                encoder = LinearEncoder(num_features, out_channels)
             else:
                 encoder = GCNEncoder(
                     num_features,
                     out_channels,
                     channel_configuration=self.layer_configuration,
-                    act_fn=torch.relu
+                    act_fn=torch.relu,
                 )
             model = GAE(encoder)
 

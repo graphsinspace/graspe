@@ -10,12 +10,20 @@ from dgl.nn.pytorch import SAGEConv
 from embeddings.base.embedding import Embedding
 from evaluation.lid_eval import EmbLIDMLEEstimatorTorch
 
-#device = "cuda" if torch.cuda.is_available() else "cpu"
+# device = "cuda" if torch.cuda.is_available() else "cpu"
 device = "cpu"
 
 
 class GraphSAGE(nn.Module):
-    def __init__(self, in_feats, num_classes, aggregator_type, configuration=(128, ), act_fn=torch.relu, dropout=0.0):
+    def __init__(
+        self,
+        in_feats,
+        num_classes,
+        aggregator_type,
+        configuration=(128,),
+        act_fn=torch.relu,
+        dropout=0.0,
+    ):
         super(GraphSAGE, self).__init__()
         self.hidden = nn.ModuleList()
         self.dropout = nn.Dropout(dropout)
@@ -31,7 +39,9 @@ class GraphSAGE(nn.Module):
 
         self.hidden = nn.Sequential(*self.hidden)  # Module registration
 
-        self.output = SAGEConv(last_hidden_size, configuration[0], aggregator_type).to(device)
+        self.output = SAGEConv(last_hidden_size, configuration[0], aggregator_type).to(
+            device
+        )
 
         # idea for embedding extraction from: https://github.com/stellargraph/stellargraph/issues/1586
         self.fc = nn.Linear(configuration[0], num_classes)
@@ -66,7 +76,7 @@ class GraphSageEmbedding(Embedding):
         d,
         epochs,
         dropout=0.0,
-        layer_configuration=(128, ),
+        layer_configuration=(128,),
         act_fn="relu",
         train=0.8,
         val=0.1,
@@ -204,7 +214,7 @@ class GraphSageEmbedding(Embedding):
 
             logits, _ = net(g, features)
             loss = F.cross_entropy(logits[train_nid], labels[train_nid])
-    
+
             if self.lid_aware:
                 _, embedding = model(g, features)
                 emb = {}

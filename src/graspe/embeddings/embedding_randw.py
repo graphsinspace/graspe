@@ -16,10 +16,12 @@ from embeddings.base.embedding import Embedding
 from networkx.algorithms.core import core_number
 
 import sys
+
 sys.path.append("../")
 
 from evaluation.lid_eval import LFMnx
 from evaluation.lid_eval import NCLIDEstimator
+
 
 class RWEmbBase(Embedding):
     def __init__(self, g, d, workers=4, seed=42):
@@ -38,17 +40,18 @@ class RWEmbBase(Embedding):
             num_walks = self.num_walks(n)
             walk_length = self.walk_length(n)
             for _ in range(num_walks):
-                walks.append(self.rndwalks_from_node(walk_length=walk_length, start_node=n))
+                walks.append(
+                    self.rndwalks_from_node(walk_length=walk_length, start_node=n)
+                )
         random.shuffle(walks)
         return walks
 
-    
     def rndwalks_from_node(self, walk_length, start_node):
         """
         Simulate a random walk starting from start node.
         """
         G = self._g
-        
+
         walk = [start_node]
 
         while len(walk) < walk_length:
@@ -63,7 +66,7 @@ class RWEmbBase(Embedding):
                 break
 
         return walk
-    
+
     @abstractmethod
     def select_next_node(self, start_node, current_node, neighbours):
         pass
@@ -82,7 +85,7 @@ class RWEmbBase(Embedding):
         walks = [list(map(str, walk)) for walk in walks]
         model = Word2Vec(
             walks,
-            vector_size=self._d,   
+            vector_size=self._d,
             min_count=0,
             sg=1,
             workers=self._workers,
@@ -90,11 +93,10 @@ class RWEmbBase(Embedding):
         )
         self._embedding = {}
         for node in self._g.nodes():
-            self._embedding[node[0]] = model.wv[str(node[0])]   
+            self._embedding[node[0]] = model.wv[str(node[0])]
 
     def requires_labels(self):
         return False
-
 
 
 class UnbiasedWalk(RWEmbBase):
@@ -132,7 +134,9 @@ class NaturalCommunities:
 
 
 class NCWalk(RWEmbBase):
-    def __init__(self, g, d, num_walks=10, walk_length=80, p=0.85, workers=4, seed=42, alpha=1):
+    def __init__(
+        self, g, d, num_walks=10, walk_length=80, p=0.85, workers=4, seed=42, alpha=1
+    ):
         super().__init__(g, d, workers, seed)
         self.nw = num_walks
         self.wl = walk_length
@@ -142,7 +146,9 @@ class NCWalk(RWEmbBase):
 
     def select_next_node(self, start_node, current_node, neighbours):
         if random.random() >= self.p:
-            ncnodes = [n for n in neighbours if self.nc.is_in_natural_community(start_node, n)]
+            ncnodes = [
+                n for n in neighbours if self.nc.is_in_natural_community(start_node, n)
+            ]
             if len(ncnodes) > 0:
                 return random.sample(ncnodes, 1)[0]
             else:
@@ -158,7 +164,9 @@ class NCWalk(RWEmbBase):
 
 
 class RNCWalk(RWEmbBase):
-    def __init__(self, g, d, num_walks=10, walk_length=80, p=0.85, workers=4, seed=42, alpha=1):
+    def __init__(
+        self, g, d, num_walks=10, walk_length=80, p=0.85, workers=4, seed=42, alpha=1
+    ):
         super().__init__(g, d, workers, seed)
         self.nw = num_walks
         self.wl = walk_length
@@ -168,7 +176,11 @@ class RNCWalk(RWEmbBase):
 
     def select_next_node(self, start_node, current_node, neighbours):
         if random.random() >= self.p:
-            ncnodes = [n for n in neighbours if self.nc.is_in_natural_community(current_node, n)]
+            ncnodes = [
+                n
+                for n in neighbours
+                if self.nc.is_in_natural_community(current_node, n)
+            ]
             if len(ncnodes) > 0:
                 return random.sample(ncnodes, 1)[0]
             else:
@@ -183,23 +195,36 @@ class RNCWalk(RWEmbBase):
         return self.wl
 
 
-
 class ShellWalk(RWEmbBase):
-    def __init__(self, g, d, num_walks=10, walk_length=80, p=0.85, workers=4, seed=42, inverted=False):
+    def __init__(
+        self,
+        g,
+        d,
+        num_walks=10,
+        walk_length=80,
+        p=0.85,
+        workers=4,
+        seed=42,
+        inverted=False,
+    ):
         super().__init__(g, d, workers, seed)
         self.nw = num_walks
         self.wl = walk_length
         self.cores = core_number(g.to_networkx())
         self.inverted = inverted
         self.p = p
-        
+
     def select_next_node(self, start_node, current_node, neighbours):
         if random.random() >= self.p:
             if self.inverted:
-                corenodes = [n for n in neighbours if self.cores[n] <= self.cores[current_node]]
+                corenodes = [
+                    n for n in neighbours if self.cores[n] <= self.cores[current_node]
+                ]
             else:
-                corenodes = [n for n in neighbours if self.cores[n] >= self.cores[current_node]]
-        
+                corenodes = [
+                    n for n in neighbours if self.cores[n] >= self.cores[current_node]
+                ]
+
             if len(corenodes) > 0:
                 return random.sample(corenodes, 1)[0]
             else:
@@ -207,10 +232,8 @@ class ShellWalk(RWEmbBase):
 
         return random.sample(neighbours, 1)[0]
 
-
     def num_walks(self, node):
         return self.nw
 
     def walk_length(self, node):
         return self.wl
-

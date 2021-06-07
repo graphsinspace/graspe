@@ -5,7 +5,14 @@ from evaluation.lid_eval import EmbLIDMLEEstimatorTorch
 
 def test_graphsage():
     g = DatasetPool.load("cora_ml")
-    e = GraphSageEmbedding(g, d=100, epochs=200, lr=0.01, layer_configuration=(128, 256, 256, 128), act_fn="tanh")
+    e = GraphSageEmbedding(
+        g,
+        d=100,
+        epochs=200,
+        lr=0.01,
+        layer_configuration=(128, 256, 256, 128),
+        act_fn="tanh",
+    )
     e.embed()
     assert e._embedding is not None
     # print(e._embedding)
@@ -44,7 +51,14 @@ def test_graphsage_all():
             continue
         print(dataset_name)
         g = DatasetPool.load(dataset_name)
-        e = GraphSageEmbedding(g, d=100, epochs=100, lr=0.05, layer_configuration=(128, 256, 128), act_fn="tanh")
+        e = GraphSageEmbedding(
+            g,
+            d=100,
+            epochs=100,
+            lr=0.05,
+            layer_configuration=(128, 256, 128),
+            act_fn="tanh",
+        )
         e.embed()
         assert e._embedding is not None
 
@@ -53,4 +67,3 @@ if __name__ == "__main__":
     test_lid_aware_graphsage()
     # test_graphsage_all()
     # test_graphsage()
-

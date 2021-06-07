@@ -69,8 +69,8 @@ class EmbFactory(ABC):
 
         self.graphsage_algs = list(
             itertools.product(
-                ['GraphSAGE'],  # name
-                ['tanh', 'relu'],  # act_fn
+                ["GraphSAGE"],  # name
+                ["tanh", "relu"],  # act_fn
                 [0.01, 0.1],  # learning rate
                 [100, 200],  # epochs
                 [(128,), (128, 128), (256, 256), (256, 512, 256)],  # layer configs
@@ -145,7 +145,9 @@ class LazyEmbFactory(EmbFactory):
         self._ems = {
             "GCN": GCNEmbedding(self._graph, self._dim, self._epochs),
             "GAE": GAEEmbedding(self._graph, self._dim, epochs=self._epochs),
-            "GraphSAGE": GraphSageEmbedding(self._graph, self._dim, epochs=self._epochs),
+            "GraphSAGE": GraphSageEmbedding(
+                self._graph, self._dim, epochs=self._epochs
+            ),
             "SDNE": SDNEEmbedding(
                 self._graph, self._dim, epochs=self._epochs, verbose=0
             ),
