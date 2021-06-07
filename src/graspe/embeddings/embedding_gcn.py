@@ -8,6 +8,7 @@ import torch.nn.functional as F
 from dgl.nn.pytorch import GraphConv
 
 from embeddings.base.embedding import Embedding
+from evaluation.lid_eval import EmbLIDMLEEstimatorTorch
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -28,6 +29,8 @@ class GCN(nn.Module):
             layer = GraphConv(last_hidden_size, layer_size).to(device)
             self.hidden.append(layer)
             last_hidden_size = layer_size
+
+        self.hidden = nn.Sequential(*self.hidden)  # Module registration
 
         self.output = GraphConv(last_hidden_size, num_classes)
 
@@ -67,6 +70,8 @@ class GCNEmbedding(Embedding):
         lr=0.01,
         layer_configuration=(128,),
         act_fn="relu",
+        lid_aware=False,
+        lid_k=20,
     ):
         """
         Parameters
@@ -85,12 +90,18 @@ class GCNEmbedding(Embedding):
             Hidden layer configuration, tuple length is depth, values are hidden sizes
         act_fn : str
             Activation function to be used, support for relu, tanh, sigmoid
+        lid_aware : bool
+            Whether to optimize for lower LID
+        lid_k : int
+            k-value param for LID
         """
         super().__init__(g, d)
         self.epochs = epochs
         self.lr = lr
         self.layer_configuration = layer_configuration
         self.act_fn = act_fn
+        self.lid_aware = lid_aware
+        self.lid_k = lid_k
         self.dgl_g = self._g.to_dgl()
 
         if (self.dgl_g.in_degrees() == 0).any():
@@ -146,18 +157,34 @@ class GCNEmbedding(Embedding):
         for epoch in range(self.epochs):
             logits = net(dgl_g.to(device), inputs.to(device)).to(device)
             logp = F.log_softmax(logits, 1)
-            loss = F.nll_loss(logp[labeled_nodes], labels)
+            criterion_1 = F.nll_loss(logp[labeled_nodes], labels)
+            if self.lid_aware:
+                emb = self.compute_embedding(dgl_g, nodes)
+                tlid = EmbLIDMLEEstimatorTorch(self._g, emb, self.lid_k)
+                tlid.estimate_lids()
+                total_lid = tlid.get_total_lid()
+                criterion_2 = F.mse_loss(
+                    total_lid, torch.tensor(self.lid_k, dtype=torch.float)
+                )
+                loss = criterion_1 + criterion_2
+            else:
+                loss = criterion_1
+
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
             # print('Epoch %d | Loss: %.4f' % (epoch, loss.item()))
         # print("loss: %.4f" % loss.item())
 
-        self._embedding = {}
+        self._embedding = self.compute_embedding(dgl_g, nodes)
+
+    def compute_embedding(self, dgl_g, nodes):
+        embedding = {}
         for i in range(len(nodes)):
-            self._embedding[nodes[i][0]] = np.array(
+            embedding[nodes[i][0]] = np.array(
                 [x.item() for x in dgl_g.ndata["feat"][i]]
             )
+        return embedding
 
     def requires_labels(self):
         return True
