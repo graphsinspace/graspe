@@ -1,5 +1,6 @@
 from common.dataset_pool import DatasetPool
 from embeddings.embedding_graphsage import GraphSageEmbedding
+from evaluation.lid_eval import EmbLIDMLEEstimatorTorch
 
 
 def test_graphsage():
@@ -8,6 +9,27 @@ def test_graphsage():
     e.embed()
     assert e._embedding is not None
     # print(e._embedding)
+
+
+def test_lid_aware_graphsage():
+    g = DatasetPool.load("karate_club_graph")
+    # LID-aware graphsage:
+    e = GraphSageEmbedding(g, d=10, epochs=100, lid_aware=True, lid_k=20)
+    e.embed()
+
+    # normal graphsage:
+    e2 = GraphSageEmbedding(g, d=10, epochs=100)
+    e2.embed()
+
+    tlid = EmbLIDMLEEstimatorTorch(g, e, 20)
+    tlid.estimate_lids()
+    print("sum (LID-Aware)", tlid.get_total_lid())
+    print("recon loss (LID-Aware)", g.link_precision(e.reconstruct(k=20)))
+
+    tlid = EmbLIDMLEEstimatorTorch(g, e2, 20)
+    tlid.estimate_lids()
+    print("sum (normal)", tlid.get_total_lid())
+    print("recon loss (normal)", g.link_precision(e2.reconstruct(k=20)))
 
 
 def test_graphsage_all():
@@ -28,5 +50,7 @@ def test_graphsage_all():
 
 
 if __name__ == "__main__":
+    test_lid_aware_graphsage()
     # test_graphsage_all()
-    test_graphsage()
+    # test_graphsage()
+

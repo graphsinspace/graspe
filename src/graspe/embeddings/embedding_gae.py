@@ -10,6 +10,7 @@ from torch_geometric.nn import GCNConv, GAE, VGAE
 from torch_geometric.utils import train_test_split_edges
 
 from embeddings.base.embedding import Embedding
+from evaluation.lid_eval import EmbLIDMLEEstimatorTorch
 
 
 class GCNEncoder(torch.nn.Module):
@@ -106,6 +107,8 @@ class GAEEmbedding(Embedding):
         lr=0.01,
         layer_configuration=(8,),
         act_fn="relu",
+        lid_aware=False,
+        lid_k=20,
     ):
         """
         Parameters
@@ -128,6 +131,10 @@ class GAEEmbedding(Embedding):
             Hidden layer configuration, tuple length is depth, values are hidden sizes
         act_fn : str
             Activation function to be used, support for relu, tanh, sigmoid
+        lid_aware : bool
+            Whether to optimize for lower LID
+        lid_k : int
+            k-value param for LID
         """
         super().__init__(g, d)
         self.epochs = epochs
@@ -136,6 +143,8 @@ class GAEEmbedding(Embedding):
         self.lr = lr
         self.layer_configuration = layer_configuration
         self.act_fn = act_fn
+        self.lid_aware = lid_aware
+        self.lid_k = lid_k
         if deterministic:  # not thread-safe, beware if running multiple at once
             torch.set_deterministic(True)
             torch.manual_seed(0)
@@ -152,9 +161,24 @@ class GAEEmbedding(Embedding):
         model.train()
         optimizer.zero_grad()
         z = model.encode(x, train_pos_edge_index)
-        loss = model.recon_loss(z, train_pos_edge_index)
+        criterion_1 = model.recon_loss(z, train_pos_edge_index)
         if self.variational:
-            loss = loss + (1 / data.num_nodes) * model.kl_loss()
+            criterion_1 = criterion_1 + (1 / data.num_nodes) * model.kl_loss()
+
+        if self.lid_aware:
+            emb = {}
+            encoded = model.encode(x, train_pos_edge_index).detach().numpy()
+            for i in range(data.num_nodes):
+                emb[i] = encoded[i, :]
+            tlid = EmbLIDMLEEstimatorTorch(self._g, emb, self.lid_k)
+            tlid.estimate_lids()
+            total_lid = tlid.get_total_lid()
+            criterion_2 = F.mse_loss(
+                total_lid, torch.tensor(self.lid_k, dtype=torch.float)
+            )
+            loss = criterion_1 + criterion_2
+        else:
+            loss = criterion_1
         loss.backward()
         optimizer.step()
         return float(loss)

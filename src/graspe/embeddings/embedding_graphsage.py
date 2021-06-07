@@ -8,6 +8,7 @@ import torch.nn.functional as F
 from dgl.nn.pytorch import SAGEConv
 
 from embeddings.base.embedding import Embedding
+from evaluation.lid_eval import EmbLIDMLEEstimatorTorch
 
 #device = "cuda" if torch.cuda.is_available() else "cpu"
 device = "cpu"
@@ -72,6 +73,8 @@ class GraphSageEmbedding(Embedding):
         test=0.1,
         lr=1e-2,
         deterministic=False,
+        lid_aware=False,
+        lid_k=20,
     ):
         """
         Parameters
@@ -98,6 +101,10 @@ class GraphSageEmbedding(Embedding):
             Learning rate
         deterministic : bool
             Whether to try and run in deterministic mode
+        lid_aware : bool
+            Whether to optimize for lower LID
+        lid_k : int
+            k-value param for LID
         """
         super().__init__(g, d)
         self._epochs = epochs
@@ -108,6 +115,8 @@ class GraphSageEmbedding(Embedding):
         self.test = test
         self.dropout = dropout
         self.lr = lr
+        self.lid_aware = lid_aware
+        self.lid_k = lid_k
         if deterministic:  # not thread-safe, beware if running multiple at once
             torch.set_deterministic(True)
             torch.manual_seed(0)
@@ -192,8 +201,25 @@ class GraphSageEmbedding(Embedding):
             if epoch >= 3:
                 t0 = time.time()
             # forward
+
             logits, _ = net(g, features)
             loss = F.cross_entropy(logits[train_nid], labels[train_nid])
+    
+            if self.lid_aware:
+                _, embedding = model(g, features)
+                emb = {}
+                for i in range(len(embedding)):
+                    emb[i] = embedding[i].detach().numpy()
+
+                tlid = EmbLIDMLEEstimatorTorch(self._g, emb, self.lid_k)
+                tlid.estimate_lids()
+                total_lid = tlid.get_total_lid()
+                criterion_2 = F.mse_loss(
+                    total_lid, torch.tensor(self.lid_k, dtype=torch.float)
+                )
+                loss = criterion_1 + criterion_2
+            else:
+                loss = criterion_1
 
             optimizer.zero_grad()
             loss.backward()

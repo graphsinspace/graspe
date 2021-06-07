@@ -1,5 +1,6 @@
 from common.dataset_pool import DatasetPool
 from embeddings.embedding_gae import GAEEmbedding
+from evaluation.lid_eval import EmbLIDMLEEstimatorTorch
 
 g = DatasetPool.load("karate_club_graph")
 
@@ -111,10 +112,35 @@ def test_gae_all():
             print(i, gae_embedding[i])
 
 
+def test_lid_aware_gae():
+    g = DatasetPool.load("karate_club_graph")
+
+    # LID-aware GAE:
+    e = GAEEmbedding(
+        g, d=10, epochs=100, variational=False, linear=False, lid_aware=True, lid_k=20
+    )
+    e.embed()
+
+    # normal GAE:
+    e2 = GAEEmbedding(g, d=10, epochs=100, variational=False, linear=False)
+    e2.embed()
+
+    tlid = EmbLIDMLEEstimatorTorch(g, e, 20)
+    tlid.estimate_lids()
+    print("LID sum (LID-Aware)", tlid.get_total_lid())
+    print("recon loss (LID-Aware)", g.link_precision(e.reconstruct(k=20)))
+
+    tlid = EmbLIDMLEEstimatorTorch(g, e2, 20)
+    tlid.estimate_lids()
+    print("LID sum (normal)", tlid.get_total_lid())
+    print("recon loss (normal)", g.link_precision(e2.reconstruct(k=20)))
+
+
 if __name__ == "__main__":
-    test_gae_variational()
-    test_gae_normal()
-    test_gae_normal_linear()
-    test_gae_variational_linear()
-    test_gae_cora()
+    test_lid_aware_gae()
+    # test_gae_variational()
+    # test_gae_normal()
+    # test_gae_normal_linear()
+    # test_gae_variational_linear()
+    # test_gae_cora()
     # test_gae_all() # takes long time
