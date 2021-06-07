@@ -262,7 +262,7 @@ class GAEEmbedding(Embedding):
 
         with torch.no_grad():
             self._embedding = {}
-            encoded = model.encode(x, train_pos_edge_index).numpy()
+            encoded = model.encode(x, train_pos_edge_index).cpu().numpy()
             for i in range(num_nodes):
                 self._embedding[i] = encoded[i, :]
 

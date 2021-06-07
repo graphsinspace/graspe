@@ -1,5 +1,6 @@
 import os
 import sys
+import traceback
 
 from common.dataset_pool import DatasetPool
 from common.graph_loaders import load_from_file
@@ -129,7 +130,7 @@ def batch_embed(args):
         except Exception as e:
             print(f"Batch embedding for {g_name}, {args.preset} failed!")
             print(str(e))
-            print(sys.gettrace())
+            traceback.print_exc()
 
 
 def classify(args):
