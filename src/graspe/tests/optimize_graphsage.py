@@ -31,7 +31,7 @@ def graphsage_tuning():
                             emb_m = GraphSageEmbedding(
                                 graph,
                                 d=d,
-                                hidden=hidden,
+                                hidden=hidden,  # @Dusan, GraphSage nema ovaj parametar, ostalo od ranije?
                                 epochs=epochs,
                                 layers=n_layers,
                                 dropout=dropout,

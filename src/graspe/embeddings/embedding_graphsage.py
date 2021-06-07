@@ -85,6 +85,7 @@ class GraphSageEmbedding(Embedding):
         deterministic=False,
         lid_aware=False,
         lid_k=20,
+        verbose=True,
     ):
         """
         Parameters
@@ -115,6 +116,8 @@ class GraphSageEmbedding(Embedding):
             Whether to optimize for lower LID
         lid_k : int
             k-value param for LID
+        verbose : boolean
+            Whether to output train data
         """
         super().__init__(g, d)
         self._epochs = epochs
@@ -127,6 +130,7 @@ class GraphSageEmbedding(Embedding):
         self.lr = lr
         self.lid_aware = lid_aware
         self.lid_k = lid_k
+        self.verbose = verbose
         if deterministic:  # not thread-safe, beware if running multiple at once
             torch.set_deterministic(True)
             torch.manual_seed(0)
@@ -213,10 +217,10 @@ class GraphSageEmbedding(Embedding):
             # forward
 
             logits, _ = net(g, features)
-            loss = F.cross_entropy(logits[train_nid], labels[train_nid])
+            criterion_1 = F.cross_entropy(logits[train_nid], labels[train_nid])
 
             if self.lid_aware:
-                _, embedding = model(g, features)
+                _, embedding = net(g, features)
                 emb = {}
                 for i in range(len(embedding)):
                     emb[i] = embedding[i].detach().numpy()
@@ -239,15 +243,21 @@ class GraphSageEmbedding(Embedding):
                 dur.append(time.time() - t0)
 
             acc = self._evaluate(net, g, features, labels, val_nid)
-            print(
-                "Epoch {:05d} | Time(s) {:.4f} | Loss {:.4f} | Accuracy {:.4f} | "
-                "ETputs(KTEPS) {:.2f}".format(
-                    epoch, np.mean(dur), loss.item(), acc, n_edges / np.mean(dur) / 1000
+            if self.verbose:
+                print(
+                    "Epoch {:05d} | Time(s) {:.4f} | Loss {:.4f} | Accuracy {:.4f} | "
+                    "ETputs(KTEPS) {:.2f}".format(
+                        epoch,
+                        np.mean(dur),
+                        loss.item(),
+                        acc,
+                        n_edges / np.mean(dur) / 1000,
+                    )
                 )
-            )
 
         acc = self._evaluate(net, g, features, labels, test_nid)
-        print("Test Accuracy {:.4f}".format(acc))
+        if self.verbose:
+            print("Test Accuracy {:.4f}".format(acc))
 
         with torch.no_grad():
             _, embedding = net(g, features)

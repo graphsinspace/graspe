@@ -81,6 +81,7 @@ class EmbFactory(ABC):
             for a in self.graphsage_algs
         ]
         presets["GraphSAGE"] = self.graphsage_names
+
         self._dim = dim
         self._quiet = quiet
 
