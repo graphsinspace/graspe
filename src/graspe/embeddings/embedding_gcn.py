@@ -10,14 +10,14 @@ from dgl.nn.pytorch import GraphConv
 from embeddings.base.embedding import Embedding
 from evaluation.lid_eval import EmbLIDMLEEstimatorTorch
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
+#device = "cuda" if torch.cuda.is_available() else "cpu"
+device = "cpu"
 
 
 class GCN(nn.Module):
     """
     Example Graph-Convolutional neural network implementation. Single or multiple hidden layer.
     """
-
     def __init__(self, in_feats, num_classes, configuration=(128,), act_fn=torch.relu):
         super(GCN, self).__init__()
         self.act_fn = act_fn
@@ -41,7 +41,6 @@ class GCN(nn.Module):
             h = self.act_fn(layer(g, h))
 
         h = self.output(g, h)
-
         return h
 
 
@@ -57,7 +56,9 @@ class GCNEmbedding(Embedding):
     Necessarry args:
 
     - epochs : number of epochs for training (int)
-    - labeles_nodes : torch.tensor with id's of nodes with labels
+    - n_layers : number of hidden layer in the GCN
+    - dropout : probability of a dropout in hidden layers of the GCN
+    - labeled_nodes : torch.tensor with id's of nodes with labels
     - labels : labels for labeled_nodes (torch.tensor)
     """
 
