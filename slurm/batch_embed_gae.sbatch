@@ -9,4 +9,4 @@
 #SBATCH --error slurm/slurm.%J.err # STDERR
 #SBATCH --export=ALL
 
-srun /home/milosevicn/miniconda3/envs/graspe/bin/python src/graspe batch_embed -g all -d 10 -p GAEg -o /home/shared/grasp/embeddings/gae/
+srun /home/milosevicn/miniconda3/envs/graspe/bin/python src/graspe batch_embed -g all -d 10 -p GAE -o /home/shared/grasp/embeddings/gae/

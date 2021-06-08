@@ -2,7 +2,9 @@ from common.dataset_pool import DatasetPool
 from embeddings.embedding_gae import GAEEmbedding
 from evaluation.lid_eval import EmbLIDMLEEstimatorTorch
 
-g = DatasetPool.load("karate_club_graph")
+g = DatasetPool.load("facebook-ego-undirected")
+g = g.to_undirected()
+g.remove_selfloop_edges()
 
 
 def test_gae_normal():
@@ -18,7 +20,7 @@ def test_gae_normal():
     )
     gae_embedding.embed()
     assert gae_embedding._embedding is not None
-    for i in range(34):
+    for i in range(len(gae_embedding._embedding)):
         print(i, gae_embedding[i])
 
 
@@ -35,7 +37,7 @@ def test_gae_variational():
     )
     gae_embedding.embed()
     assert gae_embedding._embedding is not None
-    for i in range(34):
+    for i in range(len(gae_embedding._embedding)):
         print(i, gae_embedding[i])
 
 
@@ -52,7 +54,7 @@ def test_gae_normal_linear():
     )
     gae_embedding.embed()
     assert gae_embedding._embedding is not None
-    for i in range(34):
+    for i in range(len(gae_embedding._embedding)):
         print(i, gae_embedding[i])
 
 
@@ -69,7 +71,7 @@ def test_gae_variational_linear():
     )
     gae_embedding.embed()
     assert gae_embedding._embedding is not None
-    for i in range(34):
+    for i in range(len(gae_embedding._embedding)):
         print(i, gae_embedding[i])
 
 
@@ -86,7 +88,7 @@ def test_gae_cora():
     )
     gae_embedding.embed()
     assert gae_embedding._embedding is not None
-    for i in range(34):
+    for i in range(len(gae_embedding._embedding)):
         print(i, gae_embedding[i])
 
 
@@ -108,7 +110,7 @@ def test_gae_all():
         )
         gae_embedding.embed()
         assert gae_embedding._embedding is not None
-        for i in range(34):
+        for i in range(len(gae_embedding._embedding)):
             print(i, gae_embedding[i])
 
 
@@ -137,9 +139,9 @@ def test_lid_aware_gae():
 
 
 if __name__ == "__main__":
-    test_lid_aware_gae()
+    # test_lid_aware_gae()
     # test_gae_variational()
-    # test_gae_normal()
+    test_gae_normal()
     # test_gae_normal_linear()
     # test_gae_variational_linear()
     # test_gae_cora()

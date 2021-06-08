@@ -124,7 +124,8 @@ def batch_embed(args):
                     embedding.embed()
                     embedding.to_file(
                         os.path.join(
-                            args.out, emb_factory.get_full_name(g_name, i) + ".embedding"
+                            args.out,
+                            emb_factory.get_full_name(g_name, i) + ".embedding",
                         )
                     )
         except Exception as e:
