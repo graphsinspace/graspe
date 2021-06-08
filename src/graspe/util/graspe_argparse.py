@@ -49,7 +49,7 @@ def build_argparser():
         "-g",
         "--graphs",
         help="Path to the graphs, or names of the datasets from the dataset pool (e.g. "
-        "karate_club_graph).",
+        "karate_club_graph). Specify 'all' to use all datasets.",
         nargs="+",
         required=True,
     )

@@ -321,6 +321,13 @@ class Graph:
         node_attrs = []
         if "label" in nodes[0][1]:
             node_attrs.append("label")
+            try:
+                if isinstance((nodes[0][1]["label"]), str):
+                    #  Attempt conversion to int, DGL needs int labels
+                    for _, attrs in nodes:
+                        attrs["label"] = int(attrs["label"])
+            except:
+                print("WARN: cannot convert labels to int")
         return dgl.from_networkx(self.__graph, node_attrs=node_attrs)
 
     def to_adj_matrix(self):

@@ -1,9 +1,12 @@
 import os
+import sys
+import traceback
 
 from common.dataset_pool import DatasetPool
 from common.graph_loaders import load_from_file
 from embeddings.emb_factory import LazyEmbFactory
 from util.graspe_argparse import build_argparser
+from tqdm import tqdm
 
 
 def load_graph(g):
@@ -107,18 +110,28 @@ def embed(args):
 
 
 def batch_embed(args):
-    for g_name in args.graphs:
-        g = load_graph(g_name)
-        for d in args.dimensions:
-            emb_factory = LazyEmbFactory(g, d, preset=args.preset, algs=args.algs)
-            for i in range(emb_factory.num_methods()):
-                embedding = emb_factory.get_embedding(i)
-                embedding.embed()
-                embedding.to_file(
-                    os.path.join(
-                        args.out, emb_factory.get_full_name(g_name, i) + ".embedding"
+    if args.graphs == ["all"]:
+        args.graphs = DatasetPool.get_datasets()
+
+    for g_name in tqdm(args.graphs):
+        try:
+            print("Batch embedding for ", g_name)
+            g = load_graph(g_name)
+            for d in tqdm(args.dimensions):
+                emb_factory = LazyEmbFactory(g, d, preset=args.preset, algs=args.algs)
+                for i in tqdm(range(emb_factory.num_methods())):
+                    embedding = emb_factory.get_embedding(i)
+                    embedding.embed()
+                    embedding.to_file(
+                        os.path.join(
+                            args.out,
+                            emb_factory.get_full_name(g_name, i) + ".embedding",
+                        )
                     )
-                )
+        except Exception as e:
+            print(f"Batch embedding for {g_name}, {args.preset} failed!")
+            print(str(e))
+            traceback.print_exc()
 
 
 def classify(args):

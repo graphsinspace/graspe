@@ -9,6 +9,7 @@ from embeddings.base.embedding import Embedding
 from embeddings.embedding_deepwalk import DeepWalkEmbedding
 from embeddings.embedding_gae import GAEEmbedding
 from embeddings.embedding_gcn import GCNEmbedding
+from embeddings.embedding_graphsage import GraphSageEmbedding
 from embeddings.embedding_node2vec import Node2VecEmbedding
 from embeddings.embedding_ha_node2vec import (
     HANode2VecNumWalksHubsLessEmbedding,
@@ -30,7 +31,7 @@ from embeddings.embedding_sdne import SDNEEmbedding
 class EmbFactory(ABC):
     def __init__(self, dim, quiet, preset, algs=None):
         presets = {
-            "_": ["GCN", "GAE", "SDNE", "DW", "N2V"],
+            "_": ["SDNE", "DW", "N2V"],
             "N2V": ["N2V", "N2V_p1_q0.5", "N2V_p1_q2", "N2V_p0.5_q1", "N2V_p2_q1"],
             "HA_N2V": [
                 "N2V",
@@ -55,15 +56,48 @@ class EmbFactory(ABC):
                 ["GCN"],  # name
                 ["tanh", "relu"],  # act_fn
                 [0.01, 0.1],  # learning rate
+                [100, 200],  # epochs
                 [(128,), (128, 128), (256, 256), (256, 512, 256)],  # layer configs
             )
         )
         self.gcn_names = [
-            f"{a[0]}_{a[1]}_{a[2]}_{'_'.join(str(d) for d in a[3])}"
+            f"{a[0]}_{a[1]}_{a[2]}_{a[3]}_{'_'.join(str(d) for d in a[4])}"
             for a in self.gcn_algs
         ]
         presets["GCN"] = self.gcn_names
         # end GCN builder
+
+        self.graphsage_algs = list(
+            itertools.product(
+                ["GraphSAGE"],  # name
+                ["tanh", "relu"],  # act_fn
+                [0.01, 0.1],  # learning rate
+                [100, 200],  # epochs
+                [(128,), (128, 128), (256, 256), (256, 512, 256)],  # layer configs
+            )
+        )
+        self.graphsage_names = [
+            f"{a[0]}_{a[1]}_{a[2]}_{a[3]}_{'_'.join(str(d) for d in a[4])}"
+            for a in self.graphsage_algs
+        ]
+        presets["GraphSAGE"] = self.graphsage_names
+
+        self.gae_algs = list(
+            itertools.product(
+                ["GAE"],  # name
+                ["tanh", "relu"],  # act_fn
+                ["V", "NV"],  # Variational, non-variational
+                ["L", "NL"],  # Linear, non-linear
+                [0.01, 0.1],  # learning rate
+                [100, 200],  # epochs
+                [(128,), (128, 128), (256, 256), (256, 512, 256)],  # layer configs
+            )
+        )
+        self.gae_names = [
+            f"{a[0]}_{a[1]}_{a[2]}_{a[3]}_{a[4]}_{a[5]}_{'_'.join(str(d) for d in a[6])}"
+            for a in self.gae_algs
+        ]
+        presets["GAE"] = self.gae_names
 
         self._dim = dim
         self._quiet = quiet
@@ -127,8 +161,6 @@ class LazyEmbFactory(EmbFactory):
 
     def _init_embeddings(self):
         self._ems = {
-            "GCN": GCNEmbedding(self._graph, self._dim, self._epochs),
-            "GAE": GAEEmbedding(self._graph, self._dim, epochs=self._epochs),
             "SDNE": SDNEEmbedding(
                 self._graph, self._dim, epochs=self._epochs, verbose=0
             ),
@@ -164,10 +196,32 @@ class LazyEmbFactory(EmbFactory):
             self._ems[name] = GCNEmbedding(
                 self._graph,
                 self._dim,
-                self._epochs,
+                epochs=config[3],
                 lr=config[2],
                 act_fn=config[1],
-                layer_configuration=config[3],
+                layer_configuration=config[4],
+            )
+
+        for name, config in zip(self.graphsage_names, self.graphsage_algs):
+            self._ems[name] = GraphSageEmbedding(
+                self._graph,
+                self._dim,
+                epochs=config[3],
+                lr=config[2],
+                act_fn=config[1],
+                layer_configuration=config[4],
+            )
+
+        for name, config in zip(self.gae_names, self.gae_algs):
+            self._ems[name] = GAEEmbedding(
+                self._graph,
+                self._dim,
+                act_fn=config[1],
+                variational=True if config[2] == "V" else False,
+                linear=True if config[3] == "L" else False,
+                lr=config[4],
+                epochs=config[5],
+                layer_configuration=config[6],
             )
 
     def get_embedding_by_name(self, name):

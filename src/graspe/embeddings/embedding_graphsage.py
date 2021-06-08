@@ -10,43 +10,50 @@ from dgl.nn.pytorch import SAGEConv
 from embeddings.base.embedding import Embedding
 from evaluation.lid_eval import EmbLIDMLEEstimatorTorch
 
+# device = "cuda" if torch.cuda.is_available() else "cpu"
+device = "cpu"
+
 
 class GraphSAGE(nn.Module):
     def __init__(
         self,
         in_feats,
-        n_hidden,
-        n_classes,
-        n_layers,
-        activation,
-        dropout,
+        num_classes,
         aggregator_type,
-        fc_dim,
+        configuration=(128,),
+        act_fn=torch.relu,
+        dropout=0.0,
     ):
         super(GraphSAGE, self).__init__()
-        self.layers = nn.ModuleList()
+        self.hidden = nn.ModuleList()
         self.dropout = nn.Dropout(dropout)
-        self.activation = activation
+        self.act_fn = act_fn
+        last_hidden_size = configuration[0]
 
-        # input layer
-        self.layers.append(SAGEConv(in_feats, n_hidden, aggregator_type))
-        # hidden layers
-        for _ in range(n_layers - 1):
-            self.layers.append(SAGEConv(n_hidden, n_hidden, aggregator_type))
-        # output layer
-        self.layers.append(
-            SAGEConv(n_hidden, fc_dim, aggregator_type)
-        )  # activation None
+        self.input = SAGEConv(in_feats, configuration[0], aggregator_type).to(device)
+
+        for layer_size in configuration[1:]:
+            layer = SAGEConv(last_hidden_size, layer_size, aggregator_type).to(device)
+            self.hidden.append(layer)
+            last_hidden_size = layer_size
+
+        self.hidden = nn.Sequential(*self.hidden)  # Module registration
+
+        self.output = SAGEConv(last_hidden_size, configuration[0], aggregator_type).to(
+            device
+        )
+
         # idea for embedding extraction from: https://github.com/stellargraph/stellargraph/issues/1586
-        self.fc = nn.Linear(fc_dim, n_classes)
+        self.fc = nn.Linear(configuration[0], num_classes)
 
-    def forward(self, graph, inputs):
+    def forward(self, g, inputs):
         h = self.dropout(inputs)
-        for l, layer in enumerate(self.layers):
-            h = layer(graph, h)
-            if l != len(self.layers) - 1:
-                h = self.activation(h)
-                h = self.dropout(h)
+        h = self.act_fn(self.input(g, h))
+
+        for layer in self.hidden:
+            h = self.dropout(self.act_fn(layer(g, h)))
+
+        h = self.output(g, h)
         return self.fc(h), h
 
 
@@ -68,15 +75,17 @@ class GraphSageEmbedding(Embedding):
         g,
         d,
         epochs,
+        dropout=0.0,
+        layer_configuration=(128,),
+        act_fn="relu",
         train=0.8,
         val=0.1,
         test=0.1,
-        hidden=16,
-        layers=1,
         lr=1e-2,
         deterministic=False,
         lid_aware=False,
         lid_k=20,
+        verbose=True,
     ):
         """
         Parameters
@@ -87,16 +96,18 @@ class GraphSageEmbedding(Embedding):
             Dimensionality of the embedding.
         epochs : int
             Number of epochs.
+        dropout : float
+            Probability of applying a dropout in hidden layers
+        layer_configuration : tuple[int]
+            Hidden layer configuration, tuple length is depth, values are hidden sizes
+        act_fn : str
+            Activation function to be used, support for relu, tanh, sigmoid
         train : float
             Percentage of data to be used for training.
         val : float
             Percentage of data to be used for validation.
         test : float
             Percentage of data to be used for testing.
-        hidden : int
-            Number of hidden neurons in a SageConv layer
-        layers : int
-            Number of SageConv layers
         lr : float
             Learning rate
         deterministic : bool
@@ -105,17 +116,21 @@ class GraphSageEmbedding(Embedding):
             Whether to optimize for lower LID
         lid_k : int
             k-value param for LID
+        verbose : boolean
+            Whether to output train data
         """
         super().__init__(g, d)
         self._epochs = epochs
+        self.layer_configuration = layer_configuration
+        self.act_fn = act_fn
         self.train = train
         self.val = val
         self.test = test
-        self.hidden = hidden
-        self.layers = layers
+        self.dropout = dropout
         self.lr = lr
         self.lid_aware = lid_aware
         self.lid_k = lid_k
+        self.verbose = verbose
         if deterministic:  # not thread-safe, beware if running multiple at once
             torch.set_deterministic(True)
             torch.manual_seed(0)
@@ -137,6 +152,13 @@ class GraphSageEmbedding(Embedding):
         super().embed()
 
         g = self._g.to_dgl()
+
+        if self.act_fn == "relu":
+            self.act_fn = torch.relu
+        elif self.act_fn == "tanh":
+            self.act_fn = torch.tanh
+        elif self.act_fn == "sigmoid":
+            self.act_fn = torch.sigmoid
 
         num_nodes = len(g)
 
@@ -174,32 +196,31 @@ class GraphSageEmbedding(Embedding):
         n_edges = g.number_of_edges()
 
         # create GraphSAGE model
-        model = GraphSAGE(
+        net = GraphSAGE(
             in_feats,
-            self.hidden,
             n_classes,
-            self.layers,
-            F.relu,
-            0.5,
             "gcn",
-            fc_dim=self._d,
+            configuration=self.layer_configuration,
+            act_fn=self.act_fn,
+            dropout=self.dropout,
         )
 
         # use optimizer
-        optimizer = torch.optim.Adam(model.parameters(), lr=self.lr, weight_decay=5e-4)
+        optimizer = torch.optim.Adam(net.parameters(), lr=self.lr, weight_decay=5e-4)
 
         # initialize graph
         dur = []
         for epoch in range(self._epochs):
-            model.train()
+            net.train()
             if epoch >= 3:
                 t0 = time.time()
             # forward
-            logits, _ = model(g, features)
+
+            logits, _ = net(g, features)
             criterion_1 = F.cross_entropy(logits[train_nid], labels[train_nid])
 
             if self.lid_aware:
-                _, embedding = model(g, features)
+                _, embedding = net(g, features)
                 emb = {}
                 for i in range(len(embedding)):
                     emb[i] = embedding[i].detach().numpy()
@@ -221,19 +242,25 @@ class GraphSageEmbedding(Embedding):
             if epoch >= 3:
                 dur.append(time.time() - t0)
 
-            acc = self._evaluate(model, g, features, labels, val_nid)
-            print(
-                "Epoch {:05d} | Time(s) {:.4f} | Loss {:.4f} | Accuracy {:.4f} | "
-                "ETputs(KTEPS) {:.2f}".format(
-                    epoch, np.mean(dur), loss.item(), acc, n_edges / np.mean(dur) / 1000
+            acc = self._evaluate(net, g, features, labels, val_nid)
+            if self.verbose:
+                print(
+                    "Epoch {:05d} | Time(s) {:.4f} | Loss {:.4f} | Accuracy {:.4f} | "
+                    "ETputs(KTEPS) {:.2f}".format(
+                        epoch,
+                        np.mean(dur),
+                        loss.item(),
+                        acc,
+                        n_edges / np.mean(dur) / 1000,
+                    )
                 )
-            )
 
-        acc = self._evaluate(model, g, features, labels, test_nid)
-        print("Test Accuracy {:.4f}".format(acc))
+        acc = self._evaluate(net, g, features, labels, test_nid)
+        if self.verbose:
+            print("Test Accuracy {:.4f}".format(acc))
 
         with torch.no_grad():
-            _, embedding = model(g, features)
+            _, embedding = net(g, features)
             self._embedding = {}
 
             for i in range(len(embedding)):
