@@ -1,5 +1,6 @@
 import skmultilearn.cluster.base.LabelGraphClustererBase as clusterer
-import evaluation.clustering.ClusteringEval
+from graspe.evaluation.clustering_eval import ClusteringEval
+import igraph as ig
 
 def get_method(name):
     name_sm = name.lower()
