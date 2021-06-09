@@ -99,6 +99,24 @@ class EmbFactory(ABC):
         ]
         presets["GAE"] = self.gae_names
 
+        self.sdne_algs = list(
+            itertools.product(
+                ["SDNE"],  # name
+                [1e-5, 1e-4],  # nu1 (regularizer l1)
+                [1e-4, 1e-5],  # nu2 (regularizer l2)
+                [5.0],  # beta loss
+                [1, 0.9],  # alpha loss
+                [128, 256],  # batch size
+                [100, 200],  # epochs
+                [[32, 16], [32, 32], [64, 32], [128, 64, 128]],  # hidden size
+            )
+        )
+        self.sdne_names = [
+            f"{a[0]}_{a[1]}_{a[2]}_{a[3]}_{a[4]}_{a[5]}_{a[6]}_{'_'.join(str(d) for d in a[7])}"
+            for a in self.sdne_algs
+        ]
+        presets["SDNE"] = self.sdne_names
+
         self._dim = dim
         self._quiet = quiet
 
@@ -223,6 +241,20 @@ class LazyEmbFactory(EmbFactory):
                 epochs=config[5],
                 layer_configuration=config[6],
             )
+
+        for name, config in zip(self.sdne_names, self.sdne_algs):
+            self._ems[name] = SDNEEmbedding(
+                self._graph,
+                self._dim,
+                nu1=config[1],
+                nu2=config[2],
+                beta=config[3],
+                alpha=config[4],
+                batch_size=config[5],
+                epochs=config[6],
+                hidden_size=config[7],
+            )
+
 
     def get_embedding_by_name(self, name):
         e = super().get_embedding_by_name(name)
