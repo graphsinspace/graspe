@@ -160,7 +160,7 @@ class GraphSageEmbedding(Embedding):
         elif self.act_fn == "sigmoid":
             self.act_fn = torch.sigmoid
 
-        num_nodes = len(g)
+        num_nodes = g.number_of_nodes()
 
         train_num = int(num_nodes * self.train)
         val_num = int(num_nodes * self.val)
@@ -187,9 +187,9 @@ class GraphSageEmbedding(Embedding):
         in_feats = features.shape[1]
         n_classes = len(set(labels.numpy()))
 
-        train_nid = train_mask.nonzero().squeeze()
-        val_nid = val_mask.nonzero().squeeze()
-        test_nid = test_mask.nonzero().squeeze()
+        train_nid = train_mask.nonzero(as_tuple=False).squeeze()
+        val_nid = val_mask.nonzero(as_tuple=False).squeeze()
+        test_nid = test_mask.nonzero(as_tuple=False).squeeze()
 
         # graph preprocess and calculate normalization factor
         g = dgl.remove_self_loop(g)

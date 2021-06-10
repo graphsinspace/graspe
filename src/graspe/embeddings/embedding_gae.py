@@ -5,6 +5,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 import torch_geometric as tg
+import torch.nn as nn
 from torch.nn import Sequential
 from torch_geometric.nn import GCNConv, GAE, VGAE
 from torch_geometric.utils import train_test_split_edges
@@ -171,7 +172,7 @@ class GAEEmbedding(Embedding):
 
         if self.lid_aware:
             emb = {}
-            encoded = model.encode(x, train_pos_edge_index).detach().numpy()
+            encoded = model.encode(x, train_pos_edge_index).cpu().detach().numpy()
             for i in range(data.num_nodes):
                 emb[i] = encoded[i, :]
             tlid = EmbLIDMLEEstimatorTorch(self._g, emb, self.lid_k)

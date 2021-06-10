@@ -255,7 +255,6 @@ class LazyEmbFactory(EmbFactory):
                 hidden_size=config[7],
             )
 
-
     def get_embedding_by_name(self, name):
         e = super().get_embedding_by_name(name)
 

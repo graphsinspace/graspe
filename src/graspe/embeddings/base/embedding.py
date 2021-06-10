@@ -99,7 +99,7 @@ class Embedding(ABC):
         - common.graph.Graph - Graph reconstruction.
         """
         if k % 2 == 1:
-            raise ValueError("k must be an even number")
+            raise ValueError(f"k must be an even number: {k}")
         nodes = list(self._embedding.keys())
         dists = []
         for i in range(len(nodes)):
