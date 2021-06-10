@@ -11,6 +11,10 @@ from sklearn.metrics.cluster import normalized_mutual_info_score
 from sklearn.metrics.cluster import rand_score
 from sklearn.metrics.cluster import v_measure_score
 
+from sklearn.metrics.cluster import silhouette_score
+from sklearn.metrics.cluster import calinski_harabasz_score
+from sklearn.metrics.cluster import davies_bouldin_score
+
 
 class ClusteringEval:
     def __init__(self, graph, embedding, clustering_type):
@@ -27,6 +31,9 @@ class ClusteringEval:
         self._normalized_mutual_info_score = 0.0
         self._rand_score = 0.0
         self._v_measure_score = 0.0
+        self._silhouette_score = 0.0
+        self._calinski_harabasz_score = 0.0
+        self._davies_boldin_score = 0.0
         self.__evaluate(clustering_type)
 
     def __evaluate(self, clustering_type):
@@ -47,6 +54,35 @@ class ClusteringEval:
         )
         self._rand_score = rand_score(self._labels, clusters)
         self._v_measure_score = v_measure_score(self._labels, clusters)
+        self._silhouette_score = silhouette_score(self._embedding, clusters)
+        self._calinski_harabasz_score = calinski_harabasz_score(self._embedding, clusters)
+        self._davies_boldin_score = davies_bouldin_score(self._embedding, clusters)
+
+    def evaluate_extern_labels(self, clustering_type, labels):
+        no_clusters = len(labels)
+        function = self.__get_clustering_function(clustering_type)
+        clustering = function(no_clusters)
+        clusters = clustering.fit_predict(self._node_vectors)
+        self._ajusted_mutual_info_score = adjusted_mutual_info_score(
+            self._labels, clusters
+        )
+        self._adjusted_rand_score = adjusted_rand_score(self._labels, clusters)
+        self._completeness_score = completeness_score(self._labels, clusters)
+        self._fowlkes_mallows_score = fowlkes_mallows_score(self._labels, clusters)
+        self._homogeneity_score = homogeneity_score(self._labels, clusters)
+        self._mutual_info_score = mutual_info_score(self._labels, clusters)
+        self._normalized_mutual_info_score = normalized_mutual_info_score(
+            self._labels, clusters
+        )
+        self._rand_score = rand_score(self._labels, clusters)
+        self._v_measure_score = v_measure_score(self._labels, clusters)
+        self._silhouette_score = silhouette_score(self._embedding, clusters)
+        self._calinski_harabasz_score = calinski_harabasz_score(self._embedding, clusters)
+        self._davies_boldin_score = davies_bouldin_score(self._embedding, clusters)
+
+        return clusters
+
+
 
     def __get_clustering_function(self, clustering_type):
         cltype = clustering_type.lower()
@@ -83,3 +119,12 @@ class ClusteringEval:
 
     def get_v_measure_score(self):
         return self._v_measure_score
+
+    def get_silhouette_score(self):
+        return self._silhouette_score
+
+    def get_calinski_harabasz_score(self):
+        return self._calinski_harabasz_score
+    
+    def get_davis_bolding_score(self):
+        return self._davies_boldin_score
