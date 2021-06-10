@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=clustering_eval
-#SBATCH --partition=all
+#SBATCH --partition=cuda
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=6
 #SBATCH --nodelist=n17
