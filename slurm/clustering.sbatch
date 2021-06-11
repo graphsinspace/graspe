@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=clustering_eval
 #SBATCH --partition=cuda
-#SBATCH --nodes=1
+#SBATCH --nodes=4
 #SBATCH --cpus-per-task=6
 #SBATCH --nodelist=n15,n16,n17,n18
 #SBATCH --time=120:00:00 #the maximum walltime in format h:m:s
