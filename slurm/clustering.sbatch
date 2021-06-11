@@ -1,9 +1,9 @@
 #!/bin/bash
 #SBATCH --job-name=clustering_eval
-#SBATCH --partition=cuda
+#SBATCH --partition=all
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=6
-#SBATCH --nodelist=n15
+#SBATCH --nodelist=n17
 #SBATCH --time=120:00:00 #the maximum walltime in format h:m:s
 #SBATCH --output slurm/slurm.%J.out # STDOUT
 #SBATCH --error slurm/slurm.%J.err # STDERR
