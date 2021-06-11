@@ -3,7 +3,7 @@ from embeddings.embedding_gcn import GCNEmbedding
 
 
 def gcn_tuning():
-    datasets = ['dblp']
+    datasets = ['cora_ml']
     for dataset in datasets:
         if dataset in [
             "davis_southern_women_graph",
@@ -16,11 +16,11 @@ def gcn_tuning():
         graph.to_undirected()
         emb_m = GCNEmbedding(
             g=graph,
-            d=100,
-            epochs=100,
+            d=50,
+            epochs=200,
             deterministic=False,
             lr=0.1,
-            layer_configuration=(256, 512, 256,),
+            layer_configuration=(128, 128,),
             act_fn="tanh",
             lid_aware=False,
             lid_k=20

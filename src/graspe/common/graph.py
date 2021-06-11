@@ -330,6 +330,7 @@ class Graph:
         return nx.to_scipy_sparse_matrix(self.__graph, weight="w")
 
     def set_community_labels(self, algorithm="greedy_modularity"):
+        self.remove_selfloop_edges()
         self.__graph.to_undirected()
         if algorithm == "greedy_modularity":
             communities = sorted(algorithms.greedy_modularity(self.__graph).communities, key=len, reverse=True)
