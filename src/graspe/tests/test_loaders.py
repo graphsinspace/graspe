@@ -1,12 +1,16 @@
 import statistics
-
+import numpy as np
 from common.graph_loaders import load_npz
 
 
 def test_npz():
-    g = load_npz("/Users/dusan/pycharm_projects/graspe/data/flickr-undirected.npz")
+    g = load_npz("/Users/dusan/pycharm_projects/graspe/data/dblp.npz")
     print(g)
-    print(g.nodes())
+    print(np.unique(np.array([int(label) for label in g.labels()])).shape)
+
+    g.set_community_labels()
+    print(np.unique(np.array(g.labels())))
+
     # print(g.edges())
     nx = g.to_networkx()
     in_dg = [x[1] for x in nx.in_degree(nx.nodes)]

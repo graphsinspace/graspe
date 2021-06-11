@@ -2,7 +2,7 @@ import random
 
 import dgl
 import networkx as nx
-
+from cdlib import algorithms
 
 class Graph:
     """
@@ -328,3 +328,22 @@ class Graph:
         Returns adjacency matrix of the graph.
         """
         return nx.to_scipy_sparse_matrix(self.__graph, weight="w")
+
+    def set_community_labels(self, algorithm="greedy_modularity"):
+        self.__graph.to_undirected()
+        if algorithm == "greedy_modularity":
+            communities = sorted(algorithms.greedy_modularity(self.__graph).communities, key=len, reverse=True)
+        elif algorithm == "infomap":
+            communities = sorted(algorithms.infomap(self.__graph).communities, key=len, reverse=True)
+        elif algorithm == "louvain":
+            communities = sorted(algorithms.louvain(self.__graph).communities, key=len, reverse=True)
+        elif algorithm == "leiden":
+            communities = sorted(algorithms.leiden(self.__graph).communities, key=len, reverse=True)
+        else:
+            raise Exception("Algorithm must be one of: greedy_modularity, infomap, louvain, leiden."
+                            "{} is not supported".format(algorithm))
+        for community_label, community_nodes in enumerate(communities):
+            for node in community_nodes:
+                self.__graph.nodes[node]["label"] = community_label
+        self.__graph.to_directed()
+
