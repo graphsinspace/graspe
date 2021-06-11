@@ -3,7 +3,7 @@ from embeddings.embedding_gcn import GCNEmbedding
 
 
 def gcn_tuning():
-    datasets = ['cora_ml']
+    datasets = ['cora']
     for dataset in datasets:
         if dataset in [
             "davis_southern_women_graph",

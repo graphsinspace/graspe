@@ -331,7 +331,7 @@ class Graph:
 
     def set_community_labels(self, algorithm="greedy_modularity"):
         self.remove_selfloop_edges()
-        self.__graph.to_undirected()
+        self.__graph = self.__graph.to_undirected()
         if algorithm == "greedy_modularity":
             communities = sorted(algorithms.greedy_modularity(self.__graph).communities, key=len, reverse=True)
         elif algorithm == "infomap":
@@ -346,5 +346,5 @@ class Graph:
         for community_label, community_nodes in enumerate(communities):
             for node in community_nodes:
                 self.__graph.nodes[node]["label"] = community_label
-        self.__graph.to_directed()
+        self.__graph = self.__graph.to_directed()
 
