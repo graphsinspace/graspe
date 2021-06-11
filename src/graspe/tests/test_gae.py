@@ -91,7 +91,8 @@ def test_gae_cora():
 
 
 def test_gae_all():
-    datasets = DatasetPool.get_datasets()
+    # datasets = DatasetPool.get_datasets()
+    datasets = ['facebook-ego-undirected', 'ca-HepPh-undirected', 'ppi']
     print(datasets)
     for dataset_name in datasets:
         print(dataset_name)
@@ -99,7 +100,7 @@ def test_gae_all():
         gae_embedding = GAEEmbedding(
             g,
             d=10,
-            epochs=5,
+            epochs=1,
             variational=False,
             linear=False,
             lr=0.01,
@@ -137,10 +138,10 @@ def test_lid_aware_gae():
 
 
 if __name__ == "__main__":
-    test_lid_aware_gae()
+    # test_lid_aware_gae()
     # test_gae_variational()
     # test_gae_normal()
     # test_gae_normal_linear()
     # test_gae_variational_linear()
     # test_gae_cora()
-    # test_gae_all() # takes long time
+    test_gae_all() # takes long time

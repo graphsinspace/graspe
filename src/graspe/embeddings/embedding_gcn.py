@@ -152,7 +152,7 @@ class GCNEmbedding(Embedding):
                 labeled_nodes.append(node[0])
                 labels.append(node[1]["label"])
         labels = torch.tensor(labels).to(device)
-
+        print('labels: ', labels)
         optimizer = torch.optim.Adam(
             itertools.chain(net.parameters(), e.parameters()), lr=self.lr
         )

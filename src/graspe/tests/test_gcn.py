@@ -8,9 +8,9 @@ from evaluation.lid_eval import (
 
 
 def test_gcn_citeseer():
-    g = DatasetPool.load("citeseer")
+    g = DatasetPool.load("amazon_electronics_computers")
     e = GCNEmbedding(
-        g, d=100, epochs=1, lr=0.05, layer_configuration=(128, 256, 128), act_fn="tanh"
+        g, d=10, epochs=1, lr=0.05, layer_configuration=(128, 256, 128), act_fn="tanh"
     )
     e.embed()
     assert e._embedding is not None
@@ -112,7 +112,7 @@ def test_gcn_all():
 
 
 if __name__ == "__main__":
-    test_lid_aware_gcn()
+    # test_lid_aware_gcn()
     # test_gcn_lid()
-    # test_gcn_citeseer()
+    test_gcn_citeseer()
     # test_gcn_all()

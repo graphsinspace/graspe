@@ -4,10 +4,10 @@ from common.graph_loaders import load_npz
 
 
 def test_npz():
-    g = load_npz("../../data/citeseer.npz")
+    g = load_npz("/Users/dusan/pycharm_projects/graspe/data/flickr-undirected.npz")
     print(g)
     print(g.nodes())
-    print(g.edges())
+    # print(g.edges())
     nx = g.to_networkx()
     in_dg = [x[1] for x in nx.in_degree(nx.nodes)]
     out_dg = [x[1] for x in nx.out_degree(nx.nodes)]
@@ -23,3 +23,7 @@ def test_npz():
     )
 
     assert g
+
+
+if __name__ == '__main__':
+    test_npz()
