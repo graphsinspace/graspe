@@ -7,7 +7,8 @@ NUM_ITER = 20
 
 
 def gcn_tuning():
-    datasets = ['karate_club_graph']
+    datasets = ['dblp']
+    print(datasets)
     precs = np.zeros(NUM_ITER)
     maps = np.zeros(NUM_ITER)
     recs = np.zeros(NUM_ITER)
