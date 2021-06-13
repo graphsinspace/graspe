@@ -14,8 +14,8 @@ def graphsage_tuning():
             continue
         graph = DatasetPool.load(dataset)
         print("labels =", graph.to_dgl().ndata["label"])
-        graph.set_community_labels()
-        print("community labels =", graph.to_dgl().ndata["label"])
+        # graph.set_community_labels()
+        # print("community labels =", graph.to_dgl().ndata["label"])
         graph.to_undirected()
         emb_m = GraphSageEmbedding(
             g=graph,

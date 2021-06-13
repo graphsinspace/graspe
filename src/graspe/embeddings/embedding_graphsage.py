@@ -157,7 +157,6 @@ class GraphSageEmbedding(Embedding):
         if self.community_labels:
             self._g.set_community_labels()
         g = self._g.to_dgl()
-        print('LABELS =', g.ndata['label'])
 
         if self.act_fn == "relu":
             self.act_fn = torch.relu
