@@ -10,7 +10,7 @@ from dgl.nn.pytorch import GraphConv
 from embeddings.base.embedding import Embedding
 from evaluation.lid_eval import EmbLIDMLEEstimatorTorch
 
-# device = "cuda" if torch.cuda.is_available() else "cpu"
+device = "cuda" if torch.cuda.is_available() else "cpu"
 device = "cpu"
 
 
