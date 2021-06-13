@@ -3,7 +3,7 @@ from embeddings.embedding_gcn import GCNEmbedding
 
 
 def gcn_tuning():
-    datasets = ['cora']
+    datasets = ['karate_club_graph']
     for dataset in datasets:
         if dataset in [
             "davis_southern_women_graph",
@@ -12,7 +12,9 @@ def gcn_tuning():
         ]:
             continue
         graph = DatasetPool.load(dataset)
+        print("labels =", graph.to_dgl().ndata["label"])
         graph.set_community_labels()
+        print("community labels =", graph.to_dgl().ndata["label"])
         graph.to_undirected()
         emb_m = GCNEmbedding(
             g=graph,

@@ -86,6 +86,7 @@ class GraphSageEmbedding(Embedding):
         lid_aware=False,
         lid_k=20,
         verbose=True,
+        community_labels=False,
     ):
         """
         Parameters
@@ -118,6 +119,8 @@ class GraphSageEmbedding(Embedding):
             k-value param for LID
         verbose : boolean
             Whether to output train data
+        community_labels : bool
+            Whether to use labels obtained through a community detection algorithm
         """
         super().__init__(g, d)
         self._epochs = epochs
@@ -131,6 +134,7 @@ class GraphSageEmbedding(Embedding):
         self.lid_aware = lid_aware
         self.lid_k = lid_k
         self.verbose = verbose
+        self.community_labels = community_labels
         if deterministic:  # not thread-safe, beware if running multiple at once
             torch.set_deterministic(True)
             torch.manual_seed(0)
@@ -150,8 +154,10 @@ class GraphSageEmbedding(Embedding):
 
     def embed(self):
         super().embed()
-
+        if self.community_labels:
+            self._g.set_community_labels()
         g = self._g.to_dgl()
+        print('LABELS =', g.ndata['label'])
 
         if self.act_fn == "relu":
             self.act_fn = torch.relu

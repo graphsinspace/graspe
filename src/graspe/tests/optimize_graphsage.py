@@ -4,7 +4,7 @@ from embeddings.embedding_graphsage import GraphSageEmbedding
 
 def graphsage_tuning():
     # datasets = DatasetPool.get_datasets()
-    datasets = ['dblp']
+    datasets = ['karate_club_graph']
     for dataset in datasets:
         if dataset in [
             "davis_southern_women_graph",
@@ -13,7 +13,9 @@ def graphsage_tuning():
         ]:
             continue
         graph = DatasetPool.load(dataset)
+        print("labels =", graph.to_dgl().ndata["label"])
         graph.set_community_labels()
+        print("community labels =", graph.to_dgl().ndata["label"])
         graph.to_undirected()
         emb_m = GraphSageEmbedding(
             g=graph,
@@ -24,7 +26,7 @@ def graphsage_tuning():
             layer_configuration=(256, 512, 256,),
             act_fn="tanh",
             lid_aware=False,
-            lid_k=20
+            lid_k=20,
         )
         emb_m.embed()
         num_links = graph.edges_cnt()

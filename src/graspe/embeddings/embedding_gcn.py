@@ -74,6 +74,7 @@ class GCNEmbedding(Embedding):
         act_fn="relu",
         lid_aware=False,
         lid_k=20,
+        community_labels=False
     ):
         """
         Parameters
@@ -95,7 +96,9 @@ class GCNEmbedding(Embedding):
         lid_aware : bool
             Whether to optimize for lower LID
         lid_k : int
-            k-value param for LID
+            k-value param for LID]
+        community_labels : bool
+            Whether to use labels obtained through a community detection algorithm
         """
         super().__init__(g, d)
         self.epochs = epochs
@@ -104,8 +107,9 @@ class GCNEmbedding(Embedding):
         self.act_fn = act_fn
         self.lid_aware = lid_aware
         self.lid_k = lid_k
+        if community_labels:
+            self._g.set_community_labels()
         self.dgl_g = self._g.to_dgl()
-
         if (self.dgl_g.in_degrees() == 0).any():
             self.dgl_g = dgl.add_self_loop(self.dgl_g)
 
@@ -152,7 +156,7 @@ class GCNEmbedding(Embedding):
                 labeled_nodes.append(node[0])
                 labels.append(node[1]["label"])
         labels = torch.tensor(labels).to(device)
-        print('labels: ', labels)
+        print('LABELS =', labels)
         optimizer = torch.optim.Adam(
             itertools.chain(net.parameters(), e.parameters()), lr=self.lr
         )
