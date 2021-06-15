@@ -1,0 +1,40 @@
+Average hubness: 2.810016694490818
+Fraction of nodes with low hubness: 0.7181969949916528
+Fraction of nodes with high hubness: 0.28180300500834726
+Average map: 0.4799920230588919
+Average map for low hubness: 0.3845096910127655
+Average map for high hubness: 0.7233362129063052
+Mann Whitney U for map values of two groups of nodes 1) nodes with low hubness, 2) nodes with high hubness: 1.7689706799451476e-135
+Probability that low hubness points have greater map: 0.18505720914553134
+Probability that high hubness points have greater map: 0.7634154509860949
+Average recall: 0.8020799191974908
+Average recall for low hubness: 0.8609786332400985
+Average recall for high hubness: 0.6519719406362942
+Mann Whitney U for recall values of two groups of nodes 1) nodes with low hubness, 2) nodes with high hubness: 1.1182276554172143e-93
+Probability that low hubness points have greater recall: 0.6003087949834861
+Probability that high hubness points have greater recall: 0.17645655828546625
+Average f1 for low hubness: 0.4331281812318279
+Average f1 for high hubness: 0.5890609204858572
+Mann Whitney U for f1 values of two groups of nodes 1) nodes with low hubness, 2) nodes with high hubness: 2.4890821234082374e-57
+Probability that low hubness points have greater f1: 0.30481524078958094
+Probability that high hubness points have greater f1: 0.6778975280978097
+Average knng map: 0.3574290484140234
+Average knng recall: 0.3107181759873423
+Correlation between native hubness and reconstructed hubness (pearson, spearman, kendall): 0.044475052629171494, -0.056875809282608575, -0.0408636468338447
+Correlation between native hubness and knng hubness (k=5) (pearson, spearman, kendall): -0.017073777334747308, 0.010599841020971328, 0.01168417747226239
+Correlation between native hubness and knng hubness (k=auto) (pearson, spearman, kendall): -0.10005084377189558, -0.07106532884546561, -0.056434299952826804
+Correlation between reconstructed hubness and knng hubness (k=5) (pearson, spearman, kendall): 0.40211651467890897, 0.47866471250510284, 0.38002730174483823
+Correlation between reconstructed hubness and knng hubness (k=auto) (pearson, spearman, kendall): 0.16659408023258437, 0.1931264583309663, 0.15106799885009886
+Correlation between knng hubness (k=5) and knng hubness (k=auto) (pearson, spearman, kendall): 0.583420716558315, 0.5082597964057174, 0.41101803931604286
+Correlation between native hubness and map (pearson, spearman, kendall): 0.3197241202146123, 0.49649747382759396, 0.38819111266276585
+Correlation between reconstructed hubness and map (pearson, spearman, kendall): -0.495363586011181, -0.6117693354320309, -0.4820400712271621
+Correlation between knng hubness (k=5) and map (pearson, spearman, kendall): -0.2815003835106249, -0.25006572089948803, -0.18945820227007107
+Correlation between knng hubness (k=auto) and map (pearson, spearman, kendall): -0.16254634508322144, -0.13018232551417896, -0.09909172370974839
+Correlation between native hubness and recall (pearson, spearman, kendall): -0.29789649944465674, -0.3638454165305393, -0.30243576076543915
+Correlation between reconstructed hubness and recall (pearson, spearman, kendall): 0.31316024816091437, 0.4098831331071741, 0.3289355086946121
+Correlation between knng hubness (k=5) and recall (pearson, spearman, kendall): 0.23260001342220543, 0.2247139464797588, 0.17931364580893253
+Correlation between knng hubness (k=auto) and recall (pearson, spearman, kendall): 0.3001258840649439, 0.31402305719759593, 0.258142327269363
+Correlation between native hubness and f1 (pearson, spearman, kendall): 0.084935539468805, 0.3557226648255523, 0.26367263079043735
+Correlation between reconstructed hubness and f1 (pearson, spearman, kendall): -0.4507293218240781, -0.3910734416426289, -0.2988476985482026
+Correlation between knng hubness (k=5) and f1 (pearson, spearman, kendall): -0.23457538679352097, -0.14597847270413103, -0.10835786500409225
+Correlation between knng hubness (k=auto) and f1 (pearson, spearman, kendall): -0.020526758877411476, 0.03491110392713306, 0.025804499256629643

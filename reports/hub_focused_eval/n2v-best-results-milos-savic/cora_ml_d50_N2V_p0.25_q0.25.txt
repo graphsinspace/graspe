@@ -1,0 +1,40 @@
+Average hubness: 2.810016694490818
+Fraction of nodes with low hubness: 0.7181969949916528
+Fraction of nodes with high hubness: 0.28180300500834726
+Average map: 0.5211573534905022
+Average map for low hubness: 0.4277786976569966
+Average map for high hubness: 0.7591401600045681
+Mann Whitney U for map values of two groups of nodes 1) nodes with low hubness, 2) nodes with high hubness: 1.3338935005360604e-133
+Probability that low hubness points have greater map: 0.1842480406996856
+Probability that high hubness points have greater map: 0.7581049043649928
+Average recall: 0.8615233752107917
+Average recall for low hubness: 0.9072414022875505
+Average recall for high hubness: 0.7450074080992894
+Mann Whitney U for recall values of two groups of nodes 1) nodes with low hubness, 2) nodes with high hubness: 2.004575507507573e-103
+Probability that low hubness points have greater recall: 0.5852474656337513
+Probability that high hubness points have greater recall: 0.15359217910329373
+Average f1 for low hubness: 0.49177669122245643
+Average f1 for high hubness: 0.6853842165841192
+Mann Whitney U for f1 values of two groups of nodes 1) nodes with low hubness, 2) nodes with high hubness: 4.693141135803971e-81
+Probability that low hubness points have greater f1: 0.26785458543474766
+Probability that high hubness points have greater f1: 0.7139046976937873
+Average knng map: 0.38530884808013355
+Average knng recall: 0.3400561797180982
+Correlation between native hubness and reconstructed hubness (pearson, spearman, kendall): 0.11018721934092612, 0.05239026828640113, 0.04431170921730196
+Correlation between native hubness and knng hubness (k=5) (pearson, spearman, kendall): 0.16760849517907359, 0.15327862602137007, 0.12366202664674655
+Correlation between native hubness and knng hubness (k=auto) (pearson, spearman, kendall): 0.042720357817644015, 0.04683441707165202, 0.039074783087527744
+Correlation between reconstructed hubness and knng hubness (k=5) (pearson, spearman, kendall): 0.3966077828264337, 0.5521777007146579, 0.4337759107610102
+Correlation between reconstructed hubness and knng hubness (k=auto) (pearson, spearman, kendall): 0.1574370217853362, 0.20328110256908924, 0.15882082384893095
+Correlation between knng hubness (k=5) and knng hubness (k=auto) (pearson, spearman, kendall): 0.5835012058496825, 0.47752574581321705, 0.3869371725164969
+Correlation between native hubness and map (pearson, spearman, kendall): 0.3111617774038682, 0.49790759551885294, 0.3865902643951686
+Correlation between reconstructed hubness and map (pearson, spearman, kendall): -0.47394579486172866, -0.5668383006522713, -0.43129909772830505
+Correlation between knng hubness (k=5) and map (pearson, spearman, kendall): -0.19985180829832622, -0.2002119743902246, -0.14792921288742017
+Correlation between knng hubness (k=auto) and map (pearson, spearman, kendall): -0.10216832587639613, -0.08999353433242807, -0.06779817805056357
+Correlation between native hubness and recall (pearson, spearman, kendall): -0.31944419544277997, -0.3847907264799844, -0.320784430867825
+Correlation between reconstructed hubness and recall (pearson, spearman, kendall): 0.2125885555144062, 0.20975254296783963, 0.16943733402521177
+Correlation between knng hubness (k=5) and recall (pearson, spearman, kendall): 0.11827084736153423, 0.0818323544368347, 0.06576700581259463
+Correlation between knng hubness (k=auto) and recall (pearson, spearman, kendall): 0.19642987677962953, 0.19188365203711358, 0.15850255532172824
+Correlation between native hubness and f1 (pearson, spearman, kendall): 0.1372260235999671, 0.4121688387427503, 0.3033972992472609
+Correlation between reconstructed hubness and f1 (pearson, spearman, kendall): -0.5143547440287437, -0.46524509199555275, -0.3480866223212112
+Correlation between knng hubness (k=5) and f1 (pearson, spearman, kendall): -0.21666123412140723, -0.16202880611036513, -0.1181445378245088
+Correlation between knng hubness (k=auto) and f1 (pearson, spearman, kendall): -0.03109444847597915, 0.010245879700588262, 0.007262004900490931
