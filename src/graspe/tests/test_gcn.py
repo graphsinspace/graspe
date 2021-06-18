@@ -20,6 +20,9 @@ def test_gcn_citeseer():
 
 def test_gcn_lid():
     g = DatasetPool.load("karate_club_graph")
+    hubness = g.get_hubness()
+    print(hubness)
+    print(len(g.nodes()))
     e = GCNEmbedding(
         g, d=100, epochs=1, lr=0.05, layer_configuration=(128, 256, 128), act_fn="tanh"
     )
@@ -113,6 +116,6 @@ def test_gcn_all():
 
 if __name__ == "__main__":
     # test_lid_aware_gcn()
-    # test_gcn_lid()
+    test_gcn_lid()
     test_gcn_citeseer()
     # test_gcn_all()

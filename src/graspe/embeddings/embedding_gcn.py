@@ -174,7 +174,9 @@ class GCNEmbedding(Embedding):
                 loss = criterion_1 + criterion_2
             else:
                 loss = criterion_1
-
+            print('loss', loss)
+            print('loss.shape', loss.shape)
+            print('dgl_g.nodes', dgl_g.nodes)
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
