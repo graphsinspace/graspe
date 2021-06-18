@@ -85,6 +85,8 @@ class GraphSageEmbedding(Embedding):
         deterministic=False,
         lid_aware=False,
         lid_k=20,
+        hub_aware=False,
+        hub_type='normal',
         verbose=True,
         community_labels=False,
     ):
@@ -119,6 +121,14 @@ class GraphSageEmbedding(Embedding):
             k-value param for LID
         verbose : boolean
             Whether to output train data
+        hub_aware : bool
+            Whether to use hubness of each node as a weight for the loss function
+        hub_type : str
+            Type of weight.
+                'normal' - use hubness of each node as a weight
+                'inv' - use inverse hubness of each node as a weight
+                'log' - use log(hubness) of each node as a weight
+                'log_inv' - use inverse log(hubness) of each node as a weight
         community_labels : bool
             Whether to use labels obtained through a community detection algorithm
         """
@@ -133,6 +143,8 @@ class GraphSageEmbedding(Embedding):
         self.lr = lr
         self.lid_aware = lid_aware
         self.lid_k = lid_k
+        self.hub_aware = hub_aware
+        self.hub_type = hub_type
         self.verbose = verbose
         self.community_labels = community_labels
         if deterministic:  # not thread-safe, beware if running multiple at once
@@ -164,6 +176,21 @@ class GraphSageEmbedding(Embedding):
             self.act_fn = torch.tanh
         elif self.act_fn == "sigmoid":
             self.act_fn = torch.sigmoid
+
+        if self.hub_aware:
+            g_hubs = self._g.get_hubness()
+            if self.hub_type == 'normal':
+                g_hubs = torch.Tensor([key for key, value in g_hubs.items()])
+            elif self.hub_type == 'inv':
+                g_hubs = torch.Tensor([1 / (key + 1e-6) for key, value in g_hubs.items()])
+            elif self.hub_type == 'log':
+                g_hubs = torch.Tensor([torch.log(key +1e-6) for key, value in g_hubs.items()])
+            elif self.hub_type == 'log_inv':
+                g_hubs = torch.Tensor([1 / torch.log(key + 1e-6) for key, value in g_hubs.items()])
+            else:
+                raise Exception(
+                    "{} not supported. Available options are 'normal', 'inv', 'log', 'log_inv'. ".format(self.hub_type)
+                )
 
         num_nodes = len(g)
 
@@ -222,8 +249,11 @@ class GraphSageEmbedding(Embedding):
             # forward
 
             logits, _ = net(g, features)
-            criterion_1 = F.cross_entropy(logits[train_nid], labels[train_nid])
-
+            if self.hub_aware:
+                criterion_1 = F.cross_entropy(logits[train_nid], labels[train_nid], reduction='none')
+                criterion_1 = torch.dot(criterion_1, g_hubs)
+            else:
+                criterion_1 = F.cross_entropy(logits[train_nid], labels[train_nid])
             if self.lid_aware:
                 _, embedding = net(g, features)
                 emb = {}

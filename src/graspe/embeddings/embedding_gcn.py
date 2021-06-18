@@ -106,7 +106,7 @@ class GCNEmbedding(Embedding):
                 'normal' - use hubness of each node as a weight
                 'inv' - use inverse hubness of each node as a weight
                 'log' - use log(hubness) of each node as a weight
-                'log_inv' - use use inverse log(hubness) of each node as a weight
+                'log_inv' - use inverse log(hubness) of each node as a weight
         community_labels : bool
             Whether to use labels obtained through a community detection algorithm
         """
@@ -150,6 +150,7 @@ class GCNEmbedding(Embedding):
             self.act_fn = torch.tanh
         elif self.act_fn == "sigmoid":
             self.act_fn = torch.sigmoid
+
         if self.hub_aware:
             g_hubs = self._g.get_hubness()
             if self.hub_type == 'normal':
