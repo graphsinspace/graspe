@@ -74,6 +74,8 @@ class GCNEmbedding(Embedding):
         act_fn="relu",
         lid_aware=False,
         lid_k=20,
+        hub_aware=False,
+        hub_type='normal',
         community_labels=False
     ):
         """
@@ -96,7 +98,15 @@ class GCNEmbedding(Embedding):
         lid_aware : bool
             Whether to optimize for lower LID
         lid_k : int
-            k-value param for LID]
+            k-value param for LID
+        hub_aware : bool
+            Whether to use hubness of each node as a weight for the loss function
+        hub_type : str
+            Type of weight.
+                'normal' - use hubness of each node as a weight
+                'inv' - use inverse hubness of each node as a weight
+                'log' - use log(hubness) of each node as a weight
+                'log_inv' - use use inverse log(hubness) of each node as a weight
         community_labels : bool
             Whether to use labels obtained through a community detection algorithm
         """
@@ -107,6 +117,8 @@ class GCNEmbedding(Embedding):
         self.act_fn = act_fn
         self.lid_aware = lid_aware
         self.lid_k = lid_k
+        self.hub_aware = hub_aware
+        self.hub_type = hub_type
         if community_labels:
             self._g.set_community_labels()
         self.dgl_g = self._g.to_dgl()
@@ -138,6 +150,20 @@ class GCNEmbedding(Embedding):
             self.act_fn = torch.tanh
         elif self.act_fn == "sigmoid":
             self.act_fn = torch.sigmoid
+        if self.hub_aware:
+            g_hubs = self._g.get_hubness()
+            if self.hub_type == 'normal':
+                g_hubs = torch.Tensor([key for key, value in g_hubs.items()])
+            elif self.hub_type == 'inv':
+                g_hubs = torch.Tensor([1 / (key + 1e-6) for key, value in g_hubs.items()])
+            elif self.hub_type == 'log':
+                g_hubs = torch.Tensor([torch.log(key +1e-6) for key, value in g_hubs.items()])
+            elif self.hub_type == 'log_inv':
+                g_hubs = torch.Tensor([1 / torch.log(key + 1e-6) for key, value in g_hubs.items()])
+            else:
+                raise Exception(
+                    "{} not supported. Available options are 'normal', 'inv', 'log', 'log_inv'. ".format(self.hub_type)
+                )
 
         net = GCN(
             self._d,
@@ -162,7 +188,11 @@ class GCNEmbedding(Embedding):
         for epoch in range(self.epochs):
             logits = net(dgl_g.to(device), inputs.to(device)).to(device)
             logp = F.log_softmax(logits, 1)
-            criterion_1 = F.nll_loss(logp[labeled_nodes], labels)
+            if self.hub_aware:
+                criterion_1 = F.nll_loss(logp[labeled_nodes], labels, reduction='none')
+                criterion_1 = torch.dot(criterion_1, g_hubs)
+            else:
+                criterion_1 = F.nll_loss(logp[labeled_nodes], labels)
             if self.lid_aware:
                 emb = self.compute_embedding(dgl_g, nodes)
                 tlid = EmbLIDMLEEstimatorTorch(self._g, emb, self.lid_k)
@@ -174,9 +204,7 @@ class GCNEmbedding(Embedding):
                 loss = criterion_1 + criterion_2
             else:
                 loss = criterion_1
-            print('loss', loss)
-            print('loss.shape', loss.shape)
-            print('dgl_g.nodes', dgl_g.nodes)
+
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
