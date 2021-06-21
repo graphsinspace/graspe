@@ -1,3 +1,8 @@
+#import sys
+#import os
+
+#sys.path.append('/home/knezevicd/grasp/')
+
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.cluster import KMeans
 from sklearn.cluster import SpectralClustering
@@ -8,7 +13,7 @@ from sklearn.metrics.cluster import fowlkes_mallows_score
 from sklearn.metrics.cluster import homogeneity_score
 from sklearn.metrics.cluster import mutual_info_score
 from sklearn.metrics.cluster import normalized_mutual_info_score
-from sklearn.metrics.cluster import rand_score
+#from sklearn.metrics.cluster import ran
 from sklearn.metrics.cluster import v_measure_score
 
 from sklearn.metrics.cluster import silhouette_score
@@ -29,7 +34,7 @@ class ClusteringEval:
         self._homogeneity_score = 0.0
         self._mutual_info_score = 0.0
         self._normalized_mutual_info_score = 0.0
-        self._rand_score = 0.0
+        #self._rand_score = 0.0
         self._v_measure_score = 0.0
         self._silhouette_score = 0.0
         self._calinski_harabasz_score = 0.0
@@ -52,7 +57,7 @@ class ClusteringEval:
         self._normalized_mutual_info_score = normalized_mutual_info_score(
             self._labels, clusters
         )
-        self._rand_score = rand_score(self._labels, clusters)
+        #self._rand_score = rand_score(self._labels, clusters)
         self._v_measure_score = v_measure_score(self._labels, clusters)
         self._silhouette_score = silhouette_score(self._embedding, clusters)
         self._calinski_harabasz_score = calinski_harabasz_score(self._embedding, clusters)
@@ -74,7 +79,7 @@ class ClusteringEval:
         self._normalized_mutual_info_score = normalized_mutual_info_score(
             self._labels, clusters
         )
-        self._rand_score = rand_score(self._labels, clusters)
+       # self._rand_score = rand_score(self._labels, clusters)
         self._v_measure_score = v_measure_score(self._labels, clusters)
         self._silhouette_score = silhouette_score(self._embedding, clusters)
         self._calinski_harabasz_score = calinski_harabasz_score(self._embedding, clusters)

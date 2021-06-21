@@ -1,11 +1,14 @@
-import sys
+#import sys
+#import os
+#sys.path.append('/home/lucy/grasp/gitrepo/graspe/src')
+
 from os import listdir
 from os.path import isfile, join
 from multiprocessing import Process
 
-import graspe.evaluation.clustering as evaluator
-from graspe.embeddings.base.embedding import Embedding
-from graspe.common.dataset_pool import DatasetPool
+import evaluation.clustering as evaluator
+from embeddings.base.embedding import Embedding
+from common.dataset_pool import DatasetPool
 
 from cdlib import algorithms
 from networkx.algorithms.community.quality import modularity, coverage
