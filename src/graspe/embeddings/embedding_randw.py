@@ -6,7 +6,6 @@ Embedding methods based on custom random walk schemes
 author: Milos Savic (svc@dmi.uns.ac.rs)
 """
 
-import numpy as np
 from gensim.models import Word2Vec
 import random
 from abc import abstractmethod
@@ -16,11 +15,9 @@ from embeddings.base.embedding import Embedding
 from networkx.algorithms.core import core_number
 
 import sys
-
 sys.path.append("../")
 
 from evaluation.lid_eval import LFMnx
-from evaluation.lid_eval import NCLIDEstimator
 
 
 class RWEmbBase(Embedding):
@@ -145,7 +142,9 @@ class NCWalk(RWEmbBase):
         self.p = p
 
     def select_next_node(self, start_node, current_node, neighbours):
-        if random.random() >= self.p:
+        r = random.random()
+
+        if r <= self.p:
             ncnodes = [
                 n for n in neighbours if self.nc.is_in_natural_community(start_node, n)
             ]
@@ -175,7 +174,9 @@ class RNCWalk(RWEmbBase):
         self.p = p
 
     def select_next_node(self, start_node, current_node, neighbours):
-        if random.random() >= self.p:
+        r = random.random()
+        
+        if r <= self.p:
             ncnodes = [
                 n
                 for n in neighbours
@@ -215,7 +216,9 @@ class ShellWalk(RWEmbBase):
         self.p = p
 
     def select_next_node(self, start_node, current_node, neighbours):
-        if random.random() >= self.p:
+        r = random.random()
+
+        if r <= self.p:
             if self.inverted:
                 corenodes = [
                     n for n in neighbours if self.cores[n] <= self.cores[current_node]
