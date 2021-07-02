@@ -13,6 +13,7 @@ from sklearn.metrics.cluster import normalized_mutual_info_score
 
 from networkx.algorithms.community.modularity_max import greedy_modularity_communities
 from networkx.algorithms.community.quality import modularity
+from networkx.algorithms.components import number_connected_components, connected_components
 
 
 class EmbClusterer:
@@ -60,6 +61,14 @@ class GraphClusterer:
         return clabels
 
 
+def detect_connected_components(G):
+    num_nodes = G.number_of_nodes()
+    ncc = number_connected_components(G)
+    comps = connected_components(G)
+    lcc = max(comps, key=len)
+    lcc_frac = len(lcc) / num_nodes
+    return ncc, lcc_frac
+
 
 class ClusteringEval:
     def __init__(self, dataset_name, graph, emb_dir, method):
@@ -90,7 +99,8 @@ class ClusteringEval:
 
     def eval(self):
         outf = open("clustering-eval-" + self.method + "-" + self.dataset_name + ".csv", "w")
-        outf.write("DATASET,DIM,NUM_GT_LABELS,NUM_COMMUNITIES,MODULARITY,NMI_GT_COMMUNITIES,SIL1_GT,NMI1_GT,SIL2_COMMS,NMI2_COMMS,RG_NUMCOMS,RG_MODULARITY,RG_NMI_GT\n")
+        outf.write("DATASET,DIM,NUM_GT_LABELS,NUM_COMPS,LCC_FRAC,NUM_COMMUNITIES,MODULARITY,NMI_GT_COMMUNITIES,")
+        outf.write("SIL1_GT,NMI1_GT,SIL2_COMMS,NMI2_COMMS,RG_NUMCOMPS,RG_LCC_FRAC,RG_NUMCOMS,RG_MODULARITY,RG_NMI_GT\n")
         
         gt_labels =  [n[1]["label"] for n in self.graph.nodes()]
         num_labels = len(set(gt_labels))
@@ -102,23 +112,31 @@ class ClusteringEval:
         community_labels = grc.get_community_labels()
         nmi_gt_community = normalized_mutual_info_score(gt_labels, community_labels)
         
+        # detect connected components
+        nkxG = self.graph.to_networkx().to_undirected()
+        comps, lcc_frac = detect_connected_components(nkxG)
 
         for b in self.base:
             emb_file, dataset, dim, p, q = b
             emb_file_path = join(self.emb_dir, emb_file)
             
             emb = Embedding.from_file(emb_file_path)
-
             
+            # rekonstrukcija grafa
             numl = self.graph.edges_cnt()
             rg = emb.reconstruct(numl)
+            
+            # detekcija komponenti u rekonstruisanom grafu
+            nkxG_rg = rg.to_networkx().to_undirected()
+            comps_rg, lcc_frac_rg = detect_connected_components(nkxG_rg)
+
+            # community detection na rekonstruisanom grafu
             grcrg = GraphClusterer(rg)
             modularity_rg = grcrg.get_modularity()
             numcoms_rg = grcrg.get_num_communities()
             community_labels_rg = grcrg.get_community_labels()
             nmi_gt_community_rg = normalized_mutual_info_score(community_labels, community_labels_rg)
 
-            
             # K-means za onoliko klastera koliko ima labela
             embc1 = EmbClusterer(self.graph, emb, num_labels)
             sil1 = embc1.get_sil_score()
@@ -129,9 +147,11 @@ class ClusteringEval:
             sil2 = embc2.get_sil_score()
             nmi2 = normalized_mutual_info_score(community_labels, embc2.get_clusters())
             
-            msg = dataset + "," + str(dim) + "," + str(num_labels) + "," + str(numcoms) + "," +\
+            msg = dataset + "," + str(dim) + "," + str(num_labels) + "," + str(comps) + "," + str(lcc_frac) + "," + str(numcoms) + "," +\
                 str(modularity) + "," + str(nmi_gt_community) + "," + str(sil1) + "," + str(nmi1) + "," +\
-                str(sil2) + "," + str(nmi2) + "," + str(numcoms_rg) + "," + str(modularity_rg) + "," + str(nmi_gt_community_rg)
+                str(sil2) + "," + str(nmi2) + "," +\
+                str(comps_rg) + "," + str(lcc_frac_rg) + "," +\
+                str(numcoms_rg) + "," + str(modularity_rg) + "," + str(nmi_gt_community_rg)
 
             outf.write(msg + "\n")
 
