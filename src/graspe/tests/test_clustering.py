@@ -1,10 +1,11 @@
-import sys
+#import sys
 import os
 
-from graspe.embeddings.base.embedding import Embedding
-from graspe.common.dataset_pool import DatasetPool
-from graspe.evaluation.clustering_eval import ClusteringEval
-#sys.path.append('/s01/dmi/lucy/graspe/src/graspe')
+#sys.path.append('/home/knezevicd/grasp/')
+
+from embeddings.base.embedding import Embedding
+from common.dataset_pool import DatasetPool
+from evaluation.clustering_eval import ClusteringEval
 
 def test_clustering():
     f = open("test_cl.csv", "w")
@@ -16,6 +17,7 @@ def test_clustering():
 
     for embFile in listOfFiles:
         embedding = Embedding.from_file(embFile)
+        graph = None
         for name in ds_names:
             if name in embFile:
                 graph = DatasetPool.load(name)
