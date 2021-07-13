@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=CL_RUN
+#SBATCH --job-name=CULP_RUN
 #SBATCH --partition=cuda
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=12

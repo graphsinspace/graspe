@@ -122,7 +122,7 @@ class ClusteringEval:
                 numl = self.graph.edges_cnt()
                 rg = emb.reconstruct(numl)
                 grcrg = GraphClusterer(rg)
-                modularity_rg = grc.get_modularity()
+                modularity_rg = grcrg.get_modularity()
                 community_labels_rg = grcrg.get_community_labels()
                 num_rec_comm = len(community_labels_rg)
                 #nmi_gt_community_rg = normalized_mutual_info_score(community_labels, community_labels_rg)
