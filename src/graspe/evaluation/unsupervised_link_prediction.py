@@ -194,6 +194,7 @@ def link_pred_eval_function(d, folder):
     for file_name in files:
         if d in file_name:
             emb = Embedding.from_file(file_name)
+            print(file_name)
             ds_name = d.split('/')[-1].split('.')[0]
             ulp = UnsupervisedLinkPrediction(graph, 20, emb, ds_name)
             ulp.eval()
