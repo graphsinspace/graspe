@@ -193,7 +193,8 @@ def link_pred_eval_function(d, folder):
     files = [f for f in listdir(folder) if isfile(join(folder, f))]
     for file_name in files:
         if d in file_name:
-            emb = Embedding.from_file(file_name)
+            emb_path = join(folder, file_name)
+            emb = Embedding.from_file(emb_path)
             print(file_name)
             ds_name = d.split('/')[-1].split('.')[0]
             ulp = UnsupervisedLinkPrediction(graph, 20, emb, ds_name)
