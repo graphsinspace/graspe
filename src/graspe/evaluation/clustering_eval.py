@@ -149,11 +149,11 @@ class ClusteringEval:
 
 
 datasets = [
-    "karate_club_graph",
-    "cora_ml",  
-    "citeseer",
-    "amazon_electronics_photo",
-    "amazon_electronics_computers",
+    #"karate_club_graph",
+    #"cora_ml",  
+    #"citeseer",
+    #"amazon_electronics_photo",
+    #"amazon_electronics_computers",
     "pubmed",
     "cora",
     "dblp"
