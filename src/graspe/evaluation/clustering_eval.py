@@ -157,14 +157,14 @@ datasets = [
     #"pubmed",
     #"cora",
     #"dblp"
-    "blog-catalog-undirected",
+    #"blog-catalog-undirected",
     "ca-AstroPh-undirected",
     "ca-CondMat-undirected",
-    "ca-GrQc-undirected",
+    #"ca-GrQc-undirected",
     "ca-HepPh-undirected",
     "cit-HepPh",
-    "cit-HepTh",
-    "facebook-ego-undirected"
+    "cit-HepTh"
+    #"facebook-ego-undirected"
 ]
 
 def clustering_eval_function(d, folder):
