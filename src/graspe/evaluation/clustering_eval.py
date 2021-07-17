@@ -154,17 +154,17 @@ datasets = [
     #"citeseer",
     #"amazon_electronics_photo",
     #"amazon_electronics_computers",
-    "pubmed",
-    "cora",
-    "dblp"
-    #"blog-catalog-undirected",
-    #"ca-AstroPh-undirected",
-    #"ca-CondMat-undirected",
-    #"ca-GrQc-undirected",
-    #"ca-HepPh-undirected",
-    #"cit-HepPh",
-    #"cit-HepTh",
-    #"facebook-ego-undirected"
+    #"pubmed",
+    #"cora",
+    #"dblp"
+    "blog-catalog-undirected",
+    "ca-AstroPh-undirected",
+    "ca-CondMat-undirected",
+    "ca-GrQc-undirected",
+    "ca-HepPh-undirected",
+    "cit-HepPh",
+    "cit-HepTh",
+    "facebook-ego-undirected"
 ]
 
 def clustering_eval_function(d, folder):
