@@ -122,7 +122,7 @@ class ClusteringEval:
                 numl = self.graph.edges_cnt()
                 rg = emb.reconstruct(numl)
                 grcrg = GraphClusterer(rg)
-                modularity_rg = grc.get_modularity()
+                modularity_rg = grcrg.get_modularity()
                 community_labels_rg = grcrg.get_community_labels()
                 num_rec_comm = len(community_labels_rg)
                 #nmi_gt_community_rg = normalized_mutual_info_score(community_labels, community_labels_rg)
@@ -149,22 +149,22 @@ class ClusteringEval:
 
 
 datasets = [
-    "karate_club_graph",
-    "cora_ml",  
-    "citeseer",
-    "amazon_electronics_photo",
-    "amazon_electronics_computers",
-    "pubmed",
-    "cora",
-    "dblp"
-    #"blog-catalog-undirected",
-    #"ca-AstroPh-undirected",
-    #"ca-CondMat-undirected",
-    #"ca-GrQc-undirected",
-    #"ca-HepPh-undirected",
-    #"cit-HepPh",
-    #"cit-HepTh",
-    #"facebook-ego-undirected"
+    #"karate_club_graph",
+    #"cora_ml",  
+    #"citeseer",
+    #"amazon_electronics_photo",
+    #"amazon_electronics_computers",
+    #"pubmed",
+    #"cora",
+    #"dblp"
+    "blog-catalog-undirected",
+    "ca-AstroPh-undirected",
+    "ca-CondMat-undirected",
+    "ca-GrQc-undirected",
+    "ca-HepPh-undirected",
+    "cit-HepPh",
+    "cit-HepTh",
+    "facebook-ego-undirected"
 ]
 
 def clustering_eval_function(d, folder):
