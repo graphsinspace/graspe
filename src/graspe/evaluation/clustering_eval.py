@@ -161,7 +161,7 @@ datasets = [
     "ca-AstroPh-undirected",
     "ca-CondMat-undirected",
     #"ca-GrQc-undirected",
-    "ca-HepPh-undirected",
+    #"ca-HepPh-undirected",
     "cit-HepPh",
     "cit-HepTh"
     #"facebook-ego-undirected"
