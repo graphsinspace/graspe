@@ -158,12 +158,12 @@ datasets = [
     #"cora",
     #"dblp"
     #"blog-catalog-undirected",
-    #"ca-AstroPh-undirected",
+    "ca-AstroPh-undirected"
     #"ca-CondMat-undirected",
     #"ca-GrQc-undirected",
     #"ca-HepPh-undirected",
     #"cit-HepPh",
-    "cit-HepTh"
+    #"cit-HepTh"
     #"facebook-ego-undirected"
 ]
 
