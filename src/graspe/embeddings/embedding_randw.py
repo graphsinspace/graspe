@@ -103,7 +103,7 @@ class UnbiasedWalk(RWEmbBase):
         self.nw = num_walks
         self.wl = walk_length
 
-    def select_next_node(self, start_node, current_node, neighbours):
+    def select_next_node(self, start_node, current_node, prev_node, neighbours):
         return random.sample(neighbours, 1)[0]
 
     def num_walks(self, node):
