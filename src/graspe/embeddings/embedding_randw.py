@@ -82,7 +82,7 @@ class RWEmbBase(Embedding):
         walks = self.simulate_walks()
         walks = [list(map(str, walk)) for walk in walks]
         model = Word2Vec(
-            walks,
+            sentences=walks,
             vector_size=self._d,
             min_count=0,
             sg=1,
