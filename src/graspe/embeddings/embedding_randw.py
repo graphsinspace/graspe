@@ -240,3 +240,45 @@ class ShellWalk(RWEmbBase):
 
     def walk_length(self, node):
         return self.wl
+
+
+class SCWalk(RWEmbBase):
+    def __init__(
+        self, g, d, num_walks=10, walk_length=80, p=0.85, workers=4, seed=42
+    ):
+        super().__init__(g, d, workers, seed)
+        self.nw = num_walks
+        self.wl = walk_length
+        self.p = p
+
+    def select_next_node(self, start_node, current_node, neighbours):
+        
+        r = random.random()
+
+        if r <= self.p:
+            same_label = [n for n in neighbours if self._g.get_label(n) == self._g.get_label(start_node)]
+            different_label = [n for n in neighbours if self._g.get_label(n) != self._g.get_label(start_node)]
+
+            if len(same_label) > 0:
+                return random.sample(same_label, 1)[0]
+            else if len(different_label) > 0:
+                return random.sample(different_label, 1)[0] # Maybe to get node with smallest weight between current_node and node in different_labels?
+            else # No neighbours (is this even possible?)
+               break
+
+        else: 
+            if len(neighbours) > 0:
+                return random.sample(neighbours, 1)[0]
+
+            break
+
+    def num_walks(self, node):
+        return self.nw
+
+    def walk_length(self, node):
+        return self.wl
+
+
+class HubWalk(RWEmbBase):
+    pass
+    # graspe/src/graspe/common/graph.py L107
