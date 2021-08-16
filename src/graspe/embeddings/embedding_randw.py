@@ -285,8 +285,28 @@ class HubWalk(RWEmbBase):
         self.p = p
 
     def select_next_node(self, start_node, current_node, neighbours):
-        pass
-        # https://www.jmlr.org/papers/volume11/radovanovic10a/radovanovic10a.pdf
+    
+        G = self._g
+
+        r = random.random()
+
+        if r <= self.p:
+            
+            neighbours_of_neighbours = {}
+
+            for n in neighbours:
+                n_o_n = [edge[1] for edge in G.edges(n) if G.get_label(edge[1]) != G.get_label(start_node)] # BAD
+
+                neighbours_of_neighbours[n] = n_o_n
+
+            neighbours_of_neighbours = ' '.join(sorted(neighbours_of_neighbours, key = lambda key: len(neighbours_of_neighbours[key]), reverse=True))
+
+            if len(neighbours_of_neighbours) > 0:
+                return list(neighbours_of_neighbours.keys())[0]
+            else:
+                return random.sample(neighbours, 1)[0]
+
+        return random.sample(neighbours, 1)[0]
 
     def num_walks(self, node):
         return self.nw
