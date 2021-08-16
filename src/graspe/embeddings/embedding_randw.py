@@ -265,11 +265,8 @@ class SCWalk(RWEmbBase):
                 return random.sample(same_label, 1)[0]
             else if len(different_label) > 0:
                 return random.sample(different_label, 1)[0] # Maybe to get node with smallest weight between current_node and node in different_labels?
-            
-
-       
+                  
         return random.sample(neighbours, 1)[0]
-
 
     def num_walks(self, node):
         return self.nw
@@ -289,7 +286,7 @@ class HubWalk(RWEmbBase):
 
     def select_next_node(self, start_node, current_node, neighbours):
         pass
-    
+        # https://www.jmlr.org/papers/volume11/radovanovic10a/radovanovic10a.pdf
 
     def num_walks(self, node):
         return self.nw
