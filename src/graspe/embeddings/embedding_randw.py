@@ -241,7 +241,12 @@ class ShellWalk(RWEmbBase):
     def walk_length(self, node):
         return self.wl
 
+"""
 
+author: Aleksandar Tomcic (aleksandart@dmi.uns.ac.rs)
+"""
+
+# SC - Same Class
 class SCWalk(RWEmbBase):
     def __init__(
         self, g, d, num_walks=10, walk_length=80, p=0.85, workers=4, seed=42
