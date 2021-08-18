@@ -85,6 +85,8 @@ class GraphSageEmbedding(Embedding):
         deterministic=False,
         lid_aware=False,
         lid_k=20,
+        hub_aware=False,
+        hub_fn='identity',
         verbose=True,
     ):
         """
@@ -116,6 +118,10 @@ class GraphSageEmbedding(Embedding):
             Whether to optimize for lower LID
         lid_k : int
             k-value param for LID
+        hub_aware: bool
+            Whether to take into account hubness of nodes
+        hub_fn: str
+            Which function to be used on hubness of nodes, support for identity, inverse, log, log_inverse
         verbose : boolean
             Whether to output train data
         """
@@ -130,6 +136,8 @@ class GraphSageEmbedding(Embedding):
         self.lr = lr
         self.lid_aware = lid_aware
         self.lid_k = lid_k
+        self.hub_aware = hub_aware
+        self.hub_fn = hub_fn
         self.verbose = verbose
         if deterministic:  # not thread-safe, beware if running multiple at once
             torch.set_deterministic(True)
@@ -217,7 +225,20 @@ class GraphSageEmbedding(Embedding):
             # forward
 
             logits, _ = net(g, features)
-            criterion_1 = F.cross_entropy(logits[train_nid], labels[train_nid])
+            if self.hub_aware:
+                criterion_1 = F.cross_entropy(logits[train_nid], labels[train_nid], reduction='none')
+                hubness = torch.Tensor(list(self._g.get_hubness().values())) + 1e-5
+                if self.hub_fn == 'identity':
+                    pass
+                elif self.hub_fn == 'inverse':
+                    hubness = 1 / hubness
+                elif self.hub_fn == 'log':
+                    hubness = torch.log(hubness)
+                elif self.hub_fn == 'log_inverse':
+                    hubness = 1 / torch.log(hubness)
+                criterion_1 = torch.dot(criterion_1, hubness)
+            else:
+                criterion_1 = F.cross_entropy(logits[train_nid], labels[train_nid])
 
             if self.lid_aware:
                 _, embedding = net(g, features)
