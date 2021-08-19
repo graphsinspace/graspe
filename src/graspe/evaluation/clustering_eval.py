@@ -98,7 +98,7 @@ class ClusteringEval:
 
     def eval(self):
         outf = open("clustering-eval-" + self.dataset_name + ".csv", "w")
-        outf.write("DATASET,DIM,NUM_GT_LABELS,NUM_COMMUNITIES,NUM_REC_COMMUNITIES,MODULARITY,NMI_GT_COMMUNITIES,SIL1_GT,NMI1_GT,SIL2_COMMS,NMI2_COMMS,RG_MODULARITY,RG_NMI_GT\n")
+        outf.write("DATASET,DIM,NUM_GT_LABELS,NUM_COMMUNITIES,NUM_REC_COMMUNITIES,MODULARITY,SIL1_GT,SIL2_COMMS,RG_MODULARITY\n")
         
         #gt_labels =  [n[1]["label"] for n in self.graph.nodes()]
         num_labels = [2,3,4,5,10]#len(set(gt_labels))
@@ -158,12 +158,12 @@ datasets = [
     #"cora",
     #"dblp"
     #"blog-catalog-undirected",
-    "ca-AstroPh-undirected"
-    #"ca-CondMat-undirected",
-    #"ca-GrQc-undirected",
-    #"ca-HepPh-undirected",
-    #"cit-HepPh",
-    #"cit-HepTh"
+    "ca-AstroPh-undirected",
+    "ca-CondMat-undirected",
+    "ca-GrQc-undirected",
+    "ca-HepPh-undirected",
+    "cit-HepPh",
+    "cit-HepTh"
     #"facebook-ego-undirected"
 ]
 
