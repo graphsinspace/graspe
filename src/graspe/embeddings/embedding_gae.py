@@ -114,6 +114,8 @@ class GAEEmbedding(Embedding):
         act_fn="relu",
         lid_aware=False,
         lid_k=20,
+        hub_aware=False,
+        hub_fn='identity'
     ):
         """
         Parameters
@@ -140,6 +142,10 @@ class GAEEmbedding(Embedding):
             Whether to optimize for lower LID
         lid_k : int
             k-value param for LID
+        hub_aware: bool
+            Whether to take into account hubness of nodes
+        hub_fn: str
+            Which function to be used on hubness of nodes, support for identity, inverse, log, log_inverse
         """
         super().__init__(g, d)
         self.epochs = epochs
@@ -150,6 +156,8 @@ class GAEEmbedding(Embedding):
         self.act_fn = act_fn
         self.lid_aware = lid_aware
         self.lid_k = lid_k
+        self.hub_aware = hub_aware
+        self.hub_fn = hub_fn
         if deterministic:  # not thread-safe, beware if running multiple at once
             torch.set_deterministic(True)
             torch.manual_seed(0)
