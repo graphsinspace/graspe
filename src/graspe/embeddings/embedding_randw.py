@@ -141,6 +141,7 @@ class NCWalk(RWEmbBase):
         self.nc = NaturalCommunities(g, alpha=alpha)
         self.nc.detect()
         self.p = p
+        self.q = q
 
     def select_next_node(self, start_node, current_node, prev_node, neighbours):
         r = random.random()
@@ -176,6 +177,7 @@ class RNCWalk(RWEmbBase):
         self.nc = NaturalCommunities(g, alpha=alpha)
         self.nc.detect()
         self.p = p
+        self.q = q
 
     def select_next_node(self, start_node, current_node, prev_node, neighbours):
         r = random.random()
@@ -221,6 +223,7 @@ class ShellWalk(RWEmbBase):
         self.cores = core_number(g.to_networkx())
         self.inverted = inverted
         self.p = p
+        self.q = q
 
     def select_next_node(self, start_node, current_node, prev_node, neighbours):
         r = random.random()

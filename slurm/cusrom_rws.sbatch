@@ -9,4 +9,4 @@
 #SBATCH --error slurm.%J.err
 #SBATCH --export=ALL
 
-srun env PYTHONUNBUFFERED=1 PYTHONPATH=src/graspe /home/knezevicd/anaconda3/envs/graspe/bin/python src/graspe/scripts/customrws/eval_summary.py /home/knezevicd/grasp2/CRWEVAL_amazon_electronics_computers
+srun env PYTHONUNBUFFERED=1 PYTHONPATH=src/graspe /home/knezevicd/anaconda3/envs/graspe/bin/python src/graspe/scripts/customrws/eval_summary.py /home/knezevicd/grasp2/CRWEVAL_amazon_electronics_computers.csv
