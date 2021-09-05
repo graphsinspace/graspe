@@ -2,7 +2,7 @@ from common.dataset_pool import DatasetPool
 from embeddings.embedding_gae import GAEEmbedding
 from evaluation.lid_eval import EmbLIDMLEEstimatorTorch
 
-g = DatasetPool.load("facebook-ego-undirected")
+g = DatasetPool.load("karate_club_graph")
 g = g.to_undirected()
 g.remove_selfloop_edges()
 
@@ -44,13 +44,16 @@ def test_gae_variational():
 def test_gae_normal_linear():
     gae_embedding = GAEEmbedding(
         g,
-        d=10,
-        epochs=5,
+        d=25,
+        epochs=1,
         variational=False,
         linear=True,
         lr=0.01,
         layer_configuration=(8,),
         act_fn="relu",
+        hub_aware=True,
+        hub_fn='log_inverse',
+        hub_combine='mult'
     )
     gae_embedding.embed()
     assert gae_embedding._embedding is not None
@@ -141,8 +144,8 @@ def test_lid_aware_gae():
 if __name__ == "__main__":
     # test_lid_aware_gae()
     # test_gae_variational()
-    test_gae_normal()
-    # test_gae_normal_linear()
+    # test_gae_normal()
+    test_gae_normal_linear()
     # test_gae_variational_linear()
     # test_gae_cora()
     # test_gae_all() # takes long time

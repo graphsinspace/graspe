@@ -5,19 +5,120 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 import torch_geometric as tg
-import torch.nn as nn
 from torch.nn import Sequential
-from torch_geometric.nn import GCNConv, GAE, VGAE
+from torch_geometric.nn import GCNConv, InnerProductDecoder
 from torch_geometric.utils import train_test_split_edges
-
 from embeddings.base.embedding import Embedding
 from evaluation.lid_eval import EmbLIDMLEEstimatorTorch
+from sklearn.metrics import roc_auc_score, average_precision_score
+from torch_geometric.utils import negative_sampling, remove_self_loops, add_self_loops
+from torch_geometric.nn.inits import reset
+
+
+EPS = 1e-15
+MAX_LOGSTD = 10
+
+
+class GAE(torch.nn.Module):
+    def __init__(self, encoder, decoder=None):
+        super(GAE, self).__init__()
+        self.encoder = encoder
+        self.decoder = InnerProductDecoder() if decoder is None else decoder
+        GAE.reset_parameters(self)
+
+    def reset_parameters(self):
+        reset(self.encoder)
+        reset(self.decoder)
+
+    def encode(self, *args, **kwargs):
+        return self.encoder(*args, **kwargs)
+
+    def decode(self, *args, **kwargs):
+        return self.decoder(*args, **kwargs)
+
+    def recon_loss(self, z, pos_edge_index, neg_edge_index=None,
+                   hub_vector=None, hub_aware=False, hub_combine='add'):
+        if hub_aware:
+            hub_vector_pos = hub_vector[pos_edge_index]
+            if hub_combine == 'add':
+                hub_vector_pos = hub_vector_pos.sum(axis=0)
+            elif hub_combine == 'mult':
+                hub_vector_pos = hub_vector_pos[0] * hub_vector_pos[1]
+            else:
+                raise Exception('{} is not supported as a hub_combine parameter. Currently implemented options are '
+                                'add and mult'.format(hub_combine))
+            hub_vector_pos /= hub_vector_pos.norm()
+            pos_loss = -torch.log(self.decoder(z, pos_edge_index, sigmoid=True) + EPS)
+            # print('pos_loss.mean() = ', pos_loss.mean())
+            pos_loss = torch.dot(pos_loss, hub_vector_pos)
+            # print('pos_loss_hub_aware = ', pos_loss)
+        else:
+            pos_loss = -torch.log(self.decoder(z, pos_edge_index, sigmoid=True) + EPS).mean()
+
+        # Do not include self-loops in negative samples
+        pos_edge_index, _ = remove_self_loops(pos_edge_index)
+        pos_edge_index, _ = add_self_loops(pos_edge_index)
+        if neg_edge_index is None:
+            neg_edge_index = negative_sampling(pos_edge_index, z.size(0))
+        if hub_aware:
+            hub_vector_neg = hub_vector[neg_edge_index]
+            if hub_combine == 'add':
+                hub_vector_neg = hub_vector_neg.sum(axis=0)
+            elif hub_combine == 'mult':
+                hub_vector_neg = hub_vector_neg[0] * hub_vector_neg[1]
+            else:
+                raise Exception('{} is not supported as a hub_combine parameter. Currently implemented options are '
+                                'add and mult'.format(hub_combine))
+            hub_vector_neg /= hub_vector_neg.norm()
+            neg_loss = -torch.log(1 - self.decoder(z, neg_edge_index, sigmoid=True) + EPS)
+            # print('neg_loss.mean() = ', neg_loss.mean())
+            neg_loss = torch.dot(neg_loss, hub_vector_neg)
+            # print('neg_loss_hub_aware = ', neg_loss)
+
+        else:
+            neg_loss = -torch.log(1 - self.decoder(z, neg_edge_index, sigmoid=True) + EPS).mean()
+
+        return pos_loss + neg_loss
+
+    def test(self, z, pos_edge_index, neg_edge_index):
+        pos_y = z.new_ones(pos_edge_index.size(1))
+        neg_y = z.new_zeros(neg_edge_index.size(1))
+        y = torch.cat([pos_y, neg_y], dim=0)
+
+        pos_pred = self.decoder(z, pos_edge_index, sigmoid=True)
+        neg_pred = self.decoder(z, neg_edge_index, sigmoid=True)
+        pred = torch.cat([pos_pred, neg_pred], dim=0)
+
+        y, pred = y.detach().cpu().numpy(), pred.detach().cpu().numpy()
+
+        return roc_auc_score(y, pred), average_precision_score(y, pred)
+
+
+class VGAE(GAE):
+    def __init__(self, encoder, decoder=None):
+        super(VGAE, self).__init__(encoder, decoder)
+
+    def reparametrize(self, mu, logstd):
+        if self.training:
+            return mu + torch.randn_like(logstd) * torch.exp(logstd)
+        else:
+            return mu
+
+    def encode(self, *args, **kwargs):
+        self.__mu__, self.__logstd__ = self.encoder(*args, **kwargs)
+        self.__logstd__ = self.__logstd__.clamp(max=MAX_LOGSTD)
+        z = self.reparametrize(self.__mu__, self.__logstd__)
+        return z
+
+    def kl_loss(self, mu=None, logstd=None):
+        mu = self.__mu__ if mu is None else mu
+        logstd = self.__logstd__ if logstd is None else logstd.clamp(max=MAX_LOGSTD)
+        return -0.5 * torch.mean(
+            torch.sum(1 + 2 * logstd - mu**2 - logstd.exp()**2, dim=1))
 
 
 class GCNEncoder(torch.nn.Module):
-    def __init__(
-        self, in_channels, out_channels, channel_configuration=(8,), act_fn=torch.relu
-    ):
+    def __init__(self, in_channels, out_channels, channel_configuration=(8,), act_fn=torch.relu):
         super(GCNEncoder, self).__init__()
         self.act_fn = act_fn
         self.input = GCNConv(in_channels, channel_configuration[0], cached=True)
@@ -42,9 +143,7 @@ class GCNEncoder(torch.nn.Module):
 
 
 class VariationalGCNEncoder(torch.nn.Module):
-    def __init__(
-        self, in_channels, out_channels, channel_configuration=(8,), act_fn=torch.relu
-    ):
+    def __init__(self, in_channels, out_channels, channel_configuration=(8,), act_fn=torch.relu):
         super(VariationalGCNEncoder, self).__init__()
         self.act_fn = act_fn
         self.input = GCNConv(in_channels, channel_configuration[0], cached=True)
@@ -115,7 +214,8 @@ class GAEEmbedding(Embedding):
         lid_aware=False,
         lid_k=20,
         hub_aware=False,
-        hub_fn='identity'
+        hub_fn='identity',
+        hub_combine='add'
     ):
         """
         Parameters
@@ -146,6 +246,8 @@ class GAEEmbedding(Embedding):
             Whether to take into account hubness of nodes
         hub_fn: str
             Which function to be used on hubness of nodes, support for identity, inverse, log, log_inverse
+        hub_combine: str
+            How to combine hubness of nodes for calculation of recon_loss, for hubness aware variation of the algorithm
         """
         super().__init__(g, d)
         self.epochs = epochs
@@ -158,6 +260,20 @@ class GAEEmbedding(Embedding):
         self.lid_k = lid_k
         self.hub_aware = hub_aware
         self.hub_fn = hub_fn
+        self.hub_combine = hub_combine
+        hub_vector = torch.Tensor(list(self._g.get_hubness().values())) + 1e-5
+        if self.hub_fn == 'identity':
+            pass
+        elif self.hub_fn == 'inverse':
+            hub_vector = 1 / hub_vector
+        elif self.hub_fn == 'log':
+            hub_vector = torch.log(hub_vector)
+        elif self.hub_fn == 'log_inverse':
+            hub_vector = 1 / torch.log(hub_vector)
+        else:
+            raise Exception('{} is not supported as a hub_fn parameter. Currently implemented options are '
+                            'identity, inverse, log, and log_inverse'.format(self.hub_fn))
+        self.hub_vector = hub_vector # / hub_vector.norm()
         if deterministic:  # not thread-safe, beware if running multiple at once
             torch.set_deterministic(True)
             torch.manual_seed(0)
@@ -174,7 +290,12 @@ class GAEEmbedding(Embedding):
         model.train()
         optimizer.zero_grad()
         z = model.encode(x, train_pos_edge_index)
-        criterion_1 = model.recon_loss(z, train_pos_edge_index)
+        if self.hub_aware:
+            criterion_1 = model.recon_loss(z, train_pos_edge_index, hub_vector=self.hub_vector,
+                                           hub_aware=self.hub_aware, hub_combine=self.hub_combine)
+        else:
+            criterion_1 = model.recon_loss(z, train_pos_edge_index)
+
         if self.variational:
             criterion_1 = criterion_1 + (1 / data.num_nodes) * model.kl_loss()
 
@@ -186,9 +307,7 @@ class GAEEmbedding(Embedding):
             tlid = EmbLIDMLEEstimatorTorch(self._g, emb, self.lid_k)
             tlid.estimate_lids()
             total_lid = tlid.get_total_lid()
-            criterion_2 = F.mse_loss(
-                total_lid, torch.tensor(self.lid_k, dtype=torch.float)
-            )
+            criterion_2 = F.mse_loss(total_lid, torch.tensor(self.lid_k, dtype=torch.float))
             loss = criterion_1 + criterion_2
         else:
             loss = criterion_1
@@ -258,15 +377,14 @@ class GAEEmbedding(Embedding):
         loss = -1
         for epoch in range(1, self.epochs + 1):
             loss = self._train(model, optimizer, train_pos_edge_index, data, x)
-            auc, ap = self._test(
-                data.test_pos_edge_index,
-                data.test_neg_edge_index,
-                model,
-                x,
-                train_pos_edge_index,
-            )
+            # auc, ap = self._test(
+            #     data.test_pos_edge_index,
+            #     data.test_neg_edge_index,
+            #     model,
+            #     x,
+            #     train_pos_edge_index,
+            # )
             # print("Epoch: {:03d}, AUC: {:.4f}, AP: {:.4f}".format(epoch, auc, ap))
-
         # print("loss:", loss)
 
         with torch.no_grad():

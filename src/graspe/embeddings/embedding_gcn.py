@@ -164,22 +164,28 @@ class GCNEmbedding(Embedding):
         optimizer = torch.optim.Adam(
             itertools.chain(net.parameters(), e.parameters()), lr=self.lr
         )
+
+        if self.hub_aware:
+            hub_vector = torch.Tensor(list(self._g.get_hubness().values())) + 1e-5
+            if self.hub_fn == 'identity':
+                pass
+            elif self.hub_fn == 'inverse':
+                hub_vector = 1 / hub_vector
+            elif self.hub_fn == 'log':
+                hub_vector = torch.log(hub_vector)
+            elif self.hub_fn == 'log_inverse':
+                hub_vector = 1 / torch.log(hub_vector)
+            else:
+                raise Exception('{} is not supported as a hub_fn parameter. Currently implemented options are '
+                                'identity, inverse, log, and log_inverse'.format(self.hub_fn))
+            hub_vector = hub_vector / hub_vector.norm()
+
         for epoch in range(self.epochs):
             logits = net(dgl_g.to(device), inputs.to(device)).to(device)
             logp = F.log_softmax(logits, 1)
-
             if self.hub_aware:
                 criterion_1 = F.nll_loss(logp[labeled_nodes], labels, reduction='none')
-                hubness = torch.Tensor(list(self._g.get_hubness().values())) + 1e-5
-                if self.hub_fn == 'identity':
-                    pass
-                elif self.hub_fn == 'inverse':
-                    hubness = 1 / hubness
-                elif self.hub_fn == 'log':
-                    hubness = torch.log(hubness)
-                elif self.hub_fn == 'log_inverse':
-                    hubness = 1 / torch.log(hubness)
-                criterion_1 = torch.dot(criterion_1, hubness)
+                criterion_1 = torch.dot(criterion_1, hub_vector)
             else:
                 criterion_1 = F.nll_loss(logp[labeled_nodes], labels)
 

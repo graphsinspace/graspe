@@ -218,25 +218,31 @@ class GraphSageEmbedding(Embedding):
 
         # initialize graph
         dur = []
+
+        if self.hub_aware:
+            hub_vector = torch.Tensor(list(self._g.get_hubness().values())) + 1e-5
+            if self.hub_fn == 'identity':
+                pass
+            elif self.hub_fn == 'inverse':
+                hub_vector = 1 / hub_vector
+            elif self.hub_fn == 'log':
+                hub_vector = torch.log(hub_vector)
+            elif self.hub_fn == 'log_inverse':
+                hub_vector = 1 / torch.log(hub_vector)
+            else:
+                raise Exception('{} is not supported as a hub_fn parameter. Currently implemented options are '
+                                'identity, inverse, log, and log_inverse'.format(self.hub_fn))
+            hub_vector = hub_vector / hub_vector.norm()
+
         for epoch in range(self._epochs):
             net.train()
             if epoch >= 3:
                 t0 = time.time()
             # forward
-
             logits, _ = net(g, features)
             if self.hub_aware:
                 criterion_1 = F.cross_entropy(logits[train_nid], labels[train_nid], reduction='none')
-                hubness = torch.Tensor(list(self._g.get_hubness().values())) + 1e-5
-                if self.hub_fn == 'identity':
-                    pass
-                elif self.hub_fn == 'inverse':
-                    hubness = 1 / hubness
-                elif self.hub_fn == 'log':
-                    hubness = torch.log(hubness)
-                elif self.hub_fn == 'log_inverse':
-                    hubness = 1 / torch.log(hubness)
-                criterion_1 = torch.dot(criterion_1, hubness)
+                criterion_1 = torch.dot(criterion_1, hub_vector)
             else:
                 criterion_1 = F.cross_entropy(logits[train_nid], labels[train_nid])
 
