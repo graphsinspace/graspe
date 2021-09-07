@@ -1,5 +1,6 @@
 import statistics
 import json
+from tqdm import tqdm
 from common.dataset_pool import DatasetPool
 from embeddings.embedding_gcn import GCNEmbedding
 from embeddings.embedding_graphsage import GraphSageEmbedding
@@ -29,7 +30,7 @@ def compare_gcn_all(datasets):
          [200, 'tanh', 0.1, 200, (256, 512, 256)]
     ]
     results = {}
-    for i in range(len(datasets)):
+    for i in tqdm(range(len(datasets))):
         dataset = datasets[i]
         results[dataset] = {}
         best_conf = best_confs[i]
@@ -80,7 +81,7 @@ def compare_graphsage_all(datasets):
          [10, 'tanh', 0.1, 100, (256, 512, 256)]
     ]
     results = {}
-    for i in range(len(datasets)):
+    for i in tqdm(range(len(datasets))):
         dataset = datasets[i]
         results[dataset] = {}
         best_conf = best_confs[i]
@@ -132,7 +133,7 @@ def compare_gae_all(datasets):
          [100, 'relu', True, True, 0.1, 200, (256, 512, 256)]
     ]
     results = {}
-    for i in range(len(datasets)):
+    for i in tqdm(range(len(datasets))):
         dataset = datasets[i]
         results[dataset] = {}
         best_conf = best_confs[i]
