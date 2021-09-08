@@ -242,7 +242,7 @@ class GraphSageEmbedding(Embedding):
             logits, _ = net(g, features)
             if self.hub_aware:
                 criterion_1 = F.cross_entropy(logits[train_nid], labels[train_nid], reduction='none')
-                criterion_1 = torch.dot(criterion_1, hub_vector)
+                criterion_1 = torch.dot(criterion_1, hub_vector[train_nid])
             else:
                 criterion_1 = F.cross_entropy(logits[train_nid], labels[train_nid])
 

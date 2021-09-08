@@ -4,14 +4,16 @@ from evaluation.lid_eval import EmbLIDMLEEstimatorTorch
 
 
 def test_graphsage():
-    g = DatasetPool.load("cora_ml")
+    g = DatasetPool.load("karate_club_graph")
     e = GraphSageEmbedding(
         g,
         d=100,
         epochs=200,
         lr=0.01,
-        layer_configuration=(128, 256, 256, 128),
+        layer_configuration=(128, 128),
         act_fn="tanh",
+        hub_aware=True,
+        hub_fn='identity'
     )
     e.embed()
     assert e._embedding is not None
@@ -64,6 +66,6 @@ def test_graphsage_all():
 
 
 if __name__ == "__main__":
-    test_lid_aware_graphsage()
+    # test_lid_aware_graphsage()
     # test_graphsage_all()
-    # test_graphsage()
+    test_graphsage()
