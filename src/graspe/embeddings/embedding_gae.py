@@ -261,7 +261,9 @@ class GAEEmbedding(Embedding):
         self.hub_aware = hub_aware
         self.hub_fn = hub_fn
         self.hub_combine = hub_combine
-        hub_vector = torch.Tensor(list(self._g.get_hubness().values())) + 1e-5
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        hub_vector = torch.Tensor(list(self._g.get_hubness().values())).to(self.device) + 1e-5
         if self.hub_fn == 'identity':
             pass
         elif self.hub_fn == 'inverse':
@@ -368,10 +370,9 @@ class GAEEmbedding(Embedding):
                 )
             model = GAE(encoder)
 
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        model = model.to(device)
-        x = data.x.to(device)
-        train_pos_edge_index = data.train_pos_edge_index.to(device)
+        model = model.to(self.device)
+        x = data.x.to(self.device)
+        train_pos_edge_index = data.train_pos_edge_index.to(self.device)
         optimizer = torch.optim.Adam(model.parameters(), lr=self.lr)
 
         loss = -1

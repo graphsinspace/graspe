@@ -177,13 +177,13 @@ def compare_gae_all(datasets):
 
 
 if __name__ == '__main__':
-    results_gcn = compare_gcn_all(DATASETS)
-    with open('/home/dusan/graspe_gcn_res/gcn_hub_aware.json', 'w') as file:
-        json.dump(results_gcn, file, indent=4)
-
-    results_graphsage = compare_graphsage_all(DATASETS)
-    with open('/home/dusan/graspe_graphsage_res/graphsage_hub_aware.json', 'w') as file:
-        json.dump(results_graphsage, file, indent=4)
+    # results_gcn = compare_gcn_all(DATASETS)
+    # with open('/home/dusan/graspe_gcn_res/gcn_hub_aware.json', 'w') as file:
+    #     json.dump(results_gcn, file, indent=4)
+    #
+    # results_graphsage = compare_graphsage_all(DATASETS)
+    # with open('/home/dusan/graspe_graphsage_res/graphsage_hub_aware.json', 'w') as file:
+    #     json.dump(results_graphsage, file, indent=4)
 
     results_gae = compare_gae_all(DATASETS)
     with open('/home/dusan/graspe_gae_res/gae_hub_aware.json', 'w') as file:
