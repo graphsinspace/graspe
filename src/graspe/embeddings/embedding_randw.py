@@ -19,6 +19,8 @@ sys.path.append("../")
 
 from evaluation.lid_eval import LFMnx
 
+import numpy as np
+
 
 class RWEmbBase(Embedding):
     def __init__(self, g, d, workers=4, seed=42):
@@ -316,5 +318,90 @@ class HubWalk(RWEmbBase):
     def num_walks(self, node):
         return self.nw
 
+    def walk_length(self, node):
+        return self.wl
+
+class HubWalkUniform(RWEmbBase):
+    def __init__(
+        self, g, d, num_walks=10, walk_length=80, p=0.85, workers=4, seed=42
+    ):
+        super().__init__(g, d, workers, seed)
+        self.nw = num_walks
+        self.wl = walk_length
+        self.p = p
+
+    def select_next_node(self, start_node, current_node, neighbours):
+
+        G = self._g
+
+        r = random.random()
+
+        if r <= self.p:
+
+            neighbours_of_neighbours = {}
+
+            for n in neighbours:
+                n_o_n = [edge[1] for edge in G.edges(n) if G.get_label(edge[1]) != G.get_label(start_node)]
+
+                neighbours_of_neighbours[n] = n_o_n
+
+                # This time without sorting i.e. we go uniform
+            
+            if len(neighbours_of_neighbours) > 0:
+                return random.sample(list(neighbours_of_neighbours.keys()), 1)[0]
+            else:
+                return random.sample(neighbours, 1)[0]
+
+    def num_walks(self, node):
+        return self.nw
+    
+    def walk_length(self, node):
+        return self.wl
+
+
+class HubWalkDistribution(RWEmbBase):
+    def __init__(
+        self, g, d, num_walks=10, walk_length=80, p=0.85, workers=4, seed=42
+    ):
+        super().__init__(g, d, workers, seed)
+        self.nw = num_walks
+        self.wl = walk_length
+        self.p = p
+
+    def select_next_node(self, start_node, current_node, neighbours):
+
+        G = self._g
+
+        r = random.random()
+
+        if r <= self.p:
+
+            neighbours_of_neighbours = {}
+
+            for n in neighbours:
+                n_o_n = [edge[1] for edge in G.edges(n) if G.get_label(edge[1]) != G.get_label(start_node)]
+
+                neighbours_of_neighbours[n] = n_o_n
+
+            if len(neighbours_of_neighbours) > 0:
+                full_length = 0
+                for k in neighbours_of_neighbours.keys():
+                    full_length += len(neighbours_of_neighbours[k])
+                
+
+                probabilities = []
+                for k in neighbours_of_neighbours.keys():
+                    probabilities.append(len(neighbours_of_neighbours[k]) / full_length)
+
+                return np.random.choice(list(neighbours_of_neighbours.keys()
+                                        1, 
+                                        p = probabilities)[0]
+        else:
+            return random.sample(neighbours, 1)[0]
+
+
+    def num_walks(self, node):
+        return self.nw
+    
     def walk_length(self, node):
         return self.wl
