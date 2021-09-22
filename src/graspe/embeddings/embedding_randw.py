@@ -321,6 +321,7 @@ class HubWalk(RWEmbBase):
     def walk_length(self, node):
         return self.wl
 
+
 class HubWalkUniform(RWEmbBase):
     def __init__(
         self, g, d, num_walks=10, walk_length=80, p=0.85, workers=4, seed=42
@@ -398,7 +399,6 @@ class HubWalkDistribution(RWEmbBase):
                                         p = probabilities)[0]
         else:
             return random.sample(neighbours, 1)[0]
-
 
     def num_walks(self, node):
         return self.nw
