@@ -1,0 +1,6 @@
+- napraviti granu/folder - DONE
+- proveriti radove iz fajla papers.txt i dodati nove radove u isti fajl
+- https://www.tensorflow.org/agents/tutorials/2_environments_tutorial
+- da li raditi random akcije i pustiti kroz "milion" epocha i nadati se da ce nesto nauciti
+- Taktika?
+- ...
