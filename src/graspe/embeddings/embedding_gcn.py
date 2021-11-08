@@ -10,7 +10,7 @@ from dgl.nn.pytorch import GraphConv
 from embeddings.base.embedding import Embedding
 from evaluation.lid_eval import EmbLIDMLEEstimatorTorch
 
-# device = "cuda" if torch.cuda.is_available() else "cpu"
+device = "cuda" if torch.cuda.is_available() else "cpu"
 device = "cpu"
 
 
@@ -75,7 +75,9 @@ class GCNEmbedding(Embedding):
         lid_aware=False,
         lid_k=20,
         hub_aware=False,
-        hub_fn='identity'
+        hub_fn='identity',
+        badness_aware=False,
+        badness_alpha=1
     ):
         """
         Parameters
@@ -102,6 +104,10 @@ class GCNEmbedding(Embedding):
             Whether to take into account hubness of nodes
         hub_fn: str
             Which function to be used on hubness of nodes, support for identity, inverse, log, log_inverse
+        badness_aware: bool
+            Whether to take into account goodness of nodes (take a look at method get_goodness in graph.py)
+        badness_alpha: int
+            Strength of influence of goodness aware
         """
         super().__init__(g, d)
         self.epochs = epochs
@@ -112,6 +118,8 @@ class GCNEmbedding(Embedding):
         self.lid_k = lid_k
         self.hub_aware = hub_aware
         self.hub_fn = hub_fn
+        self.badness_aware = badness_aware
+        self.badness_alpha = badness_alpha
         self.dgl_g = self._g.to_dgl()
 
         if (self.dgl_g.in_degrees() == 0).any():
@@ -166,26 +174,37 @@ class GCNEmbedding(Embedding):
         )
 
         if self.hub_aware:
-            hub_vector = torch.Tensor(list(self._g.get_hubness().values())) + 1e-5
+            hubness_vector = torch.Tensor(list(self._g.get_hubness().values())) + 1e-5
             if self.hub_fn == 'identity':
                 pass
             elif self.hub_fn == 'inverse':
-                hub_vector = 1 / hub_vector
+                hubness_vector = 1 / hubness_vector
             elif self.hub_fn == 'log':
-                hub_vector = torch.log(hub_vector)
+                hubness_vector = torch.log(hubness_vector)
             elif self.hub_fn == 'log_inverse':
-                hub_vector = 1 / torch.log(hub_vector)
+                hubness_vector = 1 / torch.log(hubness_vector)
             else:
                 raise Exception('{} is not supported as a hub_fn parameter. Currently implemented options are '
                                 'identity, inverse, log, and log_inverse'.format(self.hub_fn))
-            hub_vector = hub_vector / hub_vector.norm()
+            hubness_vector = hubness_vector / hubness_vector.norm()
+
+        if self.badness_aware:
+            badness_vector = (torch.Tensor(self._g.get_badness()) + 1) ** self.badness_alpha
 
         for epoch in range(self.epochs):
             logits = net(dgl_g.to(device), inputs.to(device)).to(device)
             logp = F.log_softmax(logits, 1)
-            if self.hub_aware:
+
+            # Re-weighting the loss with hubness and/or badness vector
+            if self.hub_aware and not self.badness_aware:
                 criterion_1 = F.nll_loss(logp[labeled_nodes], labels, reduction='none')
-                criterion_1 = torch.dot(criterion_1, hub_vector)
+                criterion_1 = torch.dot(criterion_1, hubness_vector)
+            elif not self.hub_aware and self.badness_aware:
+                criterion_1 = F.nll_loss(logp[labeled_nodes], labels, reduction='none')
+                criterion_1 = torch.dot(criterion_1, badness_vector)
+            elif self.hub_aware and self.badness_aware:
+                criterion_1 = F.nll_loss(logp[labeled_nodes], labels, reduction='none')
+                criterion_1 = torch.dot(criterion_1, (hubness_vector + badness_vector) / 2)
             else:
                 criterion_1 = F.nll_loss(logp[labeled_nodes], labels)
 

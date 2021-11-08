@@ -20,7 +20,7 @@ def test_classification():
 
     # formiranje embedinga za ucitani graf
     dim = 10
-    epochs = 100
+    epochs = 1
     embedding = GCNEmbedding(graph, dim, epochs)
     embedding.embed()
 
@@ -85,5 +85,5 @@ def test_clustering():
 
 
 if __name__ == "__main__":
-    test_clustering()
+    # test_clustering()
     test_classification()

@@ -122,6 +122,18 @@ class Graph:
             return h
         return {n: n_h for n, n_h in h}
 
+    def get_badness(self):
+        not_my_label_percents = []
+        for node1 in range(self.nodes_cnt()):
+            neigh_labels_noneqs = [
+                self.get_label(edge[1]) != self.get_label(node1) for edge in self.__graph.edges(node1)
+            ]
+            if len(neigh_labels_noneqs) > 0:
+                not_my_label_percents.append(sum(neigh_labels_noneqs) / len(neigh_labels_noneqs))
+            else:
+                not_my_label_percents.append(1.0)
+        return not_my_label_percents
+
     def add_node(self, id, label=""):
         """
         Adds a new node into the graph.

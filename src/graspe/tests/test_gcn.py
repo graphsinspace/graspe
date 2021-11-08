@@ -1,6 +1,7 @@
 from common.dataset_pool import DatasetPool
 from embeddings.embedding_gcn import GCNEmbedding
 import torch
+from collections import defaultdict
 from evaluation.lid_eval import (
     LIDMLEEstimator,
     EmbLIDMLEEstimator,
@@ -9,7 +10,11 @@ from evaluation.lid_eval import (
 
 
 def test_gcn_citeseer():
-    g = DatasetPool.load("citeseer")
+    g = DatasetPool.load("cora")
+
+
+    abc = g.get_badness()
+    print(abc)
     # print(1 / (torch.Tensor(list(g.get_hubness().values())) + 1e-5))
     e = GCNEmbedding(
         g,
@@ -19,7 +24,8 @@ def test_gcn_citeseer():
         layer_configuration=(128, 256, 128),
         act_fn="tanh",
         hub_aware=True,
-        hub_fn='log_inverse'
+        hub_fn='log_inverse',
+        badness_aware=True
     )
     e.embed()
     assert e._embedding is not None
