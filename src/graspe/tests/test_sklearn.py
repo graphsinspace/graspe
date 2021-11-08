@@ -66,7 +66,6 @@ def test_clustering():
         nattr = n[1]              # atributi cvora
         label = nattr['label']    # labela cvora
         labels.append(label)
-
         emb = embedding[nid]      # embedding cvora
         node_vectors.append(emb)
     """
