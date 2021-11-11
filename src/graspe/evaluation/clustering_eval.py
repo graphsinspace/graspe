@@ -98,9 +98,9 @@ class ClusteringEval:
 
     def eval(self):
         outf = open("clustering-eval-" + self.dataset_name + ".csv", "w")
-        outf.write("DATASET,DIM,NUM_GT_LABELS,NUM_COMMUNITIES,NUM_REC_COMMUNITIES,MODULARITY,NMI_GT_COMMUNITIES,SIL1_GT,NMI1_GT,SIL2_COMMS,NMI2_COMMS,RG_MODULARITY,RG_NMI_GT\n")
+        outf.write("DATASET,DIM,NUM_GT_LABELS,NUM_COMMUNITIES,NUM_REC_COMMUNITIES,MODULARITY,SIL1_GT,SIL2_COMMS,RG_MODULARITY\n")
         
-        #gt_labels =  [n[1]["label"] for n in self.graph.nodes()]
+        gt_labels =  [n[1]["label"] for n in self.graph.nodes()]
         num_labels = [2,3,4,5,10]#len(set(gt_labels))
 
         # perform community detection
@@ -129,8 +129,12 @@ class ClusteringEval:
 
                 
                 # K-means za onoliko klastera koliko ima labela - za 2, 3, 4, 5 i 10
-                embc1 = EmbClusterer(self.graph, emb, numlbl)
-                sil1 = embc1.get_sil_score()
+                if not gt_labels:
+                    embc1 = EmbClusterer(self.graph, emb, len(gt_labels))
+                    sil1 = embc1.get_sil_score()
+                else:
+                    embc1 = EmbClusterer(self.graph, emb, numlbl)
+                    sil1 = embc1.get_sil_score()
                 #nmi1 = normalized_mutual_info_score(gt_labels, embc1.get_clusters())
 
                 # K-means za onoliko klastera koliko ima zajednica
@@ -138,7 +142,12 @@ class ClusteringEval:
                 sil2 = embc2.get_sil_score()
             # nmi2 = normalized_mutual_info_score(community_labels, embc2.get_clusters())
                 
-                msg = dataset + "," + str(dim) + "," + str(numlbl) + "," + str(numcoms) + "," +\
+                if not gt_labels:
+                    msg = dataset + "," + str(dim) + "," + str(numlbl) + "," + str(numcoms) + "," +\
+                    str(num_rec_comm) + "," + str(modularity) + ","  + str(sil1) + "," +\
+                    str(sil2) + "," + str(modularity_rg)
+                else:
+                    msg = dataset + "," + str(dim) + "," + str(len(gt_labels)) + "," + str(numcoms) + "," +\
                     str(num_rec_comm) + "," + str(modularity) + ","  + str(sil1) + "," +\
                     str(sil2) + "," + str(modularity_rg)
 
@@ -149,22 +158,22 @@ class ClusteringEval:
 
 
 datasets = [
-    #"karate_club_graph",
-    #"cora_ml",  
-    #"citeseer",
-    #"amazon_electronics_photo",
-    #"amazon_electronics_computers",
-    #"pubmed",
-    #"cora",
-    #"dblp"
+    "karate_club_graph",
+    "cora_ml",  
+    "citeseer",
+    "amazon_electronics_photo",
+    "amazon_electronics_computers",
+    "pubmed",
+    "cora",
+    "dblp"
     "blog-catalog-undirected",
-    "ca-AstroPh-undirected",
-    "ca-CondMat-undirected",
-    "ca-GrQc-undirected",
-    "ca-HepPh-undirected",
-    "cit-HepPh",
-    "cit-HepTh",
-    "facebook-ego-undirected"
+    #"ca-AstroPh-undirected",
+    #"ca-CondMat-undirected",
+    #"ca-GrQc-undirected",
+    #"ca-HepPh-undirected",
+    #"cit-HepPh",
+    #"cit-HepTh"
+    #"facebook-ego-undirected"
 ]
 
 def clustering_eval_function(d, folder):
