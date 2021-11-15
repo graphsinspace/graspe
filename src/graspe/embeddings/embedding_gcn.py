@@ -77,7 +77,10 @@ class GCNEmbedding(Embedding):
         hub_aware=False,
         hub_fn='identity',
         badness_aware=False,
-        badness_alpha=1
+        badness_alpha=1,
+        train=0.8,
+        val=0.1,
+        test=0.1,
     ):
         """
         Parameters
@@ -108,6 +111,12 @@ class GCNEmbedding(Embedding):
             Whether to take into account goodness of nodes (take a look at method get_goodness in graph.py)
         badness_alpha: int
             Strength of influence of goodness aware
+        train : float
+            Percentage of data to be used for training.
+        val : float
+            Percentage of data to be used for validation.
+        test : float
+            Percentage of data to be used for testing.
         """
         super().__init__(g, d)
         self.epochs = epochs
@@ -121,6 +130,9 @@ class GCNEmbedding(Embedding):
         self.badness_aware = badness_aware
         self.badness_alpha = badness_alpha
         self.dgl_g = self._g.to_dgl()
+        self.train = train
+        self.val = val
+        self.test = test
 
         if (self.dgl_g.in_degrees() == 0).any():
             self.dgl_g = dgl.add_self_loop(self.dgl_g)
@@ -161,6 +173,9 @@ class GCNEmbedding(Embedding):
         net = net.to(device)
 
         inputs = e.weight
+        train_num = int(num_nodes * self.train)
+        val_num = int(num_nodes * self.val)
+        test_num = int(num_nodes * self.test)
         labeled_nodes = []
         labels = []
         for node in nodes:
@@ -168,6 +183,19 @@ class GCNEmbedding(Embedding):
                 labeled_nodes.append(node[0])
                 labels.append(node[1]["label"])
         labels = torch.tensor(labels).to(device)
+
+        train_mask = torch.tensor(
+            [True] * train_num + [False] * test_num + [False] * val_num
+        )
+        val_mask = torch.tensor(
+            [False] * train_num + [False] * test_num + [True] * val_num
+        )
+        test_mask = torch.tensor(
+            [False] * train_num + [True] * test_num + [False] * val_num
+        )
+        train_nid = train_mask.nonzero(as_tuple=False).squeeze()
+        val_nid = val_mask.nonzero(as_tuple=False).squeeze()
+        test_nid = test_mask.nonzero(as_tuple=False).squeeze()
 
         optimizer = torch.optim.Adam(
             itertools.chain(net.parameters(), e.parameters()), lr=self.lr
@@ -191,22 +219,22 @@ class GCNEmbedding(Embedding):
         if self.badness_aware:
             badness_vector = (torch.Tensor(self._g.get_badness()) + 1) ** self.badness_alpha
 
-        for epoch in range(self.epochs):
+        for epoch in range(1, self.epochs + 1):
             logits = net(dgl_g.to(device), inputs.to(device)).to(device)
             logp = F.log_softmax(logits, 1)
 
             # Re-weighting the loss with hubness and/or badness vector
             if self.hub_aware and not self.badness_aware:
-                criterion_1 = F.nll_loss(logp[labeled_nodes], labels, reduction='none')
-                criterion_1 = torch.dot(criterion_1, hubness_vector)
+                criterion_1 = F.nll_loss(logp[train_nid], labels[train_nid], reduction='none')
+                criterion_1 = torch.dot(criterion_1, hubness_vector[train_nid])
             elif not self.hub_aware and self.badness_aware:
-                criterion_1 = F.nll_loss(logp[labeled_nodes], labels, reduction='none')
-                criterion_1 = torch.dot(criterion_1, badness_vector)
+                criterion_1 = F.nll_loss(logp[train_nid], labels[train_nid], reduction='none')
+                criterion_1 = torch.dot(criterion_1, badness_vector[train_nid])
             elif self.hub_aware and self.badness_aware:
-                criterion_1 = F.nll_loss(logp[labeled_nodes], labels, reduction='none')
-                criterion_1 = torch.dot(criterion_1, (hubness_vector + badness_vector) / 2)
+                criterion_1 = F.nll_loss(logp[train_nid], labels[train_nid], reduction='none')
+                criterion_1 = torch.dot(criterion_1, (hubness_vector[train_nid] + badness_vector[train_nid]) / 2)
             else:
-                criterion_1 = F.nll_loss(logp[labeled_nodes], labels)
+                criterion_1 = F.nll_loss(logp[train_nid], labels[train_nid])
 
             if self.lid_aware:
                 emb = self.compute_embedding(dgl_g, nodes)
@@ -225,8 +253,12 @@ class GCNEmbedding(Embedding):
             optimizer.step()
             # print('Epoch %d | Loss: %.4f' % (epoch, loss.item()))
         # print("loss: %.4f" % loss.item())
-
+            if epoch % 10 == 0:
+                acc = self._evaluate(net, dgl_g, inputs, labels, val_nid)
+                print('Epoch {:05d} | Validation Accuracy {:.4f}'.format(epoch, acc))
         self._embedding = self.compute_embedding(dgl_g, nodes)
+        acc = self._evaluate(net, dgl_g, inputs, labels, test_nid)
+        print('Test Accuracy {:.4f}'.format(acc))
 
     def compute_embedding(self, dgl_g, nodes):
         embedding = {}
@@ -235,6 +267,17 @@ class GCNEmbedding(Embedding):
                 [x.item() for x in dgl_g.ndata["feat"][i]]
             )
         return embedding
+
+    def _evaluate(self, net, dgl_g, inputs, labels, labeled_nodes):
+        net.eval()
+        with torch.no_grad():
+            logits = net(dgl_g, inputs)
+            logits = logits[labeled_nodes]
+            labels = labels[labeled_nodes]
+            _, indices = torch.max(logits, dim=1)
+            correct = torch.sum(indices == labels)
+        net.train()
+        return correct.item() * 1.0 / len(labels)
 
     def requires_labels(self):
         return True

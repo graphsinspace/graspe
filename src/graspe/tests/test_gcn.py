@@ -11,15 +11,10 @@ from evaluation.lid_eval import (
 
 def test_gcn_citeseer():
     g = DatasetPool.load("cora")
-
-
-    abc = g.get_badness()
-    print(abc)
-    # print(1 / (torch.Tensor(list(g.get_hubness().values())) + 1e-5))
     e = GCNEmbedding(
         g,
         d=100,
-        epochs=1,
+        epochs=100,
         lr=0.05,
         layer_configuration=(128, 256, 128),
         act_fn="tanh",
@@ -29,8 +24,8 @@ def test_gcn_citeseer():
     )
     e.embed()
     assert e._embedding is not None
-    for i in range(34):
-        print(i, e[i])
+    # for i in range(34):
+    #     print(i, e[i])
 
 
 def test_gcn_lid():
