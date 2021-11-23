@@ -6,6 +6,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from dgl.nn.pytorch import GraphConv
+from sklearn.metrics import accuracy_score, precision_score, recall_score, confusion_matrix
 
 from embeddings.base.embedding import Embedding
 from evaluation.lid_eval import EmbLIDMLEEstimatorTorch
@@ -257,8 +258,7 @@ class GCNEmbedding(Embedding):
                 acc = self._evaluate(net, dgl_g, inputs, labels, val_nid)
                 print('Epoch {:05d} | Validation Accuracy {:.4f}'.format(epoch, acc))
         self._embedding = self.compute_embedding(dgl_g, nodes)
-        acc = self._evaluate(net, dgl_g, inputs, labels, test_nid)
-        print('Test Accuracy {:.4f}'.format(acc))
+        acc = self._evaluate(net, dgl_g, inputs, labels, test_nid, full=True)
 
     def compute_embedding(self, dgl_g, nodes):
         embedding = {}
@@ -268,16 +268,26 @@ class GCNEmbedding(Embedding):
             )
         return embedding
 
-    def _evaluate(self, net, dgl_g, inputs, labels, labeled_nodes):
+    def _evaluate(self, net, dgl_g, inputs, labels, labeled_nodes, full=False):
         net.eval()
         with torch.no_grad():
             logits = net(dgl_g, inputs)
             logits = logits[labeled_nodes]
             labels = labels[labeled_nodes]
             _, indices = torch.max(logits, dim=1)
-            correct = torch.sum(indices == labels)
         net.train()
-        return correct.item() * 1.0 / len(labels)
+        accuracy = accuracy_score(indices, labels)
+
+        if full:
+            precision = precision_score(indices, labels, average='macro')
+            recall = recall_score(indices, labels, average='macro')
+            f1 = 2 * precision * recall / (precision + recall)
+            print('Accuracy = {:.4f}'.format(accuracy))
+            print('Precision = {:.4f}'.format(precision))
+            print('Recall = {:.4f}'.format(recall))
+            print('F1 Score = {:.4f}'.format(f1))
+            print('Confusion Matrix \n', confusion_matrix(indices, labels))
+        return accuracy
 
     def requires_labels(self):
         return True
