@@ -254,9 +254,9 @@ class GCNEmbedding(Embedding):
             optimizer.step()
             # print('Epoch %d | Loss: %.4f' % (epoch, loss.item()))
         # print("loss: %.4f" % loss.item())
-            if epoch % 10 == 0:
-                acc = self._evaluate(net, dgl_g, inputs, labels, val_nid)
-                print('Epoch {:05d} | Validation Accuracy {:.4f}'.format(epoch, acc))
+        #     if epoch % 10 == 0:
+        #         acc = self._evaluate(net, dgl_g, inputs, labels, val_nid)
+        #         print('Epoch {:05d} | Validation Accuracy {:.4f}'.format(epoch, acc))
         self._embedding = self.compute_embedding(dgl_g, nodes)
         acc = self._evaluate(net, dgl_g, inputs, labels, test_nid, full=True)
 
