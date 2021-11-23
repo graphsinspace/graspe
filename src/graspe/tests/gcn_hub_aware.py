@@ -4,6 +4,7 @@ import sys
 
 DATASETS = ['pubmed', 'citeseer', 'cora_ml', 'cora', 'dblp', 'karate_club_graph',
             'amazon_electronics_computers', 'amazon_electronics_photo']
+FILE_PATH = '/home/dusanst/gcn_badness_aware_res/'
 
 
 def compare_gcns():
@@ -23,7 +24,7 @@ def compare_gcns():
                     badness_aware=bad_aware
                 )
                 file_name = '{}_gcn_embedding_epochs={}_badness_aware={}'.format(dataset_name, int(epochs), bad_aware)
-                sys.stdout = open(file_name, 'w')
+                sys.stdout = open(FILE_PATH + file_name, 'w')
                 e.embed()
 
 
