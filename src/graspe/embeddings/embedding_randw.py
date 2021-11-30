@@ -270,7 +270,7 @@ class SCWalk(RWEmbBase):
 
             if len(same_label) > 0:
                 return random.sample(same_label, 1)[0]
-            else if len(different_label) > 0:
+            elif len(different_label) > 0:
                 return random.sample(different_label, 1)[0] # Maybe to get node with smallest weight between current_node and node in different_labels?
                   
         return random.sample(neighbours, 1)[0]
@@ -302,7 +302,7 @@ class HubWalk(RWEmbBase):
             neighbours_of_neighbours = {}
 
             for n in neighbours:
-                n_o_n = [edge[1] for edge in G.edges(n) if G.get_label(edge[1]) != G.get_label(start_node)] # BAD
+                n_o_n = [edge[1] for edge in G.edges(n) if G.get_label(edge[1]) == G.get_label(start_node)] 
 
                 neighbours_of_neighbours[n] = n_o_n
 
@@ -342,7 +342,7 @@ class HubWalkUniform(RWEmbBase):
             neighbours_of_neighbours = {}
 
             for n in neighbours:
-                n_o_n = [edge[1] for edge in G.edges(n) if G.get_label(edge[1]) != G.get_label(start_node)]
+                n_o_n = [edge[1] for edge in G.edges(n) if G.get_label(edge[1]) == G.get_label(start_node)]
 
                 neighbours_of_neighbours[n] = n_o_n
 
@@ -380,7 +380,7 @@ class HubWalkDistribution(RWEmbBase):
             neighbours_of_neighbours = {}
 
             for n in neighbours:
-                n_o_n = [edge[1] for edge in G.edges(n) if G.get_label(edge[1]) != G.get_label(start_node)]
+                n_o_n = [edge[1] for edge in G.edges(n) if G.get_label(edge[1]) == G.get_label(start_node)]
 
                 neighbours_of_neighbours[n] = n_o_n
 
@@ -392,11 +392,22 @@ class HubWalkDistribution(RWEmbBase):
 
                 probabilities = []
                 for k in neighbours_of_neighbours.keys():
+                    if full_length == 0:
+                        full_length = 1
                     probabilities.append(len(neighbours_of_neighbours[k]) / full_length)
+                    
+                probabilities = np.asarray(probabilities).astype('float64')
+                probabilities = probabilities / np.sum(probabilities)
 
-                return np.random.choice(list(neighbours_of_neighbours.keys()
-                                        1, 
-                                        p = probabilities)[0]
+                np.seterr(divide='ignore', invalid='ignore')
+
+                if np.isnan(probabilities).any():
+                    return random.sample(neighbours, 1)[0]
+
+                return np.random.choice(list(neighbours_of_neighbours.keys()), 1, p = probabilities)[0]
+            else:
+                return random.sample(neighbours, 1)[0]
+
         else:
             return random.sample(neighbours, 1)[0]
 
