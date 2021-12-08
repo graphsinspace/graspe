@@ -24,6 +24,7 @@ def compare_gcns():
                     badness_aware=bad_aware
                 )
                 file_name = '{}_gcn_embedding_epochs={}_badness_aware={}'.format(dataset_name, int(epochs), bad_aware)
+                print('Results saved at:', file_name)
                 sys.stdout = open(FILE_PATH + file_name, 'w')
                 e.embed()
 
