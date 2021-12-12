@@ -1,7 +1,9 @@
 #kreiranje enviromenta
+
 conda create -n NAZIV_ENV python=3.7 anaconda
 
 #ulazak u enviroment
+
 conda activate NAZIV_ENV
 
 #instalacija potrebnih biblioteka
@@ -22,8 +24,10 @@ pip install stable-baselines[mpi] #ako bude problem
 
 #registracija/aktiviranje gym-a...
 #cd u foldergde je setup.py(mora se tako zvati fajl)
+
 pip install -e .
 
 
 #pokretanje test fajla
+
 python gym_basic_env_test.py
