@@ -1,6 +1,10 @@
+import sys
+import os
+import statistics
+import pandas as pd
 from common.dataset_pool import DatasetPool
 from embeddings.embedding_gcn import GCNEmbedding
-import sys
+
 
 DATASETS = ['pubmed', 'citeseer', 'cora_ml', 'cora', 'dblp', 'karate_club_graph',
             'amazon_electronics_computers', 'amazon_electronics_photo']
@@ -9,10 +13,9 @@ FILE_PATH = '/home/dusanst/gcn_badness_aware_res/'
 
 def compare_gcns():
     datasets = DatasetPool.get_datasets()
-    print(datasets)
     for dataset_name in DATASETS:
         g = DatasetPool.load(dataset_name)
-        for epochs in [100,200]:
+        for epochs in [100, 200]:
             for bad_aware in [True, False]:
                 e = GCNEmbedding(
                     g,
@@ -24,7 +27,9 @@ def compare_gcns():
                     badness_aware=bad_aware
                 )
                 file_name = '{}_gcn_embedding_epochs={}_badness_aware={}'.format(dataset_name, int(epochs), bad_aware)
-                print('Results saved at:', file_name)
+                print('Results saved at:', FILE_PATH + file_name)
+                if os.path.exists(FILE_PATH + file_name):
+                    continue
                 sys.stdout = open(FILE_PATH + file_name, 'w')
                 e.embed()
 
