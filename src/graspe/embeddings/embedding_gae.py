@@ -277,7 +277,8 @@ class GAEEmbedding(Embedding):
                             'identity, inverse, log, and log_inverse'.format(self.hub_fn))
         self.hub_vector = hub_vector # / hub_vector.norm()
         if deterministic:  # not thread-safe, beware if running multiple at once
-            torch.set_deterministic(True)
+            #torch.set_deterministic(True)
+            torch.use_deterministic_algorithms(True)  # Torch 1.10
             torch.manual_seed(0)
             np.random.seed(0)
             random.seed(0)
@@ -286,7 +287,8 @@ class GAEEmbedding(Embedding):
             torch.backends.cudnn.deterministic = True
             torch.backends.cudnn.benchmark = False
         else:
-            torch.set_deterministic(False)
+            #torch.set_deterministic(False)
+            torch.use_deterministic_algorithms(True)  # Torch 1.10
 
     def _train(self, model, optimizer, train_pos_edge_index, data, x):
         model.train()
