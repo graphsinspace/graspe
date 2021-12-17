@@ -283,7 +283,7 @@ class GCNEmbedding(Embedding):
         if full:
             precision = precision_score(indices, labels, average='macro')
             recall = recall_score(indices, labels, average='macro')
-            f1 = 2 * precision * recall / (precision + recall)
+            f1 = (2 * precision * recall) / (precision + recall)
             print('Accuracy = {:.4f}'.format(accuracy))
             print('Precision = {:.4f}'.format(precision))
             print('Recall = {:.4f}'.format(recall))
