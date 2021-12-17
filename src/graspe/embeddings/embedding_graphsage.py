@@ -142,11 +142,13 @@ class GraphSageEmbedding(Embedding):
         if deterministic:  # not thread-safe, beware if running multiple at once
             #torch.set_deterministic(True)
             torch.use_deterministic_algorithms(True)  # Torch 1.10
+
             torch.manual_seed(0)
             np.random.seed(0)
         else:
             #torch.set_deterministic(False)
             torch.use_deterministic_algorithms(True)  # Torch 1.10
+
 
     def _evaluate(self, model, graph, features, labels, nid):
         model.eval()
@@ -271,7 +273,18 @@ class GraphSageEmbedding(Embedding):
             if epoch >= 3:
                 dur.append(time.time() - t0)
 
-            aset
+            acc = self._evaluate(net, g, features, labels, val_nid)
+            if self.verbose:
+                print(
+                    "Epoch {:05d} | Time(s) {:.4f} | Loss {:.4f} | Accuracy {:.4f} | "
+                    "ETputs(KTEPS) {:.2f}".format(
+                        epoch,
+                        np.mean(dur),
+                        loss.item(),
+                        acc,
+                        n_edges / np.mean(dur) / 1000,
+                    )
+                )
 
         acc = self._evaluate(net, g, features, labels, test_nid)
         if self.verbose:
