@@ -8,7 +8,7 @@ from embeddings.embedding_gcn import GCNEmbedding
 
 DATASETS = ['pubmed', 'citeseer', 'cora_ml', 'cora', 'dblp', 'karate_club_graph',
             'amazon_electronics_computers', 'amazon_electronics_photo']
-FILE_PATH = '/home/dusanst/gcn_badness_aware_res/'
+FILE_PATH = '/home/stamenkovicd/gcn_badness_aware_res/'
 
 
 def compare_gcns():
