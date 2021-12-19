@@ -11,8 +11,8 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, confu
 from embeddings.base.embedding import Embedding
 from evaluation.lid_eval import EmbLIDMLEEstimatorTorch
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
-# device = "cpu"
+# device = "cuda" if torch.cuda.is_available() else "cpu"
+device = "cpu"
 
 
 class GraphSAGE(nn.Module):
