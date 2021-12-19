@@ -207,6 +207,8 @@ class GraphSageEmbedding(Embedding):
             features[i][d] = 1  # one hot vector, node degree
 
         labels = g.ndata["label"]
+        labels = torch.tensor(labels).to(device)
+
         train_mask = torch.tensor(
             [True] * train_num + [False] * test_num + [False] * val_num
         )
