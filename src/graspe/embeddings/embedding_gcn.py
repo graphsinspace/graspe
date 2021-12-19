@@ -187,15 +187,10 @@ class GCNEmbedding(Embedding):
                 labels.append(node[1]["label"])
         labels = torch.tensor(labels).to(device)
 
-        train_mask = torch.tensor(
-            [True] * train_num + [False] * test_num + [False] * val_num
-        )
-        val_mask = torch.tensor(
-            [False] * train_num + [False] * test_num + [True] * val_num
-        )
-        test_mask = torch.tensor(
-            [False] * train_num + [True] * test_num + [False] * val_num
-        )
+        train_mask = torch.tensor([True] * train_num + [False] * test_num + [False] * val_num)
+        val_mask = torch.tensor([False] * train_num + [False] * test_num + [True] * val_num)
+        test_mask = torch.tensor([False] * train_num + [True] * test_num + [False] * val_num)
+
         train_nid = train_mask.nonzero(as_tuple=False).squeeze()
         val_nid = val_mask.nonzero(as_tuple=False).squeeze()
         test_nid = test_mask.nonzero(as_tuple=False).squeeze()

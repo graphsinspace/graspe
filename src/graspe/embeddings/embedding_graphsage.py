@@ -158,28 +158,6 @@ class GraphSageEmbedding(Embedding):
             #torch.set_deterministic(False)
             torch.use_deterministic_algorithms(True)  # Torch 1.10
 
-
-    def _evaluate(self, net, dgl_g, inputs, labels, labeled_nodes, full=False):
-        net.eval()
-        with torch.no_grad():
-            logits = net(dgl_g, inputs)
-            logits = logits[labeled_nodes]
-            labels = labels[labeled_nodes]
-            _, indices = torch.max(logits, dim=1)
-        net.train()
-        accuracy = accuracy_score(indices, labels)
-
-        if full:
-            precision = precision_score(indices, labels, average='macro')
-            recall = recall_score(indices, labels, average='macro')
-            f1 = (2 * precision * recall) / (precision + recall)
-            print('Accuracy = {:.4f}'.format(accuracy))
-            print('Precision = {:.4f}'.format(precision))
-            print('Recall = {:.4f}'.format(recall))
-            print('F1 Score = {:.4f}'.format(f1))
-            print('Confusion Matrix \n', confusion_matrix(indices, labels))
-        return accuracy
-
     def embed(self):
         super().embed()
 
@@ -202,10 +180,11 @@ class GraphSageEmbedding(Embedding):
         # not using attrs, using node degrees as features
         degrees = [self._g.to_networkx().degree(i) for i in range(self._g.nodes_cnt())]
         max_degree = max(degrees)
-        features = torch.zeros((num_nodes, max_degree + 1))
-
-        for i, d in enumerate(degrees):
-            features[i][d] = 1  # one hot vector, node degree
+        # features = torch.zeros((num_nodes, max_degree + 1))
+        #
+        # for i, d in enumerate(degrees):
+        #     features[i][d] = 1  # one hot vector, node degree
+        inputs = nn.Embedding(num_nodes, self._d).to(device)
 
         labeled_nodes = []
         labels = []
@@ -215,25 +194,20 @@ class GraphSageEmbedding(Embedding):
                 labels.append(node[1]["label"])
         labels = torch.tensor(labels).to(device)
 
-        train_mask = torch.tensor(
-            [True] * train_num + [False] * test_num + [False] * val_num
-        )
-        val_mask = torch.tensor(
-            [True] * train_num + [True] * test_num + [False] * val_num
-        )
-        test_mask = torch.tensor(
-            [True] * train_num + [False] * test_num + [True] * val_num
-        )
-        in_feats = features.shape[1]
-        n_classes = len(set(labels.numpy()))
+        train_mask = torch.tensor([True] * train_num + [False] * test_num + [False] * val_num)
+        val_mask = torch.tensor([True] * train_num + [True] * test_num + [False] * val_num)
+        test_mask = torch.tensor([True] * train_num + [False] * test_num + [True] * val_num)
 
         train_nid = train_mask.nonzero(as_tuple=False).squeeze()
         val_nid = val_mask.nonzero(as_tuple=False).squeeze()
         test_nid = test_mask.nonzero(as_tuple=False).squeeze()
 
+        in_feats = inputs.shape[1]
+        n_classes = len(set(labels.numpy()))
+
+
         # graph preprocess and calculate normalization factor
         g = dgl.remove_self_loop(g)
-        n_edges = g.number_of_edges()
 
         # create GraphSAGE model
         net = GraphSAGE(
@@ -274,7 +248,7 @@ class GraphSageEmbedding(Embedding):
             net.train()
             if epoch >= 3:
                 t0 = time.time()
-            logits, _ = net(g, features)
+            logits, _ = net(g, inputs)
 
             if self.hub_aware and not self.badness_aware:
                 criterion_1 = F.cross_entropy(logits[train_nid], labels[train_nid], reduction='none')
@@ -289,7 +263,7 @@ class GraphSageEmbedding(Embedding):
                 criterion_1 = F.cross_entropy(logits[train_nid], labels[train_nid])
 
             if self.lid_aware:
-                _, embedding = net(g, features)
+                _, embedding = net(g, inputs)
                 emb = {}
                 for i in range(len(embedding)):
                     emb[i] = embedding[i].detach().numpy()
@@ -324,16 +298,37 @@ class GraphSageEmbedding(Embedding):
             #         )
             #     )
 
-        acc = self._evaluate(net, g, features, labels, test_nid, full=True)
+        acc = self._evaluate(net, g, inputs, labels, test_nid, full=True)
         if self.verbose:
             print("Test Accuracy {:.4f}".format(acc))
 
         with torch.no_grad():
-            _, embedding = net(g, features)
+            _, embedding = net(g, inputs)
             self._embedding = {}
 
             for i in range(len(embedding)):
                 self._embedding[i] = embedding[i].numpy()
+
+    def _evaluate(self, net, dgl_g, inputs, labels, labeled_nodes, full=False):
+        net.eval()
+        with torch.no_grad():
+            logits = net(dgl_g, inputs)
+            logits = logits[labeled_nodes]
+            labels = labels[labeled_nodes]
+            _, indices = torch.max(logits, dim=1)
+        net.train()
+        accuracy = accuracy_score(indices, labels)
+
+        if full:
+            precision = precision_score(indices, labels, average='macro')
+            recall = recall_score(indices, labels, average='macro')
+            f1 = (2 * precision * recall) / (precision + recall)
+            print('Accuracy = {:.4f}'.format(accuracy))
+            print('Precision = {:.4f}'.format(precision))
+            print('Recall = {:.4f}'.format(recall))
+            print('F1 Score = {:.4f}'.format(f1))
+            print('Confusion Matrix \n', confusion_matrix(indices, labels))
+        return accuracy
 
     def requires_labels(self):
         return True
