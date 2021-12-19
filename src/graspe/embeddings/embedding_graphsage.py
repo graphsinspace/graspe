@@ -202,7 +202,6 @@ class GraphSageEmbedding(Embedding):
         val_nid = val_mask.nonzero(as_tuple=False).squeeze()
         test_nid = test_mask.nonzero(as_tuple=False).squeeze()
 
-        in_feats = inputs.shape[1]
         n_classes = len(set(labels.numpy()))
 
 
@@ -211,7 +210,7 @@ class GraphSageEmbedding(Embedding):
 
         # create GraphSAGE model
         net = GraphSAGE(
-            in_feats,
+            self._d,
             n_classes,
             "gcn",
             configuration=self.layer_configuration,
