@@ -184,6 +184,9 @@ class GraphSageEmbedding(Embedding):
         super().embed()
 
         g = self._g.to_dgl()
+        nodes = self._g.nodes()
+        labels = self._g.labels()
+        num_nodes = g.number_of_nodes()
 
         if self.act_fn == "relu":
             self.act_fn = torch.relu
@@ -191,8 +194,6 @@ class GraphSageEmbedding(Embedding):
             self.act_fn = torch.tanh
         elif self.act_fn == "sigmoid":
             self.act_fn = torch.sigmoid
-
-        num_nodes = g.number_of_nodes()
 
         train_num = int(num_nodes * self.train)
         val_num = int(num_nodes * self.val)
@@ -206,7 +207,12 @@ class GraphSageEmbedding(Embedding):
         for i, d in enumerate(degrees):
             features[i][d] = 1  # one hot vector, node degree
 
-        labels = g.ndata["label"]
+        labeled_nodes = []
+        labels = []
+        for node in nodes:
+            if "label" in node[1]:
+                labeled_nodes.append(node[0])
+                labels.append(node[1]["label"])
         labels = torch.tensor(labels).to(device)
 
         train_mask = torch.tensor(
@@ -268,7 +274,6 @@ class GraphSageEmbedding(Embedding):
             net.train()
             if epoch >= 3:
                 t0 = time.time()
-            # forward\
             logits, _ = net(g, features)
 
             if self.hub_aware and not self.badness_aware:
