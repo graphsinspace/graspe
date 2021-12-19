@@ -1,23 +1,20 @@
 import sys
 import os
-import statistics
-import pandas as pd
 from common.dataset_pool import DatasetPool
-from embeddings.embedding_gcn import GCNEmbedding
+from embeddings.embedding_graphsage import GraphSageEmbedding
 
 
 DATASETS = ['pubmed', 'citeseer', 'cora_ml', 'cora', 'dblp', 'karate_club_graph',
             'amazon_electronics_computers', 'amazon_electronics_photo']
-FILE_PATH = '/home/stamenkovicd/gcn_badness_aware_res/'
+FILE_PATH = '/home/stamenkovicd/graphsage_gbu/'
 
 
-def compare_gcns():
-    datasets = DatasetPool.get_datasets()
+def compare_graphsages():
     for dataset_name in DATASETS:
         g = DatasetPool.load(dataset_name)
         for epochs in [100, 200]:
             for bad_aware in [True, False]:
-                e = GCNEmbedding(
+                e = GraphSageEmbedding(
                     g,
                     d=100,
                     epochs=epochs,
@@ -26,7 +23,9 @@ def compare_gcns():
                     act_fn="tanh",
                     badness_aware=bad_aware
                 )
-                file_name = '{}_gcn_embedding_epochs={}_badness_aware={}'.format(dataset_name, int(epochs), bad_aware)
+                file_name = '{}_graphsage_embedding_epochs={}_badness_aware={}'.format(dataset_name,
+                                                                                       int(epochs),
+                                                                                       bad_aware)
                 print('Results saved at:', FILE_PATH + file_name)
                 if os.path.exists(FILE_PATH + file_name):
                     continue
@@ -35,4 +34,4 @@ def compare_gcns():
 
 
 if __name__ == '__main__':
-    compare_gcns()
+    compare_graphsages()

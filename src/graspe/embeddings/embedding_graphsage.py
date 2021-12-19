@@ -6,12 +6,13 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from dgl.nn.pytorch import SAGEConv
+from sklearn.metrics import accuracy_score, precision_score, recall_score, confusion_matrix
 
 from embeddings.base.embedding import Embedding
 from evaluation.lid_eval import EmbLIDMLEEstimatorTorch
 
-# device = "cuda" if torch.cuda.is_available() else "cpu"
-device = "cpu"
+device = "cuda" if torch.cuda.is_available() else "cpu"
+# device = "cpu"
 
 
 class GraphSAGE(nn.Module):
@@ -87,6 +88,8 @@ class GraphSageEmbedding(Embedding):
         lid_k=20,
         hub_aware=False,
         hub_fn='identity',
+        badness_aware=False,
+        badness_alpha=1,
         verbose=True,
     ):
         """
@@ -122,6 +125,10 @@ class GraphSageEmbedding(Embedding):
             Whether to take into account hubness of nodes
         hub_fn: str
             Which function to be used on hubness of nodes, support for identity, inverse, log, log_inverse
+        badness_aware: bool
+            Whether to take into account goodness of nodes (take a look at method get_goodness in graph.py)
+        badness_alpha: int
+            Strength of influence of goodness aware
         verbose : boolean
             Whether to output train data
         """
@@ -138,6 +145,8 @@ class GraphSageEmbedding(Embedding):
         self.lid_k = lid_k
         self.hub_aware = hub_aware
         self.hub_fn = hub_fn
+        self.badness_aware = badness_aware
+        self.badness_alpha = badness_alpha
         self.verbose = verbose
         if deterministic:  # not thread-safe, beware if running multiple at once
             #torch.set_deterministic(True)
@@ -150,15 +159,26 @@ class GraphSageEmbedding(Embedding):
             torch.use_deterministic_algorithms(True)  # Torch 1.10
 
 
-    def _evaluate(self, model, graph, features, labels, nid):
-        model.eval()
+    def _evaluate(self, net, dgl_g, inputs, labels, labeled_nodes, full=False):
+        net.eval()
         with torch.no_grad():
-            logits, _ = model(graph, features)
-            logits = logits[nid]
-            labels = labels[nid]
+            logits = net(dgl_g, inputs)
+            logits = logits[labeled_nodes]
+            labels = labels[labeled_nodes]
             _, indices = torch.max(logits, dim=1)
-            correct = torch.sum(indices == labels)
-            return correct.item() * 1.0 / len(labels)
+        net.train()
+        accuracy = accuracy_score(indices, labels)
+
+        if full:
+            precision = precision_score(indices, labels, average='macro')
+            recall = recall_score(indices, labels, average='macro')
+            f1 = (2 * precision * recall) / (precision + recall)
+            print('Accuracy = {:.4f}'.format(accuracy))
+            print('Precision = {:.4f}'.format(precision))
+            print('Recall = {:.4f}'.format(recall))
+            print('F1 Score = {:.4f}'.format(f1))
+            print('Confusion Matrix \n', confusion_matrix(indices, labels))
+        return accuracy
 
     def embed(self):
         super().embed()
@@ -224,29 +244,40 @@ class GraphSageEmbedding(Embedding):
         dur = []
 
         if self.hub_aware:
-            hub_vector = torch.Tensor(list(self._g.get_hubness().values())) + 1e-5
+            hubness_vector = torch.Tensor(list(self._g.get_hubness().values())) + 1e-5
             if self.hub_fn == 'identity':
                 pass
             elif self.hub_fn == 'inverse':
-                hub_vector = 1 / hub_vector
+                hubness_vector = 1 / hubness_vector
             elif self.hub_fn == 'log':
-                hub_vector = torch.log(hub_vector)
+                hubness_vector = torch.log(hubness_vector)
             elif self.hub_fn == 'log_inverse':
-                hub_vector = 1 / torch.log(hub_vector)
+                hubness_vector = 1 / torch.log(hubness_vector)
             else:
                 raise Exception('{} is not supported as a hub_fn parameter. Currently implemented options are '
                                 'identity, inverse, log, and log_inverse'.format(self.hub_fn))
-            hub_vector = hub_vector / hub_vector.norm()
+            hubness_vector = hubness_vector / hubness_vector.norm()
+
+        if self.badness_aware:
+            badness_vector = (torch.Tensor(self._g.get_badness()) + 1) ** self.badness_alpha
+
 
         for epoch in range(self._epochs):
             net.train()
             if epoch >= 3:
                 t0 = time.time()
-            # forward
+            # forward\
             logits, _ = net(g, features)
-            if self.hub_aware:
+
+            if self.hub_aware and not self.badness_aware:
                 criterion_1 = F.cross_entropy(logits[train_nid], labels[train_nid], reduction='none')
-                criterion_1 = torch.dot(criterion_1, hub_vector[train_nid])
+                criterion_1 = torch.dot(criterion_1, hubness_vector[train_nid])
+            elif not self.hub_aware and self.badness_aware:
+                criterion_1 = F.cross_entropy(logits[train_nid], labels[train_nid], reduction='none')
+                criterion_1 = torch.dot(criterion_1, badness_vector[train_nid])
+            elif self.hub_aware and self.badness_aware:
+                criterion_1 = F.cross_entropy(logits[train_nid], labels[train_nid], reduction='none')
+                criterion_1 = torch.dot(criterion_1, (hubness_vector[train_nid] + badness_vector[train_nid]) / 2)
             else:
                 criterion_1 = F.cross_entropy(logits[train_nid], labels[train_nid])
 
@@ -273,20 +304,20 @@ class GraphSageEmbedding(Embedding):
             if epoch >= 3:
                 dur.append(time.time() - t0)
 
-            acc = self._evaluate(net, g, features, labels, val_nid)
-            if self.verbose:
-                print(
-                    "Epoch {:05d} | Time(s) {:.4f} | Loss {:.4f} | Accuracy {:.4f} | "
-                    "ETputs(KTEPS) {:.2f}".format(
-                        epoch,
-                        np.mean(dur),
-                        loss.item(),
-                        acc,
-                        n_edges / np.mean(dur) / 1000,
-                    )
-                )
+            # acc = self._evaluate(net, g, features, labels, val_nid)
+            # if self.verbose:
+            #     print(
+            #         "Epoch {:05d} | Time(s) {:.4f} | Loss {:.4f} | Accuracy {:.4f} | "
+            #         "ETputs(KTEPS) {:.2f}".format(
+            #             epoch,
+            #             np.mean(dur),
+            #             loss.item(),
+            #             acc,
+            #             n_edges / np.mean(dur) / 1000,
+            #         )
+            #     )
 
-        acc = self._evaluate(net, g, features, labels, test_nid)
+        acc = self._evaluate(net, g, features, labels, test_nid, full=True)
         if self.verbose:
             print("Test Accuracy {:.4f}".format(acc))
 

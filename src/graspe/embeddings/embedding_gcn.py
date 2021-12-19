@@ -12,7 +12,7 @@ from embeddings.base.embedding import Embedding
 from evaluation.lid_eval import EmbLIDMLEEstimatorTorch
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
-device = "cpu"
+# device = "cpu"
 
 
 class GCN(nn.Module):
