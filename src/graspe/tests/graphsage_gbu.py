@@ -12,7 +12,7 @@ FILE_PATH = '/home/stamenkovicd/graphsage_gbu/'
 def compare_graphsages():
     for dataset_name in DATASETS:
         g = DatasetPool.load(dataset_name)
-        for epochs in [1]:
+        for epochs in [100, 200]:
             for bad_aware in [True, False]:
                 e = GraphSageEmbedding(
                     g,
@@ -23,13 +23,13 @@ def compare_graphsages():
                     act_fn="tanh",
                     badness_aware=bad_aware
                 )
-                # file_name = '{}_graphsage_embedding_epochs={}_badness_aware={}'.format(dataset_name,
-                #                                                                        int(epochs),
-                #                                                                        bad_aware)
-                # print('Results saved at:', FILE_PATH + file_name)
-                # if os.path.exists(FILE_PATH + file_name):
-                #     continue
-                # sys.stdout = open(FILE_PATH + file_name, 'w')
+                file_name = '{}_graphsage_embedding_epochs={}_badness_aware={}'.format(dataset_name,
+                                                                                       int(epochs),
+                                                                                       bad_aware)
+                print('Results saved at:', FILE_PATH + file_name)
+                if os.path.exists(FILE_PATH + file_name):
+                    continue
+                sys.stdout = open(FILE_PATH + file_name, 'w')
                 e.embed()
 
 

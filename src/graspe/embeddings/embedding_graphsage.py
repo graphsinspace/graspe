@@ -148,14 +148,14 @@ class GraphSageEmbedding(Embedding):
         self.badness_alpha = badness_alpha
         self.verbose = verbose
         if deterministic:  # not thread-safe, beware if running multiple at once
-            torch.set_deterministic(True)
-            #torch.use_deterministic_algorithms(True)  # Torch 1.10
+            #torch.set_deterministic(True)
+            torch.use_deterministic_algorithms(True)  # Torch 1.10
 
             torch.manual_seed(0)
             np.random.seed(0)
         else:
-            torch.set_deterministic(False)
-            #torch.use_deterministic_algorithms(True)  # Torch 1.10
+            #torch.set_deterministic(False)
+            torch.use_deterministic_algorithms(True)  # Torch 1.10
 
     def embed(self):
         super().embed()
@@ -309,8 +309,6 @@ class GraphSageEmbedding(Embedding):
 
     def _evaluate(self, net, dgl_g, inputs, labels, labeled_nodes, full=False):
         net.eval()
-        print(labeled_nodes)
-        print(labeled_nodes.type())
         with torch.no_grad():
             logits, _ = net(dgl_g, inputs)
             logits = logits[labeled_nodes]
