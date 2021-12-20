@@ -48,7 +48,7 @@ class GraphSAGE(nn.Module):
         self.fc = nn.Linear(configuration[0], num_classes)
 
     def forward(self, g, inputs):
-        h = self.act_fn(self.input(g, h))
+        h = self.act_fn(self.input(g, inputs))
 
         for layer in self.hidden:
             h = self.dropout(self.act_fn(layer(g, h)))
