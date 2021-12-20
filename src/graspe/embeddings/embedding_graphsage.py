@@ -309,6 +309,9 @@ class GraphSageEmbedding(Embedding):
 
     def _evaluate(self, net, dgl_g, inputs, labels, labeled_nodes, full=False):
         net.eval()
+        print(type(labeled_nodes))
+        print(labeled_nodes)
+        print(labeled_nodes.type)
         with torch.no_grad():
             logits = net(dgl_g, inputs)
             logits = logits[labeled_nodes]
