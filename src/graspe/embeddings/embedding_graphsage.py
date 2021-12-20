@@ -183,6 +183,7 @@ class GraphSageEmbedding(Embedding):
 
         for i, d in enumerate(degrees):
             inputs[i][d] = 1  # one hot vector, node degree
+        in_feats = inputs.shape[1]
 
         labeled_nodes = []
         labels = []
@@ -208,7 +209,7 @@ class GraphSageEmbedding(Embedding):
 
         # create GraphSAGE model
         net = GraphSAGE(
-            self._d,
+            in_feats,
             n_classes,
             "gcn",
             configuration=self.layer_configuration,
