@@ -179,11 +179,12 @@ class GraphSageEmbedding(Embedding):
         # not using attrs, using node degrees as features
         degrees = [self._g.to_networkx().degree(i) for i in range(self._g.nodes_cnt())]
         max_degree = max(degrees)
-        inputs = torch.zeros((num_nodes, max_degree + 1))
 
-        for i, d in enumerate(degrees):
-            inputs[i][d] = 1  # one hot vector, node degree
-        in_feats = inputs.shape[1]
+        # inputs = torch.zeros((num_nodes, max_degree + 1))
+        # for i, d in enumerate(degrees):
+        #     inputs[i][d] = 1  # one hot vector, node degree
+        # in_feats = inputs.shape[1]
+        inputs = nn.Embedding(num_nodes, self._d).to(device)
 
         labeled_nodes = []
         labels = []
@@ -209,7 +210,7 @@ class GraphSageEmbedding(Embedding):
 
         # create GraphSAGE model
         net = GraphSAGE(
-            in_feats,
+            self._d,
             n_classes,
             "gcn",
             configuration=self.layer_configuration,
