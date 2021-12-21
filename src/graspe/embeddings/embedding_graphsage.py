@@ -7,6 +7,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from dgl.nn.pytorch import SAGEConv
 from sklearn.metrics import accuracy_score, precision_score, recall_score, confusion_matrix
+from sklearn.model_selection import train_test_split
 
 from embeddings.base.embedding import Embedding
 from evaluation.lid_eval import EmbLIDMLEEstimatorTorch
@@ -180,11 +181,11 @@ class GraphSageEmbedding(Embedding):
         degrees = [self._g.to_networkx().degree(i) for i in range(self._g.nodes_cnt())]
         max_degree = max(degrees)
 
-        # inputs = torch.zeros((num_nodes, max_degree + 1))
-        # for i, d in enumerate(degrees):
-        #     inputs[i][d] = 1  # one hot vector, node degree
-        # in_feats = inputs.shape[1]
-        inputs = nn.Embedding(num_nodes, self._d).to(device)
+        inputs = torch.zeros((num_nodes, max_degree + 1))
+        for i, d in enumerate(degrees):
+            inputs[i][d] = 1  # one hot vector, node degree
+        in_feats = inputs.shape[1]
+        # inputs = nn.Embedding(num_nodes, self._d).to(device)
 
         labeled_nodes = []
         labels = []
@@ -194,13 +195,15 @@ class GraphSageEmbedding(Embedding):
                 labels.append(node[1]["label"])
         labels = torch.tensor(labels).to(device)
 
-        train_mask = torch.tensor([True] * train_num + [False] * test_num + [False] * val_num)
-        val_mask = torch.tensor([True] * train_num + [True] * test_num + [False] * val_num)
-        test_mask = torch.tensor([True] * train_num + [False] * test_num + [True] * val_num)
+        # train_mask = torch.tensor([True] * train_num + [False] * test_num + [False] * val_num)
+        # val_mask = torch.tensor([True] * train_num + [True] * test_num + [False] * val_num)
+        # test_mask = torch.tensor([True] * train_num + [False] * test_num + [True] * val_num)
 
-        train_nid = train_mask.nonzero(as_tuple=False).squeeze()
-        val_nid = val_mask.nonzero(as_tuple=False).squeeze()
-        test_nid = test_mask.nonzero(as_tuple=False).squeeze()
+        train_nid, test_nid = train_test_split(range(len(labels)), test_size=0.2)
+        train_nid, test_nid = torch.Tensor(train_nid), torch.Tensor(test_nid)
+        # train_nid = train_mask.nonzero(as_tuple=False).squeeze()
+        # val_nid = val_mask.nonzero(as_tuple=False).squeeze()
+        # test_nid = test_mask.nonzero(as_tuple=False).squeeze()
 
         n_classes = len(set(labels.numpy()))
 
@@ -210,7 +213,7 @@ class GraphSageEmbedding(Embedding):
 
         # create GraphSAGE model
         net = GraphSAGE(
-            self._d,
+            in_feats,
             n_classes,
             "gcn",
             configuration=self.layer_configuration,
