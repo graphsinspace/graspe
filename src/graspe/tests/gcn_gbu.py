@@ -10,7 +10,6 @@ FILE_PATH = '/home/stamenkovicd/gcn_badness_aware_res/'
 
 
 def compare_gcns():
-    datasets = DatasetPool.get_datasets()
     for dataset_name in DATASETS:
         g = DatasetPool.load(dataset_name)
         for epochs in [100, 200]:
@@ -26,8 +25,6 @@ def compare_gcns():
                 )
                 file_name = '{}_gcn_embedding_epochs={}_badness_aware={}'.format(dataset_name, int(epochs), bad_aware)
                 print('Results saved at:', FILE_PATH + file_name)
-                if os.path.exists(FILE_PATH + file_name):
-                    continue
                 sys.stdout = open(FILE_PATH + file_name, 'w')
                 e.embed()
 

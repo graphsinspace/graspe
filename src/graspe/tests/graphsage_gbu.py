@@ -27,8 +27,6 @@ def compare_graphsages():
                                                                                        int(epochs),
                                                                                        bad_aware)
                 print('Results saved at:', FILE_PATH + file_name)
-                if os.path.exists(FILE_PATH + file_name):
-                    continue
                 sys.stdout = open(FILE_PATH + file_name, 'w')
                 e.embed()
 

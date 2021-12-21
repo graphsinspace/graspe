@@ -199,14 +199,14 @@ class GraphSageEmbedding(Embedding):
         # val_mask = torch.tensor([True] * train_num + [True] * test_num + [False] * val_num)
         # test_mask = torch.tensor([True] * train_num + [False] * test_num + [True] * val_num)
 
-        train_nid, test_nid = train_test_split(range(len(labels)), test_size=0.2)
-        train_nid, test_nid = torch.Tensor(train_nid).long(), torch.Tensor(test_nid).long()
         # train_nid = train_mask.nonzero(as_tuple=False).squeeze()
         # val_nid = val_mask.nonzero(as_tuple=False).squeeze()
         # test_nid = test_mask.nonzero(as_tuple=False).squeeze()
 
-        n_classes = len(set(labels.numpy()))
+        train_nid, test_nid = train_test_split(range(len(labels)), test_size=0.2)
+        train_nid, test_nid = torch.Tensor(train_nid).long(), torch.Tensor(test_nid).long()
 
+        n_classes = len(set(labels.numpy()))
 
         # graph preprocess and calculate normalization factor
         g = dgl.remove_self_loop(g)
@@ -314,7 +314,7 @@ class GraphSageEmbedding(Embedding):
     def _evaluate(self, net, dgl_g, inputs, labels, labeled_nodes, full=False):
         net.eval()
         with torch.no_grad():
-            logits, _ = net(dgl_g, inputs)
+            _, logits = net(dgl_g, inputs)
             logits = logits[labeled_nodes]
             labels = labels[labeled_nodes]
             _, indices = torch.max(logits, dim=1)
