@@ -250,7 +250,7 @@ class GraphSageEmbedding(Embedding):
             net.train()
             if epoch >= 3:
                 t0 = time.time()
-            logits, _ = net(g, inputs)
+            _, logits = net(g, inputs)
 
             if self.hub_aware and not self.badness_aware:
                 criterion_1 = F.cross_entropy(logits[train_nid], labels[train_nid], reduction='none')
