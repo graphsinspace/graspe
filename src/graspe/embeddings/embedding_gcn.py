@@ -7,6 +7,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from dgl.nn.pytorch import GraphConv
 from sklearn.metrics import accuracy_score, precision_score, recall_score, confusion_matrix
+from sklearn.model_selection import train_test_split
 
 from embeddings.base.embedding import Embedding
 from evaluation.lid_eval import EmbLIDMLEEstimatorTorch
@@ -176,9 +177,9 @@ class GCNEmbedding(Embedding):
         net = net.to(device)
 
         inputs = e.weight
-        train_num = int(num_nodes * self.train)
-        val_num = int(num_nodes * self.val)
-        test_num = int(num_nodes * self.test)
+        # train_num = int(num_nodes * self.train)
+        # val_num = int(num_nodes * self.val)
+        # test_num = int(num_nodes * self.test)
         labeled_nodes = []
         labels = []
         for node in nodes:
@@ -187,13 +188,17 @@ class GCNEmbedding(Embedding):
                 labels.append(node[1]["label"])
         labels = torch.tensor(labels).to(device)
 
-        train_mask = torch.tensor([True] * train_num + [False] * test_num + [False] * val_num)
-        val_mask = torch.tensor([False] * train_num + [False] * test_num + [True] * val_num)
-        test_mask = torch.tensor([False] * train_num + [True] * test_num + [False] * val_num)
+        # train_mask = torch.tensor([True] * train_num + [False] * test_num + [False] * val_num)
+        # val_mask = torch.tensor([False] * train_num + [False] * test_num + [True] * val_num)
+        # test_mask = torch.tensor([False] * train_num + [True] * test_num + [False] * val_num)
+        #
+        # train_nid = train_mask.nonzero(as_tuple=False).squeeze()
+        # val_nid = val_mask.nonzero(as_tuple=False).squeeze()
+        # test_nid = test_mask.nonzero(as_tuple=False).squeeze()
 
-        train_nid = train_mask.nonzero(as_tuple=False).squeeze()
-        val_nid = val_mask.nonzero(as_tuple=False).squeeze()
-        test_nid = test_mask.nonzero(as_tuple=False).squeeze()
+        train_nid, test_nid = train_test_split(range(len(labels)), test_size=0.2, random_state=1)
+        train_nid, test_nid = torch.Tensor(train_nid).long(), torch.Tensor(test_nid).long()
+
 
         optimizer = torch.optim.Adam(
             itertools.chain(net.parameters(), e.parameters()), lr=self.lr
@@ -249,11 +254,7 @@ class GCNEmbedding(Embedding):
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            # print('Epoch %d | Loss: %.4f' % (epoch, loss.item()))
-        # print("loss: %.4f" % loss.item())
-        #     if epoch % 10 == 0:
-        #         acc = self._evaluate(net, dgl_g, inputs, labels, val_nid)
-        #         print('Epoch {:05d} | Validation Accuracy {:.4f}'.format(epoch, acc))
+
         self._embedding = self.compute_embedding(dgl_g, nodes)
         acc = self._evaluate(net, dgl_g, inputs, labels, test_nid, full=True)
 

@@ -40,10 +40,7 @@ class GraphSAGE(nn.Module):
             last_hidden_size = layer_size
 
         self.hidden = nn.Sequential(*self.hidden)  # Module registration
-
-        self.output = SAGEConv(last_hidden_size, configuration[0], aggregator_type).to(
-            device
-        )
+        self.output = SAGEConv(last_hidden_size, configuration[0], aggregator_type).to(device)
 
         # idea for embedding extraction from: https://github.com/stellargraph/stellargraph/issues/1586
         self.fc = nn.Linear(configuration[0], num_classes)
@@ -173,9 +170,9 @@ class GraphSageEmbedding(Embedding):
         elif self.act_fn == "sigmoid":
             self.act_fn = torch.sigmoid
 
-        train_num = int(num_nodes * self.train)
-        val_num = int(num_nodes * self.val)
-        test_num = int(num_nodes * self.test)
+        # train_num = int(num_nodes * self.train)
+        # val_num = int(num_nodes * self.val)
+        # test_num = int(num_nodes * self.test)
 
         # not using attrs, using node degrees as features
         degrees = [self._g.to_networkx().degree(i) for i in range(self._g.nodes_cnt())]
@@ -203,7 +200,7 @@ class GraphSageEmbedding(Embedding):
         # val_nid = val_mask.nonzero(as_tuple=False).squeeze()
         # test_nid = test_mask.nonzero(as_tuple=False).squeeze()
 
-        train_nid, test_nid = train_test_split(range(len(labels)), test_size=0.2)
+        train_nid, test_nid = train_test_split(range(len(labels)), test_size=0.2, random_state=1)
         train_nid, test_nid = torch.Tensor(train_nid).long(), torch.Tensor(test_nid).long()
 
         n_classes = len(set(labels.numpy()))
@@ -223,9 +220,6 @@ class GraphSageEmbedding(Embedding):
 
         # use optimizer
         optimizer = torch.optim.Adam(net.parameters(), lr=self.lr, weight_decay=5e-4)
-
-        # initialize graph
-        dur = []
 
         if self.hub_aware:
             hubness_vector = torch.Tensor(list(self._g.get_hubness().values())) + 1e-5
@@ -283,22 +277,6 @@ class GraphSageEmbedding(Embedding):
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-
-            if epoch >= 3:
-                dur.append(time.time() - t0)
-
-            # acc = self._evaluate(net, g, features, labels, val_nid)
-            # if self.verbose:
-            #     print(
-            #         "Epoch {:05d} | Time(s) {:.4f} | Loss {:.4f} | Accuracy {:.4f} | "
-            #         "ETputs(KTEPS) {:.2f}".format(
-            #             epoch,
-            #             np.mean(dur),
-            #             loss.item(),
-            #             acc,
-            #             n_edges / np.mean(dur) / 1000,
-            #         )
-            #     )
 
         acc = self._evaluate(net, g, inputs, labels, test_nid, full=True)
         if self.verbose:
