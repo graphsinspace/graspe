@@ -200,7 +200,7 @@ class GraphSageEmbedding(Embedding):
         # test_mask = torch.tensor([True] * train_num + [False] * test_num + [True] * val_num)
 
         train_nid, test_nid = train_test_split(range(len(labels)), test_size=0.2)
-        train_nid, test_nid = torch.Tensor(train_nid), torch.Tensor(test_nid)
+        train_nid, test_nid = torch.Tensor(train_nid).long(), torch.Tensor(test_nid).long()
         # train_nid = train_mask.nonzero(as_tuple=False).squeeze()
         # val_nid = val_mask.nonzero(as_tuple=False).squeeze()
         # test_nid = test_mask.nonzero(as_tuple=False).squeeze()
