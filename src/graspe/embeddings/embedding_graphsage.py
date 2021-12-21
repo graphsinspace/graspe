@@ -250,7 +250,7 @@ class GraphSageEmbedding(Embedding):
             net.train()
             if epoch >= 3:
                 t0 = time.time()
-            _, logits = net(g, inputs)
+            logits, _ = net(g, inputs)
 
             if self.hub_aware and not self.badness_aware:
                 criterion_1 = F.cross_entropy(logits[train_nid], labels[train_nid], reduction='none')
@@ -314,7 +314,7 @@ class GraphSageEmbedding(Embedding):
     def _evaluate(self, net, dgl_g, inputs, labels, labeled_nodes, full=False):
         net.eval()
         with torch.no_grad():
-            _, logits = net(dgl_g, inputs)
+            logits, _ = net(dgl_g, inputs)
             logits = logits[labeled_nodes]
             labels = labels[labeled_nodes]
             _, indices = torch.max(logits, dim=1)
