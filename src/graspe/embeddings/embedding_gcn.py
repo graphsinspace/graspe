@@ -140,13 +140,17 @@ class GCNEmbedding(Embedding):
             self.dgl_g = dgl.add_self_loop(self.dgl_g)
 
         if deterministic:  # not thread-safe, beware if running multiple at once
-            #torch.set_deterministic(True)
-            torch.use_deterministic_algorithms(True)   # Torch 1.10
+            if torch.__version__ == '1.10.0':
+                torch.use_deterministic_algorithms(True)  # Torch 1.10
+            else:
+                torch.set_deterministic(True)
             torch.manual_seed(0)
             np.random.seed(0)
         else:
-            #torch.set_deterministic(False)
-            torch.use_deterministic_algorithms(False)  # Torch 1.10
+            if torch.__version__ == '1.10.0':
+                torch.use_deterministic_algorithms(False)  # Torch 1.10
+            else:
+                torch.set_deterministic(False)
 
     def embed(self):
         super().embed()
@@ -187,7 +191,7 @@ class GCNEmbedding(Embedding):
                 labeled_nodes.append(node[0])
                 labels.append(node[1]["label"])
         labels = torch.tensor(labels).to(device)
-
+        print(labels)
         # train_mask = torch.tensor([True] * train_num + [False] * test_num + [False] * val_num)
         # val_mask = torch.tensor([False] * train_num + [False] * test_num + [True] * val_num)
         # test_mask = torch.tensor([False] * train_num + [True] * test_num + [False] * val_num)
