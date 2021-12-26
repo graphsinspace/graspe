@@ -140,17 +140,13 @@ class GCNEmbedding(Embedding):
             self.dgl_g = dgl.add_self_loop(self.dgl_g)
 
         if deterministic:  # not thread-safe, beware if running multiple at once
-            if torch.__version__ == '1.10':
-                torch.use_deterministic_algorithms(True)  # Torch 1.10
-            else:
-                torch.set_deterministic(True)
+            torch.use_deterministic_algorithms(True)  # Torch 1.10
+            #torch.set_deterministic(True)
             torch.manual_seed(0)
             np.random.seed(0)
         else:
-            if torch.__version__ == '1.10':
-                torch.use_deterministic_algorithms(False)  # Torch 1.10
-            else:
-                torch.set_deterministic(False)
+            torch.use_deterministic_algorithms(False)  # Torch 1.10
+            #torch.set_deterministic(False)
 
     def embed(self):
         super().embed()
