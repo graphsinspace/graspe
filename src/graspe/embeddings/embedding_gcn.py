@@ -163,6 +163,7 @@ class GCNEmbedding(Embedding):
 
         e = nn.Embedding(num_nodes, self._d).to(device)
         dgl_g.ndata["feat"] = e.weight
+        inputs = e.weight
 
         if self.act_fn == "relu":
             self.act_fn = torch.relu
@@ -177,13 +178,8 @@ class GCNEmbedding(Embedding):
             act_fn=self.act_fn,
             configuration=self.layer_configuration,
         )
-
         net = net.to(device)
 
-        inputs = e.weight
-        # train_num = int(num_nodes * self.train)
-        # val_num = int(num_nodes * self.val)
-        # test_num = int(num_nodes * self.test)
         labeled_nodes = []
         labels = []
         for node in nodes:
@@ -191,18 +187,9 @@ class GCNEmbedding(Embedding):
                 labeled_nodes.append(node[0])
                 labels.append(node[1]["label"])
         labels = torch.tensor(labels).to(device)
-        print(labels)
-        # train_mask = torch.tensor([True] * train_num + [False] * test_num + [False] * val_num)
-        # val_mask = torch.tensor([False] * train_num + [False] * test_num + [True] * val_num)
-        # test_mask = torch.tensor([False] * train_num + [True] * test_num + [False] * val_num)
-        #
-        # train_nid = train_mask.nonzero(as_tuple=False).squeeze()
-        # val_nid = val_mask.nonzero(as_tuple=False).squeeze()
-        # test_nid = test_mask.nonzero(as_tuple=False).squeeze()
 
         train_nid, test_nid = train_test_split(range(len(labels)), test_size=0.2, random_state=1)
         train_nid, test_nid = torch.Tensor(train_nid).long(), torch.Tensor(test_nid).long()
-
 
         optimizer = torch.optim.Adam(
             itertools.chain(net.parameters(), e.parameters()), lr=self.lr

@@ -161,11 +161,6 @@ class GraphSageEmbedding(Embedding):
     def embed(self):
         super().embed()
 
-        g = self._g.to_dgl()
-        nodes = self._g.nodes()
-        labels = self._g.labels()
-        num_nodes = g.number_of_nodes()
-
         if self.act_fn == "relu":
             self.act_fn = torch.relu
         elif self.act_fn == "tanh":
@@ -173,18 +168,12 @@ class GraphSageEmbedding(Embedding):
         elif self.act_fn == "sigmoid":
             self.act_fn = torch.sigmoid
 
-        # train_num = int(num_nodes * self.train)
-        # val_num = int(num_nodes * self.val)
-        # test_num = int(num_nodes * self.test)
+        g = self._g.to_dgl()
+        nodes = self._g.nodes()
 
-        # not using attrs, using node degrees as features
-        degrees = [self._g.to_networkx().degree(i) for i in range(self._g.nodes_cnt())]
-        max_degree = max(degrees)
-
-        inputs = torch.zeros((num_nodes, max_degree + 1))
-        for i, d in enumerate(degrees):
-            inputs[i][d] = 1  # one hot vector, node degree
-        in_feats = inputs.shape[1]
+        graph_adj = self._g.to_adj_matrix().toarray()
+        inputs = torch.Tensor(graph_adj)
+        in_feats = graph_adj.shape[0]
         # inputs = nn.Embedding(num_nodes, self._d).to(device)
 
         labeled_nodes = []
@@ -194,6 +183,10 @@ class GraphSageEmbedding(Embedding):
                 labeled_nodes.append(node[0])
                 labels.append(node[1]["label"])
         labels = torch.tensor(labels).to(device)
+
+        # train_num = int(num_nodes * self.train)
+        # val_num = int(num_nodes * self.val)
+        # test_num = int(num_nodes * self.test)
 
         # train_mask = torch.tensor([True] * train_num + [False] * test_num + [False] * val_num)
         # val_mask = torch.tensor([True] * train_num + [True] * test_num + [False] * val_num)
@@ -241,7 +234,7 @@ class GraphSageEmbedding(Embedding):
 
         if self.badness_aware:
             badness_vector = (torch.Tensor(self._g.get_badness()) + 1) ** self.badness_alpha
-
+            badness_vector = badness_vector / badness_vector.norm()
 
         for epoch in range(self._epochs):
             net.train()
