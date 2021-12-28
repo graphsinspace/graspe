@@ -1,19 +1,18 @@
 import sys
-import os
 from common.dataset_pool import DatasetPool
 from embeddings.embedding_gcn import GCNEmbedding
 
 
 DATASETS = ['pubmed', 'citeseer', 'cora_ml', 'cora', 'dblp', 'karate_club_graph',
             'amazon_electronics_computers', 'amazon_electronics_photo']
-FILE_PATH = '/home/stamenkovicd/gcn_badness_aware_res/'
+FILE_PATH = '/home/stamenkovicd/gcn_hub_aware_res/'
 
 
 def compare_gcns():
     for dataset_name in DATASETS:
         g = DatasetPool.load(dataset_name)
         for epochs in [100, 200]:
-            for bad_aware in [True, False]:
+            for hub_aware in [True, False]:
                 e = GCNEmbedding(
                     g,
                     d=100,
@@ -21,9 +20,9 @@ def compare_gcns():
                     lr=0.05,
                     layer_configuration=(128, 256, 128),
                     act_fn="tanh",
-                    badness_aware=bad_aware
+                    hub_aware=hub_aware
                 )
-                file_name = '{}_gcn_embedding_epochs={}_badness_aware={}'.format(dataset_name, int(epochs), bad_aware)
+                file_name = '{}_gcn_embedding_epochs={}_hubness_aware={}'.format(dataset_name, int(epochs), hub_aware)
                 print('Results saved at:', FILE_PATH + file_name)
                 sys.stdout = open(FILE_PATH + file_name, 'w')
                 e.embed()
