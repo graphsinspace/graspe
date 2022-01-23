@@ -290,6 +290,7 @@ class GraphSageEmbedding(Embedding):
             labels = labels[labeled_nodes]
             _, indices = torch.max(logits, dim=1)
         net.train()
+        indices = indices.cpu().numpy()
         accuracy = accuracy_score(indices, labels)
 
         if full:
