@@ -22,7 +22,7 @@ def compare_graphsages():
                     act_fn="tanh",
                     badness_aware=badness_aware
                 )
-                file_name = '{}_graphsage_embedding_epochs={}_hubness_aware={}'.format(
+                file_name = '{}_graphsage_embedding_epochs={}_badness_aware={}'.format(
                     dataset_name, int(epochs), badness_aware
                 )
                 print('Results saved at:', FILE_PATH + file_name)
