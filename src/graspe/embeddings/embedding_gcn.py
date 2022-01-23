@@ -208,6 +208,8 @@ class GCNEmbedding(Embedding):
 
         if self.badness_aware:
             badness_vector = (torch.Tensor(self._g.get_badness()) + 1) ** self.badness_alpha
+            badness_vector = badness_vector / badness_vector.norm()
+            badness_vector = badness_vector.to(device)
 
         for epoch in range(1, self.epochs + 1):
             logits = net(dgl_g.to(device), inputs.to(device)).to(device)
