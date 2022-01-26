@@ -327,6 +327,7 @@ class GCNEmbeddingLIDAware(GCNEmbeddingBase):
 
     def calculate_loss(self, logp, labels, train_nid):
         criterion_1 = F.nll_loss(logp[train_nid], labels[train_nid])
+        emb = self.compute_embedding(dgl_g, nodes)
         tlid = EmbLIDMLEEstimatorTorch(self._g, emb, self.lid_k)
         tlid.estimate_lids()
         total_lid = tlid.get_total_lid()
