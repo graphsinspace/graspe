@@ -47,7 +47,7 @@ class GCN(nn.Module):
         return h
 
 
-class GCNEmbedding(Embedding):
+class GCNEmbeddingBase(Embedding):
     """
     Embedding with Graph Convolutional Neural Networks (DGL/PyTorch).
 
@@ -74,12 +74,6 @@ class GCNEmbedding(Embedding):
         lr=0.01,
         layer_configuration=(128,),
         act_fn="relu",
-        lid_aware=False,
-        lid_k=20,
-        hub_aware=False,
-        hub_fn='identity',
-        badness_aware=False,
-        badness_alpha=1,
         train=0.8,
         val=0.1,
         test=0.1,
@@ -101,18 +95,6 @@ class GCNEmbedding(Embedding):
             Hidden layer configuration, tuple length is depth, values are hidden sizes
         act_fn : str
             Activation function to be used, support for relu, tanh, sigmoid
-        lid_aware : bool
-            Whether to optimize for lower LID
-        lid_k : int
-            k-value param for LID
-        hub_aware: bool
-            Whether to take into account hubness of nodes
-        hub_fn: str
-            Which function to be used on hubness of nodes, support for identity, inverse, log, log_inverse
-        badness_aware: bool
-            Whether to take into account goodness of nodes (take a look at method get_goodness in graph.py)
-        badness_alpha: int
-            Strength of influence of goodness aware
         train : float
             Percentage of data to be used for training.
         val : float
@@ -125,12 +107,6 @@ class GCNEmbedding(Embedding):
         self.lr = lr
         self.layer_configuration = layer_configuration
         self.act_fn = act_fn
-        self.lid_aware = lid_aware
-        self.lid_k = lid_k
-        self.hub_aware = hub_aware
-        self.hub_fn = hub_fn
-        self.badness_aware = badness_aware
-        self.badness_alpha = badness_alpha
         self.dgl_g = self._g.to_dgl()
         self.train = train
         self.val = val
@@ -147,6 +123,10 @@ class GCNEmbedding(Embedding):
         else:
             torch.use_deterministic_algorithms(False)  # Torch 1.10
             #torch.set_deterministic(False)
+
+    @abstractmethod
+    def calculate_loss(self, logp, labels, train_nid):
+        pass
 
     def embed(self):
         super().embed()
@@ -187,58 +167,13 @@ class GCNEmbedding(Embedding):
         train_nid, test_nid = train_test_split(range(len(labels)), test_size=0.2, random_state=1)
         train_nid, test_nid = torch.Tensor(train_nid).long(), torch.Tensor(test_nid).long()
 
-        optimizer = torch.optim.Adam(
-            itertools.chain(net.parameters(), e.parameters()), lr=self.lr
-        )
-
-        if self.hub_aware:
-            hubness_vector = torch.Tensor(list(self._g.get_hubness().values())) + 1e-5
-            if self.hub_fn == 'identity':
-                pass
-            elif self.hub_fn == 'inverse':
-                hubness_vector = 1 / hubness_vector
-            elif self.hub_fn == 'log':
-                hubness_vector = torch.log(hubness_vector)
-            elif self.hub_fn == 'log_inverse':
-                hubness_vector = 1 / torch.log(hubness_vector)
-            else:
-                raise Exception('{} is not supported as a hub_fn parameter. Currently implemented options are '
-                                'identity, inverse, log, and log_inverse'.format(self.hub_fn))
-            hubness_vector = hubness_vector / hubness_vector.norm()
-
-        if self.badness_aware:
-            badness_vector = (torch.Tensor(self._g.get_badness()) + 1) ** self.badness_alpha
-            badness_vector = badness_vector / badness_vector.norm()
-            badness_vector = badness_vector.to(device)
+        optimizer = torch.optim.Adam(itertools.chain(net.parameters(), e.parameters()), lr=self.lr)
 
         for epoch in range(1, self.epochs + 1):
             logits = net(dgl_g.to(device), inputs.to(device)).to(device)
             logp = F.log_softmax(logits, 1)
 
-            # Re-weighting the loss with hubness and/or badness vector
-            if self.hub_aware and not self.badness_aware:
-                criterion_1 = F.nll_loss(logp[train_nid], labels[train_nid], reduction='none')
-                criterion_1 = torch.dot(criterion_1, hubness_vector[train_nid])
-            elif not self.hub_aware and self.badness_aware:
-                criterion_1 = F.nll_loss(logp[train_nid], labels[train_nid], reduction='none')
-                criterion_1 = torch.dot(criterion_1, badness_vector[train_nid])
-            elif self.hub_aware and self.badness_aware:
-                criterion_1 = F.nll_loss(logp[train_nid], labels[train_nid], reduction='none')
-                criterion_1 = torch.dot(criterion_1, (hubness_vector[train_nid] + badness_vector[train_nid]) / 2)
-            else:
-                criterion_1 = F.nll_loss(logp[train_nid], labels[train_nid])
-
-            if self.lid_aware:
-                emb = self.compute_embedding(dgl_g, nodes)
-                tlid = EmbLIDMLEEstimatorTorch(self._g, emb, self.lid_k)
-                tlid.estimate_lids()
-                total_lid = tlid.get_total_lid()
-                criterion_2 = F.mse_loss(
-                    total_lid, torch.tensor(self.lid_k, dtype=torch.float)
-                )
-                loss = criterion_1 + criterion_2
-            else:
-                loss = criterion_1
+            loss = self.calculate_loss(logp, labels, train_nid)
 
             optimizer.zero_grad()
             loss.backward()
@@ -279,3 +214,117 @@ class GCNEmbedding(Embedding):
 
     def requires_labels(self):
         return True
+
+
+class GCNEmbedding(GCNEmbeddingBase):
+    def __init__(
+            self,
+            g,
+            d,
+            epochs,
+            deterministic=False,
+            lr=0.01,
+            layer_configuration=(128,),
+            act_fn="relu",
+            train=0.8,
+            val=0.1,
+            test=0.1,
+    ):
+        super().__init__(g, d, epochs, deterministic, lr, layer_configuration, act_fn, train, val, test)
+
+    def calculate_loss(self, logp, labels, train_nid):
+        return F.nll_loss(logp[train_nid], labels[train_nid])
+
+
+class GCNEmbeddingLIDAware(GCNEmbeddingBase):
+    def __init__(
+            self,
+            g,
+            d,
+            epochs,
+            deterministic=False,
+            lr=0.01,
+            layer_configuration=(128,),
+            act_fn="relu",
+            train=0.8,
+            val=0.1,
+            test=0.1,
+            lid_k=20
+    ):
+        super().__init__(g, d, epochs, deterministic, lr, layer_configuration, act_fn, train, val, test)
+        self.lid_k = lid_k
+
+    def calculate_loss(self, logp, labels, train_nid):
+        loss_1 = F.nll_loss(logp[train_nid], labels[train_nid])
+        emb = self.compute_embedding(dgl_g, nodes)
+        tlid = EmbLIDMLEEstimatorTorch(self._g, emb, self.lid_k)
+        tlid.estimate_lids()
+        total_lid = tlid.get_total_lid()
+        loss_2 = F.mse_loss(
+            total_lid, torch.tensor(self.lid_k, dtype=torch.float)
+        )
+        loss = loss_1 + loss_2
+        return loss
+
+
+class GCNEmbeddingHubAware(GCNEmbeddingBase):
+    def __init__(
+            self,
+            g,
+            d,
+            epochs,
+            deterministic=False,
+            lr=0.01,
+            layer_configuration=(128,),
+            act_fn="relu",
+            train=0.8,
+            val=0.1,
+            test=0.1,
+            hub_fn='identity'
+    ):
+        super().__init__(g, d, epochs, deterministic, lr, layer_configuration, act_fn, train, val, test)
+        hubness_vector = torch.Tensor(list(self._g.get_hubness().values())) + 1e-5
+        if hub_fn == 'identity':
+            pass
+        elif hub_fn == 'inverse':
+            hubness_vector = 1 / hubness_vector
+        elif hub_fn == 'log':
+            hubness_vector = torch.log(hubness_vector)
+        elif hub_fn == 'log_inverse':
+            hubness_vector = 1 / torch.log(hubness_vector)
+        else:
+            raise Exception('{} is not supported as a hub_fn parameter. Currently implemented options are '
+                            'identity, inverse, log, and log_inverse'.format(hub_fn))
+        hubness_vector = hubness_vector / hubness_vector.norm()
+        self.hubness_vector = hubness_vector.to(device)
+
+    def calculate_loss(self, logp, labels, train_nid):
+        loss = F.nll_loss(logp[train_nid], labels[train_nid])
+        loss = torch.dot(loss, self.hubness_vector[train_nid])
+        return loss
+
+
+class GCNEmbeddingBadAware(GCNEmbeddingBase):
+    def __init__(
+            self,
+            g,
+            d,
+            epochs,
+            deterministic=False,
+            lr=0.01,
+            layer_configuration=(128,),
+            act_fn="relu",
+            train=0.8,
+            val=0.1,
+            test=0.1,
+            badness_alpha=1
+    ):
+        super().__init__(g, d, epochs, deterministic, lr, layer_configuration, act_fn, train, val, test)
+        badness_vector = (torch.Tensor(self._g.get_badness()) + 1) ** badness_alpha
+        badness_vector = badness_vector / badness_vector.norm()
+        self.badness_vector = badness_vector.to(device)
+
+    def calculate_loss(self, logp, labels, train_nid):
+        loss = F.nll_loss(logp[train_nid], labels[train_nid])
+        loss = torch.dot(loss, self.badness_vector[train_nid])
+        return loss
