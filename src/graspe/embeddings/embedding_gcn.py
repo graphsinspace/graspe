@@ -1,16 +1,18 @@
+import os
 import itertools
-
+import pickle
 import dgl
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from abc import abstractmethod
 from dgl.nn.pytorch import GraphConv
 from sklearn.metrics import accuracy_score, precision_score, recall_score, confusion_matrix
 from sklearn.model_selection import train_test_split
 
 from embeddings.base.embedding import Embedding
-from evaluation.lid_eval import EmbLIDMLEEstimatorTorch
+from evaluation.lid_eval import EmbLIDMLEEstimatorTorch, NCLIDEstimator
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 # device = "cpu"
@@ -180,8 +182,9 @@ class GCNEmbeddingBase(Embedding):
             optimizer.step()
 
         self._embedding = self.compute_embedding(dgl_g, nodes)
-        acc = self._evaluate(net, dgl_g, inputs, labels, test_nid, full=True)
-
+        acc, prec, rec, f1 = self._evaluate(net, dgl_g, inputs, labels, test_nid, full=True)
+        return acc, prec, rec, f1
+    
     def compute_embedding(self, dgl_g, nodes):
         embedding = {}
         for i in range(len(nodes)):
@@ -200,8 +203,9 @@ class GCNEmbeddingBase(Embedding):
         net.train()
         indices, labels = indices.cpu().numpy(), labels.cpu().numpy()
         accuracy = accuracy_score(indices, labels)
-
-        if full:
+        if not full:
+            return accuracy
+        else:
             precision = precision_score(indices, labels, average='macro')
             recall = recall_score(indices, labels, average='macro')
             f1 = (2 * precision * recall) / (precision + recall)
@@ -210,8 +214,8 @@ class GCNEmbeddingBase(Embedding):
             print('Recall = {:.4f}'.format(recall))
             print('F1 Score = {:.4f}'.format(f1))
             print('Confusion Matrix \n', confusion_matrix(indices, labels))
-        return accuracy
-
+            return accuracy, precision, recall, f1
+        
     def requires_labels(self):
         return True
 
@@ -300,7 +304,7 @@ class GCNEmbeddingHubAware(GCNEmbeddingBase):
 
     def calculate_loss(self, logp, labels, train_nid):
         loss = F.nll_loss(logp[train_nid], labels[train_nid])
-        loss = torch.dot(loss, self.hubness_vector[train_nid])
+        loss = torch.mul(loss, self.hubness_vector[train_nid]).mean()
         return loss
 
 
@@ -326,5 +330,38 @@ class GCNEmbeddingBadAware(GCNEmbeddingBase):
 
     def calculate_loss(self, logp, labels, train_nid):
         loss = F.nll_loss(logp[train_nid], labels[train_nid])
-        loss = torch.dot(loss, self.badness_vector[train_nid])
+        loss = torch.mul(loss, self.badness_vector[train_nid]).mean()
+        return loss
+    
+    
+class GCNEmbeddingNCLID(GCNEmbeddingBase):
+    def __init__(
+        self,
+        g,
+        d,
+        epochs,
+        deterministic=False,
+        lr=0.01,
+        layer_configuration=(128,),
+        act_fn="relu",
+        train=0.8,
+        val=0.1,
+        test=0.1,
+        alpha=1,
+        dataset_name=None
+    ):
+        super().__init__(g, d, epochs, deterministic, lr, layer_configuration, act_fn, train, val, test)
+        path = f'/home/stamenkovicd/nclids/{dataset_name}_nclids_tensor.pkl'
+        if os.path.exists(path):
+            with open(path, 'rb') as file:
+                nclids = pickle.load(file)
+                self.nclids = nclids.to(device)
+        else:
+            nclid = NCLIDEstimator(g, alpha=1)
+            nclid.estimate_lids()
+            self.nclids = torch.Tensor([nclid.get_lid(node[0]) for node in self._g.nodes()]).to(device)    
+
+    def calculate_loss(self, logp, labels, train_nid):
+        loss = F.nll_loss(logp[train_nid], labels[train_nid])
+        loss = torch.mul(loss, self.nclids[train_nid]).mean()
         return loss

@@ -1,6 +1,7 @@
 import time
-
+from abc import abstractmethod
 import dgl
+import os
 import numpy as np
 import torch
 import torch.nn as nn
@@ -10,7 +11,7 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, confu
 from sklearn.model_selection import train_test_split
 
 from embeddings.base.embedding import Embedding
-from evaluation.lid_eval import EmbLIDMLEEstimatorTorch
+from evaluation.lid_eval import EmbLIDMLEEstimatorTorch, NCLIDEstimator
 
 # device = "cuda" if torch.cuda.is_available() else "cpu"
 device = "cpu"
@@ -22,7 +23,7 @@ class GraphSAGE(nn.Module):
         in_feats,
         num_classes,
         aggregator_type,
-        configuration=(128,),
+        layer_configuration=(128,),
         act_fn=torch.relu,
         dropout=0.0,
     ):
@@ -30,20 +31,20 @@ class GraphSAGE(nn.Module):
         self.hidden = nn.ModuleList()
         self.dropout = nn.Dropout(dropout)
         self.act_fn = act_fn
-        last_hidden_size = configuration[0]
+        last_hidden_size = layer_configuration[0]
 
-        self.input = SAGEConv(in_feats, configuration[0], aggregator_type).to(device)
+        self.input = SAGEConv(in_feats, layer_configuration[0], aggregator_type).to(device)
 
-        for layer_size in configuration[1:]:
+        for layer_size in layer_configuration[1:]:
             layer = SAGEConv(last_hidden_size, layer_size, aggregator_type).to(device)
             self.hidden.append(layer)
             last_hidden_size = layer_size
 
         self.hidden = nn.Sequential(*self.hidden)  # Module registration
-        self.output = SAGEConv(last_hidden_size, configuration[0], aggregator_type).to(device)
+        self.output = SAGEConv(last_hidden_size, layer_configuration[0], aggregator_type).to(device)
 
         # idea for embedding extraction from: https://github.com/stellargraph/stellargraph/issues/1586
-        self.fc = nn.Linear(configuration[0], num_classes)
+        self.fc = nn.Linear(layer_configuration[0], num_classes)
 
     def forward(self, g, inputs):
         h = self.act_fn(self.input(g, inputs))
@@ -167,13 +168,12 @@ class GraphSageEmbeddingBase(Embedding):
 
         # graph preprocess and calculate normalization factor
         g = dgl.remove_self_loop(g)
-
         # create GraphSAGE model
         net = GraphSAGE(
-            in_feats,
-            n_classes,
-            "gcn",
-            configuration=self.layer_configuration,
+            in_feats=in_feats,
+            num_classes=n_classes,
+            aggregator_type="gcn",
+            layer_configuration=self.layer_configuration,
             act_fn=self.act_fn,
             dropout=self.dropout,
         )
@@ -192,17 +192,19 @@ class GraphSageEmbeddingBase(Embedding):
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-
-        acc = self._evaluate(net, g, inputs, labels, test_nid, full=True)
-        if self.verbose:
-            print("Test Accuracy {:.4f}".format(acc))
-
+        
         with torch.no_grad():
             _, embedding = net(g, inputs)
             self._embedding = {}
 
             for i in range(len(embedding)):
                 self._embedding[i] = embedding[i].numpy()
+        
+        acc, prec, rec, f1 = self._evaluate(net, g, inputs, labels, test_nid, full=True)
+        if self.verbose:
+            print("Test Accuracy {:.4f}".format(acc))
+
+        return acc, prec, rec, f1
 
     def _evaluate(self, net, dgl_g, inputs, labels, labeled_nodes, full=False):
         net.eval()
@@ -215,7 +217,9 @@ class GraphSageEmbeddingBase(Embedding):
         indices, labels = indices.cpu().numpy(), labels.cpu().numpy()
         accuracy = accuracy_score(indices, labels)
 
-        if full:
+        if not full:
+            return accuracy
+        else:
             precision = precision_score(indices, labels, average='macro')
             recall = recall_score(indices, labels, average='macro')
             f1 = (2 * precision * recall) / (precision + recall)
@@ -224,7 +228,7 @@ class GraphSageEmbeddingBase(Embedding):
             print('Recall = {:.4f}'.format(recall))
             print('F1 Score = {:.4f}'.format(f1))
             print('Confusion Matrix \n', confusion_matrix(indices, labels))
-        return accuracy
+            return accuracy, precision, recall, f1
 
     def requires_labels(self):
         return True
@@ -245,7 +249,7 @@ class GraphSageEmbedding(GraphSageEmbeddingBase):
         lr=1e-2,
         deterministic=False,
     ):
-        super().__init__(g, d, epochs, dropout, deterministic, lr, layer_configuration, act_fn, train, val, test)
+        super().__init__(g, d, epochs, dropout, layer_configuration, act_fn, train, val, test, lr, deterministic)
 
     def compute_loss(self, logits, labels, train_nid):
         return F.cross_entropy(logits[train_nid], labels[train_nid])
@@ -267,7 +271,7 @@ class GraphSageEmbeddingLIDAware(GraphSageEmbeddingBase):
         deterministic=False,
         lid_k=20
     ):
-        super().__init__(g, d, epochs, dropout, deterministic, lr, layer_configuration, act_fn, train, val, test)
+        super().__init__(g, d, epochs, dropout, layer_configuration, act_fn, train, val, test, lr, deterministic)
         self.lid_k = lid_k
 
     def compute_loss(self, logits, labels, train_nid):
@@ -301,7 +305,7 @@ class GraphSageEmbeddingHubAware(GraphSageEmbeddingBase):
         deterministic=False,
         hub_fn='identity',
     ):
-        super().__init__(g, d, epochs, dropout, deterministic, lr, layer_configuration, act_fn, train, val, test)
+        super().__init__(g, d, epochs, dropout, layer_configuration, act_fn, train, val, test, lr, deterministic)
         hubness_vector = torch.Tensor(list(self._g.get_hubness().values())) + 1e-5
         if hub_fn == 'identity':
             pass
@@ -319,7 +323,7 @@ class GraphSageEmbeddingHubAware(GraphSageEmbeddingBase):
 
     def compute_loss(self, logits, labels, train_nid):
         loss = F.cross_entropy(logits[train_nid], labels[train_nid])
-        loss = torch.dot(loss, self.hubness_vector[train_nid])
+        loss = torch.mul(loss, self.hubness_vector[train_nid]).mean()
         return loss
 
 
@@ -339,12 +343,49 @@ class GraphSageEmbeddingBadAware(GraphSageEmbeddingBase):
         deterministic=False,
         badness_alpha=1,
     ):
-        super().__init__(g, d, epochs, dropout, deterministic, lr, layer_configuration, act_fn, train, val, test)
+        super().__init__(g, d, epochs, dropout, layer_configuration, act_fn, train, val, test, lr, deterministic)
         badness_vector = (torch.Tensor(self._g.get_badness()) + 1) ** badness_alpha
         badness_vector = badness_vector / badness_vector.norm()
         self.badness_vector = badness_vector.to(device)
 
     def compute_loss(self, logits, labels, train_nid):
         loss = F.cross_entropy(logits[train_nid], labels[train_nid])
-        loss = torch.dot(loss, self.badness_vector[train_nid])
+        loss = torch.mul(loss, self.badness_vector[train_nid]).mean()
         return loss
+
+    
+class GraphSageEmbeddingNCLID(GraphSageEmbeddingBase):
+    def __init__(
+        self,
+        g,
+        d,
+        epochs,
+        dropout=0.0,
+        layer_configuration=(128,),
+        act_fn="relu",
+        train=0.8,
+        val=0.1,
+        test=0.1,
+        lr=1e-2,
+        deterministic=False,
+        alpha=1,
+        dataset_name=None
+    ):
+        super().__init__(g, d, epochs, deterministic, lr, layer_configuration, act_fn, train, val, test)
+        path = f'/home/stamenkovicd/nclids/{dataset_name}_nclids_tensor.pkl'
+        if os.path.exists(path):
+            with open(path, 'rb') as file:
+                nclids = pickle.load(file)
+                self.nclids = nclids.to(device)
+        else:
+            nclid = NCLIDEstimator(g, alpha=1)
+            nclid.estimate_lids()
+            self.nclids = torch.Tensor([nclid.get_lid(node[0]) for node in self._g.nodes()]).to(device)    
+
+
+
+    def compute_loss(self, logits, labels, train_nid):
+        loss = F.cross_entropy(logits[train_nid], labels[train_nid])
+        loss = torch.mul(loss, self.nclids[train_nid]).mean()
+        return loss
+    

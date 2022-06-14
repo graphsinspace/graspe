@@ -1,0 +1,1156 @@
+config
+ ('tanh', 0.01, 100, (128,), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbedding'>
+layer_config (128,)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.01, 100, (128, 128), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbedding'>
+layer_config (128, 128)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.01, 100, (256, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbedding'>
+layer_config (256, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.01, 100, (256, 512, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbedding'>
+layer_config (256, 512, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.01, 200, (128,), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbedding'>
+layer_config (128,)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.01, 200, (128, 128), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbedding'>
+layer_config (128, 128)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.01, 200, (256, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbedding'>
+layer_config (256, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.01, 200, (256, 512, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbedding'>
+layer_config (256, 512, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.1, 100, (128,), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbedding'>
+layer_config (128,)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.1, 100, (128, 128), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbedding'>
+layer_config (128, 128)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.1, 100, (256, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbedding'>
+layer_config (256, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.1, 100, (256, 512, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbedding'>
+layer_config (256, 512, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.1, 200, (128,), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbedding'>
+layer_config (128,)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.1, 200, (128, 128), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbedding'>
+layer_config (128, 128)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.1, 200, (256, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbedding'>
+layer_config (256, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.1, 200, (256, 512, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbedding'>
+layer_config (256, 512, 256)
+Accuracy = 0.2857
+Precision = 0.5000
+Recall = 0.1429
+F1 Score = 0.2222
+Confusion Matrix 
+ [[2 5]
+ [0 0]]
+Test Accuracy 0.2857
+config
+ ('relu', 0.01, 100, (128,), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbedding'>
+layer_config (128,)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.01, 100, (128, 128), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbedding'>
+layer_config (128, 128)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.01, 100, (256, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbedding'>
+layer_config (256, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.01, 100, (256, 512, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbedding'>
+layer_config (256, 512, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.01, 200, (128,), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbedding'>
+layer_config (128,)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.01, 200, (128, 128), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbedding'>
+layer_config (128, 128)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.01, 200, (256, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbedding'>
+layer_config (256, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.01, 200, (256, 512, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbedding'>
+layer_config (256, 512, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.1, 100, (128,), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbedding'>
+layer_config (128,)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.1, 100, (128, 128), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbedding'>
+layer_config (128, 128)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.1, 100, (256, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbedding'>
+layer_config (256, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.1, 100, (256, 512, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbedding'>
+layer_config (256, 512, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.1, 200, (128,), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbedding'>
+layer_config (128,)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.1, 200, (128, 128), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbedding'>
+layer_config (128, 128)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.1, 200, (256, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbedding'>
+layer_config (256, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.1, 200, (256, 512, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbedding'>
+layer_config (256, 512, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.01, 100, (128,), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingHubAware'>
+layer_config (128,)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.01, 100, (128, 128), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingHubAware'>
+layer_config (128, 128)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.01, 100, (256, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingHubAware'>
+layer_config (256, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.01, 100, (256, 512, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingHubAware'>
+layer_config (256, 512, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.01, 200, (128,), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingHubAware'>
+layer_config (128,)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.01, 200, (128, 128), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingHubAware'>
+layer_config (128, 128)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.01, 200, (256, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingHubAware'>
+layer_config (256, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.01, 200, (256, 512, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingHubAware'>
+layer_config (256, 512, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.1, 100, (128,), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingHubAware'>
+layer_config (128,)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.1, 100, (128, 128), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingHubAware'>
+layer_config (128, 128)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.1, 100, (256, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingHubAware'>
+layer_config (256, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.1, 100, (256, 512, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingHubAware'>
+layer_config (256, 512, 256)
+Accuracy = 0.8571
+Precision = 0.9000
+Recall = 0.8333
+F1 Score = 0.8654
+Confusion Matrix 
+ [[2 1]
+ [0 4]]
+Test Accuracy 0.8571
+config
+ ('tanh', 0.1, 200, (128,), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingHubAware'>
+layer_config (128,)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.1, 200, (128, 128), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingHubAware'>
+layer_config (128, 128)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.1, 200, (256, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingHubAware'>
+layer_config (256, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.1, 200, (256, 512, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingHubAware'>
+layer_config (256, 512, 256)
+Accuracy = 0.4286
+Precision = 0.6000
+Recall = 0.6667
+F1 Score = 0.6316
+Confusion Matrix 
+ [[2 4]
+ [0 1]]
+Test Accuracy 0.4286
+config
+ ('relu', 0.01, 100, (128,), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingHubAware'>
+layer_config (128,)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.01, 100, (128, 128), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingHubAware'>
+layer_config (128, 128)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.01, 100, (256, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingHubAware'>
+layer_config (256, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.01, 100, (256, 512, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingHubAware'>
+layer_config (256, 512, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.01, 200, (128,), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingHubAware'>
+layer_config (128,)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.01, 200, (128, 128), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingHubAware'>
+layer_config (128, 128)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.01, 200, (256, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingHubAware'>
+layer_config (256, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.01, 200, (256, 512, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingHubAware'>
+layer_config (256, 512, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.1, 100, (128,), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingHubAware'>
+layer_config (128,)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.1, 100, (128, 128), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingHubAware'>
+layer_config (128, 128)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.1, 100, (256, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingHubAware'>
+layer_config (256, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.1, 100, (256, 512, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingHubAware'>
+layer_config (256, 512, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.1, 200, (128,), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingHubAware'>
+layer_config (128,)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.1, 200, (128, 128), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingHubAware'>
+layer_config (128, 128)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.1, 200, (256, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingHubAware'>
+layer_config (256, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.1, 200, (256, 512, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingHubAware'>
+layer_config (256, 512, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.01, 100, (128,), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingBadAware'>
+layer_config (128,)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.01, 100, (128, 128), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingBadAware'>
+layer_config (128, 128)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.01, 100, (256, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingBadAware'>
+layer_config (256, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.01, 100, (256, 512, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingBadAware'>
+layer_config (256, 512, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.01, 200, (128,), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingBadAware'>
+layer_config (128,)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.01, 200, (128, 128), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingBadAware'>
+layer_config (128, 128)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.01, 200, (256, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingBadAware'>
+layer_config (256, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.01, 200, (256, 512, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingBadAware'>
+layer_config (256, 512, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.1, 100, (128,), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingBadAware'>
+layer_config (128,)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.1, 100, (128, 128), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingBadAware'>
+layer_config (128, 128)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.1, 100, (256, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingBadAware'>
+layer_config (256, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.1, 100, (256, 512, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingBadAware'>
+layer_config (256, 512, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.1, 200, (128,), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingBadAware'>
+layer_config (128,)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.1, 200, (128, 128), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingBadAware'>
+layer_config (128, 128)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.1, 200, (256, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingBadAware'>
+layer_config (256, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.1, 200, (256, 512, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingBadAware'>
+layer_config (256, 512, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.01, 100, (128,), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingBadAware'>
+layer_config (128,)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.01, 100, (128, 128), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingBadAware'>
+layer_config (128, 128)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.01, 100, (256, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingBadAware'>
+layer_config (256, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.01, 100, (256, 512, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingBadAware'>
+layer_config (256, 512, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.01, 200, (128,), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingBadAware'>
+layer_config (128,)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.01, 200, (128, 128), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingBadAware'>
+layer_config (128, 128)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.01, 200, (256, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingBadAware'>
+layer_config (256, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.01, 200, (256, 512, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingBadAware'>
+layer_config (256, 512, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.1, 100, (128,), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingBadAware'>
+layer_config (128,)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.1, 100, (128, 128), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingBadAware'>
+layer_config (128, 128)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.1, 100, (256, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingBadAware'>
+layer_config (256, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.1, 100, (256, 512, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingBadAware'>
+layer_config (256, 512, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.1, 200, (128,), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingBadAware'>
+layer_config (128,)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.1, 200, (128, 128), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingBadAware'>
+layer_config (128, 128)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.1, 200, (256, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingBadAware'>
+layer_config (256, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('relu', 0.1, 200, (256, 512, 256), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingBadAware'>
+layer_config (256, 512, 256)
+Accuracy = 1.0000
+Precision = 1.0000
+Recall = 1.0000
+F1 Score = 1.0000
+Confusion Matrix 
+ [[2 0]
+ [0 5]]
+Test Accuracy 1.0000
+config
+ ('tanh', 0.01, 100, (128,), 100)
+model.algo <class 'embeddings.embedding_graphsage.GraphSageEmbeddingNCLID'>
+layer_config (128,)

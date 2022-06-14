@@ -1,0 +1,13 @@
+[09:41:43] /opt/dgl/src/runtime/tensordispatch.cc:43: TensorDispatcher: dlopen failed: /home/stamenkovicd/miniconda3/envs/graspe/lib/python3.8/site-packages/dgl/tensoradapter/pytorch/libtensoradapter_pytorch_1.10.1.so: cannot open shared object file: No such file or directory
+Using backend: pytorch
+/home/stamenkovicd/miniconda3/envs/graspe/lib/python3.8/site-packages/sklearn/metrics/_classification.py:1308: UndefinedMetricWarning: Recall is ill-defined and being set to 0.0 in labels with no true samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, msg_start, len(result))
+Traceback (most recent call last):
+  File "/home/stamenkovicd/graspe/src/graspe/optimize_graphsage.py", line 70, in <module>
+    acc, prec, rec, f1 = e.embed()
+  File "/home/stamenkovicd/graspe/src/graspe/embeddings/embedding_graphsage.py", line 172, in embed
+    net = GraphSAGE(
+  File "/home/stamenkovicd/graspe/src/graspe/embeddings/embedding_graphsage.py", line 34, in __init__
+    last_hidden_size = layer_configuration[0]
+TypeError: 'float' object is not subscriptable
+srun: error: n01: task 0: Exited with exit code 1
