@@ -1,7 +1,7 @@
 # graspe
 Graphs in Space: Graph Embeddings for Machine Learning on Complex Data
 
-This repository contains code for Graph Embedding evaluation for the GRASP project.
+This repository contains code for Graph Embedding evaluation for the [GRASP](https://graphsinspace.net/) project.
 
 ## Structure
 
