@@ -17,8 +17,8 @@ MODELS = [
     Model('gs_bad_aware', GraphSageEmbeddingBadAware),
     Model('gs_nclid', GraphSageEmbeddingNCLID)
 ] 
-DATASETS = ['karate_club_graph', 'pubmed', 'citeseer', 'cora_ml', 'cora', 'dblp']
-# DATASETS = ['amazon_electronics_computers', 'amazon_electronics_photo']
+# DATASETS = ['karate_club_graph', 'pubmed', 'citeseer', 'cora_ml', 'cora', 'dblp']
+DATASETS = ['amazon_electronics_computers', 'amazon_electronics_photo']
 
 
 def produce_configs():
@@ -73,5 +73,5 @@ if __name__ == '__main__':
                     columns=cols
                 )
                 final_res = pd.concat([final_res, current_res], axis=0)
-        with open('/home/stamenkovicd/graphsage_tuning_res_{}.pkl'.format(dataset), 'wb') as f:
+        with open('/home/stamenkovicd/graphsage_tuning_res/graphsage_tuning_res_{}.pkl'.format(dataset), 'wb') as f:
             pickle.dump(final_res, f)

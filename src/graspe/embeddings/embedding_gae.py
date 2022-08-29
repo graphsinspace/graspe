@@ -49,9 +49,7 @@ class GAE(torch.nn.Module):
                                 'add and mult'.format(hub_combine))
             hub_vector_pos /= hub_vector_pos.norm()
             pos_loss = -torch.log(self.decoder(z, pos_edge_index, sigmoid=True) + EPS)
-            # print('pos_loss.mean() = ', pos_loss.mean())
             pos_loss = torch.dot(pos_loss, hub_vector_pos)
-            # print('pos_loss_hub_aware = ', pos_loss)
         else:
             pos_loss = -torch.log(self.decoder(z, pos_edge_index, sigmoid=True) + EPS).mean()
 
@@ -71,9 +69,7 @@ class GAE(torch.nn.Module):
                                 'add and mult'.format(hub_combine))
             hub_vector_neg /= hub_vector_neg.norm()
             neg_loss = -torch.log(1 - self.decoder(z, neg_edge_index, sigmoid=True) + EPS)
-            # print('neg_loss.mean() = ', neg_loss.mean())
             neg_loss = torch.dot(neg_loss, hub_vector_neg)
-            # print('neg_loss_hub_aware = ', neg_loss)
 
         else:
             neg_loss = -torch.log(1 - self.decoder(z, neg_edge_index, sigmoid=True) + EPS).mean()

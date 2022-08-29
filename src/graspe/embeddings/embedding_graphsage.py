@@ -371,7 +371,17 @@ class GraphSageEmbeddingNCLID(GraphSageEmbeddingBase):
         alpha=1,
         dataset_name=None
     ):
-        super().__init__(g, d, epochs, deterministic, lr, layer_configuration, act_fn, train, val, test)
+        super().__init__(
+            g=g,
+            d=d,
+            epochs=epochs,
+            deterministic=deterministic,
+            lr=lr,
+            layer_configuration=layer_configuration,
+            act_fn=act_fn,
+            train=train,
+            val=val,
+            test=test)
         path = f'/home/stamenkovicd/nclids/{dataset_name}_nclids_tensor.pkl'
         if os.path.exists(path):
             with open(path, 'rb') as file:
