@@ -290,7 +290,7 @@ class GAEEmbeddingBase(Embedding):
         model.train()
         optimizer.zero_grad()
         z = model.encode(x, train_pos_edge_index)
-        criterion_1 = self.calculate_loss(z, model, train_pos_edge_index)
+        criterion_1 = self.calculate_loss(z, model, train_pos_edge_index, data, x)
         if self.variational:
             criterion_1 = criterion_1 + (1 / data.num_nodes) * model.kl_loss()
         loss = criterion_1
