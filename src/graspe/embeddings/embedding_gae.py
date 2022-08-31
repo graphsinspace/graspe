@@ -280,7 +280,7 @@ class GAEEmbeddingBase(Embedding):
             torch.backends.cudnn.deterministic = True
             torch.backends.cudnn.benchmark = False
         else:
-            torch.use_deterministic_algorithms(True)  # Torch 1.10
+            torch.use_deterministic_algorithms(False)  # Torch 1.10
 
     @abstractmethod
     def calculate_loss(self, z, model, train_pos_edge_index, data, x):
