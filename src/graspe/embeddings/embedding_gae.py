@@ -460,18 +460,23 @@ class GAEEmbeddingBadAware(GAEEmbeddingBase):
         lr=0.01,
         layer_configuration=(8,),
         act_fn="relu",
-        badness_alpha=1
+        badness_alpha=1,
+        badness_combine='add'
     ):
         super().__init__(g, d, epochs, deterministic, variational, linear, lr, layer_configuration, act_fn)
         badness_vector = (torch.Tensor(self._g.get_badness()) + 1) ** badness_alpha
         badness_vector = badness_vector / badness_vector.norm()
         self.badness_vector = badness_vector.to(DEVICE)
+        self.badness_combine = badness_combine
 
-    def compute_loss(self, logits, labels, train_nid):
-        loss = F.cross_entropy(logits[train_nid], labels[train_nid])
-        loss = torch.mul(loss, self.badness_vector[train_nid]).mean()
+    def calculate_loss(self, z, model, train_pos_edge_index, data, x):
+        loss = model.recon_loss(
+            z,
+            train_pos_edge_index,
+            nclid_aware=True,
+            nclid_vector=self.badness_vector,
+            combine_fn=self.badness_combine)
         return loss
-
 
 
 class GAEEmbeddingNCLIDAware(GAEEmbeddingBase):

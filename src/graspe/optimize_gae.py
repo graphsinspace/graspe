@@ -5,7 +5,7 @@ import os
 import pandas as pd
 from collections import namedtuple
 from common.dataset_pool import DatasetPool
-from embeddings.embedding_gae import GAEEmbedding, GAEEmbeddingLIDAware, GAEEmbeddingNCLIDAware, GAEEmbeddingHubAware
+from embeddings.embedding_gae import GAEEmbedding, GAEEmbeddingBadAware, GAEEmbeddingNCLIDAware, GAEEmbeddingHubAware
 
 Model = namedtuple('Model', ['name', 'algo'])
 MODELS = [
@@ -45,7 +45,7 @@ if __name__ == '__main__':
 
         for model in MODELS:
             for config in configs:
-                if model.algo != 'gcn_nclid':
+                if model.algo != 'GAE NCLID':
                     e = model.algo(
                         g,
                         d=config[4],
