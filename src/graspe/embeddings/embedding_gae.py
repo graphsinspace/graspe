@@ -271,13 +271,13 @@ class GAEEmbeddingBase(Embedding):
         self.act_fn = act_fn
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         if deterministic:  # not thread-safe, beware if running multiple at once
-            torch.use_deterministic_algorithms(True)  # Torch 1.10
+            torch.use_deterministic_algorithms(False)  # Torch 1.10
             torch.manual_seed(0)
             np.random.seed(0)
             random.seed(0)
             torch.cuda.manual_seed_all(0)
             os.environ["PYTHONHASHSEED"] = str(0)
-            torch.backends.cudnn.deterministic = True
+            torch.backends.cudnn.deterministic = False
             torch.backends.cudnn.benchmark = False
         else:
             torch.use_deterministic_algorithms(False)  # Torch 1.10
