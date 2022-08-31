@@ -20,11 +20,10 @@ def test_gae():
         act_fn="relu",
     )
     gae_embedding.embed()
-    e = gae_embedding._embedding
 
     g_undirected = g.to_undirected()
     g_undirected.remove_selfloop_edges()
-    recg = e.reconstruct(g_undirected.edges_cnt())
+    recg = gae_embedding.reconstruct(g_undirected.edges_cnt())
     avg_map, maps = g_undirected.map_value(recg)
     avg_recall, recalls = g_undirected.recall(recg)
     f1 = [
