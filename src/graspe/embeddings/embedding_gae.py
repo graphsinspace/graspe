@@ -239,11 +239,6 @@ class GAEEmbeddingBase(Embedding):
         lr=0.01,
         layer_configuration=(8,),
         act_fn="relu",
-        # lid_aware=False,
-        # lid_k=20,
-        # hub_aware=False,
-        # hub_fn='identity',
-        # hub_combine='add'
     ):
         """
         Parameters
@@ -276,7 +271,6 @@ class GAEEmbeddingBase(Embedding):
         self.act_fn = act_fn
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         if deterministic:  # not thread-safe, beware if running multiple at once
-            #torch.set_deterministic(True)
             torch.use_deterministic_algorithms(True)  # Torch 1.10
             torch.manual_seed(0)
             np.random.seed(0)
@@ -286,7 +280,6 @@ class GAEEmbeddingBase(Embedding):
             torch.backends.cudnn.deterministic = True
             torch.backends.cudnn.benchmark = False
         else:
-            #torch.set_deterministic(False)
             torch.use_deterministic_algorithms(True)  # Torch 1.10
 
     @abstractmethod
@@ -297,27 +290,9 @@ class GAEEmbeddingBase(Embedding):
         model.train()
         optimizer.zero_grad()
         z = model.encode(x, train_pos_edge_index)
-        # if self.hub_aware:
-        #     criterion_1 = model.recon_loss(z, train_pos_edge_index, hub_vector=self.hub_vector,
-        #                                    hub_aware=self.hub_aware, hub_combine=self.hub_combine)
-        # else:
-        # criterion_1 = model.recon_loss(z, train_pos_edge_index)
-
         criterion_1 = self.calculate_loss(z, model, train_pos_edge_index)
         if self.variational:
             criterion_1 = criterion_1 + (1 / data.num_nodes) * model.kl_loss()
-
-        # if self.lid_aware:
-        #     emb = {}
-        #     encoded = model.encode(x, train_pos_edge_index).cpu().detach().numpy()
-        #     for i in range(data.num_nodes):
-        #         emb[i] = encoded[i, :]
-        #     tlid = EmbLIDMLEEstimatorTorch(self._g, emb, self.lid_k)
-        #     tlid.estimate_lids()
-        #     total_lid = tlid.get_total_lid()
-        #     criterion_2 = F.mse_loss(total_lid, torch.tensor(self.lid_k, dtype=torch.float))
-        #     loss = criterion_1 + criterion_2
-        # else:
         loss = criterion_1
         loss.backward()
         optimizer.step()
@@ -334,7 +309,10 @@ class GAEEmbeddingBase(Embedding):
 
         # TODO: this seems like extra work to me, since pytorch_geometric already has
         # TODO: datasets ready to use...
-        data = tg.utils.from_networkx(self._g.to_networkx())
+        digraph = self._g.to_networkx()
+        print(type(digraph))
+        print(digraph)
+        data = tg.utils.from_networkx(digraph)
 
         out_channels = self._d
         num_nodes = data.num_nodes
