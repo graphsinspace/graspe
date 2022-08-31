@@ -14,7 +14,7 @@ from sklearn.model_selection import train_test_split
 from embeddings.base.embedding import Embedding
 from evaluation.lid_eval import EmbLIDMLEEstimatorTorch, NCLIDEstimator
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 # device = "cpu"
 
 
@@ -31,7 +31,7 @@ class GCN(nn.Module):
         last_hidden_size = configuration[0]
 
         for layer_size in configuration[1:]:
-            layer = GraphConv(last_hidden_size, layer_size).to(device)
+            layer = GraphConv(last_hidden_size, layer_size).to(DEVICE)
             self.hidden.append(layer)
             last_hidden_size = layer_size
 
@@ -137,9 +137,9 @@ class GCNEmbeddingBase(Embedding):
         num_nodes = len(nodes)
         labels = self._g.labels()
 
-        dgl_g = self.dgl_g.to(device)
+        dgl_g = self.dgl_g.to(DEVICE)
 
-        e = nn.Embedding(num_nodes, self._d).to(device)
+        e = nn.Embedding(num_nodes, self._d).to(DEVICE)
         dgl_g.ndata["feat"] = e.weight
         inputs = e.weight
 
@@ -156,7 +156,7 @@ class GCNEmbeddingBase(Embedding):
             act_fn=self.act_fn,
             configuration=self.layer_configuration,
         )
-        net = net.to(device)
+        net = net.to(DEVICE)
 
         labeled_nodes = []
         labels = []
@@ -164,7 +164,7 @@ class GCNEmbeddingBase(Embedding):
             if "label" in node[1]:
                 labeled_nodes.append(node[0])
                 labels.append(node[1]["label"])
-        labels = torch.tensor(labels).to(device)
+        labels = torch.tensor(labels).to(DEVICE)
 
         train_nid, test_nid = train_test_split(range(len(labels)), test_size=0.2, random_state=1)
         train_nid, test_nid = torch.Tensor(train_nid).long(), torch.Tensor(test_nid).long()
@@ -172,7 +172,7 @@ class GCNEmbeddingBase(Embedding):
         optimizer = torch.optim.Adam(itertools.chain(net.parameters(), e.parameters()), lr=self.lr)
 
         for epoch in range(1, self.epochs + 1):
-            logits = net(dgl_g.to(device), inputs.to(device)).to(device)
+            logits = net(dgl_g.to(DEVICE), inputs.to(DEVICE)).to(DEVICE)
             logp = F.log_softmax(logits, 1)
 
             loss = self.calculate_loss(logp, labels, train_nid)
@@ -260,7 +260,7 @@ class GCNEmbeddingLIDAware(GCNEmbeddingBase):
 
     def calculate_loss(self, logp, labels, train_nid):
         loss_1 = F.nll_loss(logp[train_nid], labels[train_nid])
-        emb = self.compute_embedding(dgl_g, nodes)
+        emb = self.compute_embedding(self.dgl_g.to(DEVICE), logp)
         tlid = EmbLIDMLEEstimatorTorch(self._g, emb, self.lid_k)
         tlid.estimate_lids()
         total_lid = tlid.get_total_lid()
@@ -300,7 +300,7 @@ class GCNEmbeddingHubAware(GCNEmbeddingBase):
             raise Exception('{} is not supported as a hub_fn parameter. Currently implemented options are '
                             'identity, inverse, log, and log_inverse'.format(hub_fn))
         hubness_vector = hubness_vector / hubness_vector.norm()
-        self.hubness_vector = hubness_vector.to(device)
+        self.hubness_vector = hubness_vector.to(DEVICE)
 
     def calculate_loss(self, logp, labels, train_nid):
         loss = F.nll_loss(logp[train_nid], labels[train_nid])
@@ -326,7 +326,7 @@ class GCNEmbeddingBadAware(GCNEmbeddingBase):
         super().__init__(g, d, epochs, deterministic, lr, layer_configuration, act_fn, train, val, test)
         badness_vector = (torch.Tensor(self._g.get_badness()) + 1) ** badness_alpha
         badness_vector = badness_vector / badness_vector.norm()
-        self.badness_vector = badness_vector.to(device)
+        self.badness_vector = badness_vector.to(DEVICE)
 
     def calculate_loss(self, logp, labels, train_nid):
         loss = F.nll_loss(logp[train_nid], labels[train_nid])
@@ -355,11 +355,11 @@ class GCNEmbeddingNCLID(GCNEmbeddingBase):
         if os.path.exists(path):
             with open(path, 'rb') as file:
                 nclids = pickle.load(file)
-                self.nclids = nclids.to(device)
+                self.nclids = nclids.to(DEVICE)
         else:
             nclid = NCLIDEstimator(g, alpha=1)
             nclid.estimate_lids()
-            self.nclids = torch.Tensor([nclid.get_lid(node[0]) for node in self._g.nodes()]).to(device)    
+            self.nclids = torch.Tensor([nclid.get_lid(node[0]) for node in self._g.nodes()]).to(DEVICE)
 
     def calculate_loss(self, logp, labels, train_nid):
         loss = F.nll_loss(logp[train_nid], labels[train_nid])

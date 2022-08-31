@@ -4,6 +4,7 @@ import dgl
 import os
 import numpy as np
 import torch
+import pickle
 import torch.nn as nn
 import torch.nn.functional as F
 from dgl.nn.pytorch import SAGEConv
@@ -13,8 +14,8 @@ from sklearn.model_selection import train_test_split
 from embeddings.base.embedding import Embedding
 from evaluation.lid_eval import EmbLIDMLEEstimatorTorch, NCLIDEstimator
 
-# device = "cuda" if torch.cuda.is_available() else "cpu"
-device = "cpu"
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+# device = "cpu"
 
 
 class GraphSAGE(nn.Module):
@@ -33,15 +34,15 @@ class GraphSAGE(nn.Module):
         self.act_fn = act_fn
         last_hidden_size = layer_configuration[0]
 
-        self.input = SAGEConv(in_feats, layer_configuration[0], aggregator_type).to(device)
+        self.input = SAGEConv(in_feats, layer_configuration[0], aggregator_type).to(DEVICE)
 
         for layer_size in layer_configuration[1:]:
-            layer = SAGEConv(last_hidden_size, layer_size, aggregator_type).to(device)
+            layer = SAGEConv(last_hidden_size, layer_size, aggregator_type).to(DEVICE)
             self.hidden.append(layer)
             last_hidden_size = layer_size
 
         self.hidden = nn.Sequential(*self.hidden)  # Module registration
-        self.output = SAGEConv(last_hidden_size, layer_configuration[0], aggregator_type).to(device)
+        self.output = SAGEConv(last_hidden_size, layer_configuration[0], aggregator_type).to(DEVICE)
 
         # idea for embedding extraction from: https://github.com/stellargraph/stellargraph/issues/1586
         self.fc = nn.Linear(layer_configuration[0], num_classes)
@@ -159,7 +160,7 @@ class GraphSageEmbeddingBase(Embedding):
             if "label" in node[1]:
                 labeled_nodes.append(node[0])
                 labels.append(node[1]["label"])
-        labels = torch.tensor(labels).to(device)
+        labels = torch.tensor(labels).to(DEVICE)
 
         train_nid, test_nid = train_test_split(range(len(labels)), test_size=0.2, random_state=1)
         train_nid, test_nid = torch.Tensor(train_nid).long(), torch.Tensor(test_nid).long()
@@ -169,7 +170,7 @@ class GraphSageEmbeddingBase(Embedding):
         # graph preprocess and calculate normalization factor
         g = dgl.remove_self_loop(g)
         # create GraphSAGE model
-        net = GraphSAGE(
+        self.net = GraphSAGE(
             in_feats=in_feats,
             num_classes=n_classes,
             aggregator_type="gcn",
@@ -179,13 +180,13 @@ class GraphSageEmbeddingBase(Embedding):
         )
 
         # use optimizer
-        optimizer = torch.optim.Adam(net.parameters(), lr=self.lr, weight_decay=5e-4)
+        optimizer = torch.optim.Adam(self.net.parameters(), lr=self.lr, weight_decay=5e-4)
 
         for epoch in range(self._epochs):
-            net.train()
+            self.net.train()
             if epoch >= 3:
                 t0 = time.time()
-            logits, _ = net(g, inputs)
+            logits, _ = self.net(g, inputs)
 
             loss = self.compute_loss(logits, labels, train_nid)
 
@@ -194,13 +195,13 @@ class GraphSageEmbeddingBase(Embedding):
             optimizer.step()
         
         with torch.no_grad():
-            _, embedding = net(g, inputs)
+            _, embedding = self.net(g, inputs)
             self._embedding = {}
 
             for i in range(len(embedding)):
                 self._embedding[i] = embedding[i].numpy()
         
-        acc, prec, rec, f1 = self._evaluate(net, g, inputs, labels, test_nid, full=True)
+        acc, prec, rec, f1 = self._evaluate(self.net, g, inputs, labels, test_nid, full=True)
         if self.verbose:
             print("Test Accuracy {:.4f}".format(acc))
 
@@ -276,8 +277,7 @@ class GraphSageEmbeddingLIDAware(GraphSageEmbeddingBase):
 
     def compute_loss(self, logits, labels, train_nid):
         loss_1 = F.cross_entropy(logits[train_nid], labels[train_nid])
-
-        _, embedding = net(g, inputs)
+        _, embedding = self.net(self._g, logits)
         emb = {}
         for i in range(len(embedding)):
             emb[i] = embedding[i].detach().numpy()
@@ -319,7 +319,7 @@ class GraphSageEmbeddingHubAware(GraphSageEmbeddingBase):
             raise Exception('{} is not supported as a hub_fn parameter. Currently implemented options are '
                             'identity, inverse, log, and log_inverse'.format(hub_fn))
         hubness_vector = hubness_vector / hubness_vector.norm()
-        self.hubness_vector = hubness_vector.to(device)
+        self.hubness_vector = hubness_vector.to(DEVICE)
 
     def compute_loss(self, logits, labels, train_nid):
         loss = F.cross_entropy(logits[train_nid], labels[train_nid])
@@ -346,7 +346,7 @@ class GraphSageEmbeddingBadAware(GraphSageEmbeddingBase):
         super().__init__(g, d, epochs, dropout, layer_configuration, act_fn, train, val, test, lr, deterministic)
         badness_vector = (torch.Tensor(self._g.get_badness()) + 1) ** badness_alpha
         badness_vector = badness_vector / badness_vector.norm()
-        self.badness_vector = badness_vector.to(device)
+        self.badness_vector = badness_vector.to(DEVICE)
 
     def compute_loss(self, logits, labels, train_nid):
         loss = F.cross_entropy(logits[train_nid], labels[train_nid])
@@ -386,13 +386,11 @@ class GraphSageEmbeddingNCLID(GraphSageEmbeddingBase):
         if os.path.exists(path):
             with open(path, 'rb') as file:
                 nclids = pickle.load(file)
-                self.nclids = nclids.to(device)
+                self.nclids = nclids.to(DEVICE)
         else:
-            nclid = NCLIDEstimator(g, alpha=1)
+            nclid = NCLIDEstimator(g, alpha=alpha)
             nclid.estimate_lids()
-            self.nclids = torch.Tensor([nclid.get_lid(node[0]) for node in self._g.nodes()]).to(device)    
-
-
+            self.nclids = torch.Tensor([nclid.get_lid(node[0]) for node in self._g.nodes()]).to(DEVICE)
 
     def compute_loss(self, logits, labels, train_nid):
         loss = F.cross_entropy(logits[train_nid], labels[train_nid])

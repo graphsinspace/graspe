@@ -5,11 +5,13 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 import torch_geometric as tg
+import pickle
+from abc import abstractmethod
 from torch.nn import Sequential
 from torch_geometric.nn import GCNConv, InnerProductDecoder
 from torch_geometric.utils import train_test_split_edges
 from embeddings.base.embedding import Embedding
-from evaluation.lid_eval import EmbLIDMLEEstimatorTorch
+from evaluation.lid_eval import EmbLIDMLEEstimatorTorch, NCLIDEstimator
 from sklearn.metrics import roc_auc_score, average_precision_score
 from torch_geometric.utils import negative_sampling, remove_self_loops, add_self_loops
 from torch_geometric.nn.inits import reset
@@ -17,6 +19,7 @@ from torch_geometric.nn.inits import reset
 
 EPS = 1e-15
 MAX_LOGSTD = 10
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 
 class GAE(torch.nn.Module):
@@ -37,40 +40,69 @@ class GAE(torch.nn.Module):
         return self.decoder(*args, **kwargs)
 
     def recon_loss(self, z, pos_edge_index, neg_edge_index=None,
-                   hub_vector=None, hub_aware=False, hub_combine='add'):
-        if hub_aware:
+                   hub_vector=None, hub_aware=False, nclid_vector=None,
+                   nclid_aware=False, combine_fn='add'):
+
+        # Recon loss is comprised of positive loss and negative loss.
+        # Positive loss
+        if hub_aware:  # Hub Aware block
             hub_vector_pos = hub_vector[pos_edge_index]
-            if hub_combine == 'add':
+            if combine_fn == 'add':
                 hub_vector_pos = hub_vector_pos.sum(axis=0)
-            elif hub_combine == 'mult':
+            elif combine_fn == 'mult':
                 hub_vector_pos = hub_vector_pos[0] * hub_vector_pos[1]
             else:
                 raise Exception('{} is not supported as a hub_combine parameter. Currently implemented options are '
-                                'add and mult'.format(hub_combine))
+                                'add and mult'.format(combine_fn))
             hub_vector_pos /= hub_vector_pos.norm()
             pos_loss = -torch.log(self.decoder(z, pos_edge_index, sigmoid=True) + EPS)
-            pos_loss = torch.dot(pos_loss, hub_vector_pos)
+            pos_loss = torch.mul(pos_loss, hub_vector_pos).mean()
+
+        elif nclid_aware:  # NCLID Aware block
+            nclid_vector_pos = nclid_vector[pos_edge_index]
+            if combine_fn == 'add':
+                nclid_vector_pos = nclid_vector_pos.sum(axis=0)
+            elif combine_fn == 'mult':
+                nclid_vector_pos = nclid_vector_pos[0] * nclid_vector_pos[1]
+            else:
+                raise Exception('{} is not supported as a hub_combine parameter. Currently implemented options are '
+                                'add and mult'.format(combine_fn))
+            nclid_vector_pos /= nclid_vector_pos.norm()
+            pos_loss = -torch.log(self.decoder(z, pos_edge_index, sigmoid=True) + EPS).mean()
+            pos_loss = torch.mul(pos_loss, nclid_vector_pos).mean()
         else:
             pos_loss = -torch.log(self.decoder(z, pos_edge_index, sigmoid=True) + EPS).mean()
 
+        # Negative loss
         # Do not include self-loops in negative samples
         pos_edge_index, _ = remove_self_loops(pos_edge_index)
         pos_edge_index, _ = add_self_loops(pos_edge_index)
         if neg_edge_index is None:
             neg_edge_index = negative_sampling(pos_edge_index, z.size(0))
-        if hub_aware:
+        if hub_aware:  # Hub Aware block
             hub_vector_neg = hub_vector[neg_edge_index]
-            if hub_combine == 'add':
+            if combine_fn == 'add':
                 hub_vector_neg = hub_vector_neg.sum(axis=0)
-            elif hub_combine == 'mult':
+            elif combine_fn == 'mult':
                 hub_vector_neg = hub_vector_neg[0] * hub_vector_neg[1]
             else:
                 raise Exception('{} is not supported as a hub_combine parameter. Currently implemented options are '
-                                'add and mult'.format(hub_combine))
+                                'add and mult'.format(combine_fn))
             hub_vector_neg /= hub_vector_neg.norm()
             neg_loss = -torch.log(1 - self.decoder(z, neg_edge_index, sigmoid=True) + EPS)
-            neg_loss = torch.dot(neg_loss, hub_vector_neg)
-
+            neg_loss = torch.mul(neg_loss, hub_vector_neg).mean()
+        elif nclid_aware:  # NCLID Aware block
+            nclid_vector_neg = nclid_vector[neg_edge_index]
+            if combine_fn == 'add':
+                nclid_vector_neg = nclid_vector_neg.sum(axis=0)
+            elif combine_fn == 'mult':
+                nclid_vector_neg = nclid_vector_neg[0] * nclid_vector_neg[1]
+            else:
+                raise Exception('{} is not supported as a hub_combine parameter. Currently implemented options are '
+                                'add and mult'.format(combine_fn))
+            nclid_vector_neg /= nclid_vector_neg.norm()
+            neg_loss = -torch.log(1 - self.decoder(z, neg_edge_index, sigmoid=True) + EPS)
+            neg_loss = torch.mul(neg_loss, nclid_vector_neg).mean()
         else:
             neg_loss = -torch.log(1 - self.decoder(z, neg_edge_index, sigmoid=True) + EPS).mean()
 
@@ -184,7 +216,7 @@ class VariationalLinearEncoder(torch.nn.Module):
         return self.conv_mu(x, edge_index), self.conv_logstd(x, edge_index)
 
 
-class GAEEmbedding(Embedding):
+class GAEEmbeddingBase(Embedding):
     """
     Embedding with Graph Auto Encoders (pytorch_geometric impl.)
     Support for:
@@ -207,11 +239,11 @@ class GAEEmbedding(Embedding):
         lr=0.01,
         layer_configuration=(8,),
         act_fn="relu",
-        lid_aware=False,
-        lid_k=20,
-        hub_aware=False,
-        hub_fn='identity',
-        hub_combine='add'
+        # lid_aware=False,
+        # lid_k=20,
+        # hub_aware=False,
+        # hub_fn='identity',
+        # hub_combine='add'
     ):
         """
         Parameters
@@ -234,16 +266,6 @@ class GAEEmbedding(Embedding):
             Hidden layer configuration, tuple length is depth, values are hidden sizes
         act_fn : str
             Activation function to be used, support for relu, tanh, sigmoid
-        lid_aware : bool
-            Whether to optimize for lower LID
-        lid_k : int
-            k-value param for LID
-        hub_aware: bool
-            Whether to take into account hubness of nodes
-        hub_fn: str
-            Which function to be used on hubness of nodes, support for identity, inverse, log, log_inverse
-        hub_combine: str
-            How to combine hubness of nodes for calculation of recon_loss, for hubness aware variation of the algorithm
         """
         super().__init__(g, d)
         self.epochs = epochs
@@ -252,26 +274,7 @@ class GAEEmbedding(Embedding):
         self.lr = lr
         self.layer_configuration = layer_configuration
         self.act_fn = act_fn
-        self.lid_aware = lid_aware
-        self.lid_k = lid_k
-        self.hub_aware = hub_aware
-        self.hub_fn = hub_fn
-        self.hub_combine = hub_combine
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-        hub_vector = torch.Tensor(list(self._g.get_hubness().values())).to(self.device) + 1e-5
-        if self.hub_fn == 'identity':
-            pass
-        elif self.hub_fn == 'inverse':
-            hub_vector = 1 / hub_vector
-        elif self.hub_fn == 'log':
-            hub_vector = torch.log(hub_vector)
-        elif self.hub_fn == 'log_inverse':
-            hub_vector = 1 / torch.log(hub_vector)
-        else:
-            raise Exception('{} is not supported as a hub_fn parameter. Currently implemented options are '
-                            'identity, inverse, log, and log_inverse'.format(self.hub_fn))
-        self.hub_vector = hub_vector # / hub_vector.norm()
         if deterministic:  # not thread-safe, beware if running multiple at once
             #torch.set_deterministic(True)
             torch.use_deterministic_algorithms(True)  # Torch 1.10
@@ -286,31 +289,36 @@ class GAEEmbedding(Embedding):
             #torch.set_deterministic(False)
             torch.use_deterministic_algorithms(True)  # Torch 1.10
 
+    @abstractmethod
+    def calculate_loss(self, z, model, train_pos_edge_index, data, x):
+        pass
+
     def _train(self, model, optimizer, train_pos_edge_index, data, x):
         model.train()
         optimizer.zero_grad()
         z = model.encode(x, train_pos_edge_index)
-        if self.hub_aware:
-            criterion_1 = model.recon_loss(z, train_pos_edge_index, hub_vector=self.hub_vector,
-                                           hub_aware=self.hub_aware, hub_combine=self.hub_combine)
-        else:
-            criterion_1 = model.recon_loss(z, train_pos_edge_index)
+        # if self.hub_aware:
+        #     criterion_1 = model.recon_loss(z, train_pos_edge_index, hub_vector=self.hub_vector,
+        #                                    hub_aware=self.hub_aware, hub_combine=self.hub_combine)
+        # else:
+        # criterion_1 = model.recon_loss(z, train_pos_edge_index)
 
+        criterion_1 = self.calculate_loss(z, model, train_pos_edge_index)
         if self.variational:
             criterion_1 = criterion_1 + (1 / data.num_nodes) * model.kl_loss()
 
-        if self.lid_aware:
-            emb = {}
-            encoded = model.encode(x, train_pos_edge_index).cpu().detach().numpy()
-            for i in range(data.num_nodes):
-                emb[i] = encoded[i, :]
-            tlid = EmbLIDMLEEstimatorTorch(self._g, emb, self.lid_k)
-            tlid.estimate_lids()
-            total_lid = tlid.get_total_lid()
-            criterion_2 = F.mse_loss(total_lid, torch.tensor(self.lid_k, dtype=torch.float))
-            loss = criterion_1 + criterion_2
-        else:
-            loss = criterion_1
+        # if self.lid_aware:
+        #     emb = {}
+        #     encoded = model.encode(x, train_pos_edge_index).cpu().detach().numpy()
+        #     for i in range(data.num_nodes):
+        #         emb[i] = encoded[i, :]
+        #     tlid = EmbLIDMLEEstimatorTorch(self._g, emb, self.lid_k)
+        #     tlid.estimate_lids()
+        #     total_lid = tlid.get_total_lid()
+        #     criterion_2 = F.mse_loss(total_lid, torch.tensor(self.lid_k, dtype=torch.float))
+        #     loss = criterion_1 + criterion_2
+        # else:
+        loss = criterion_1
         loss.backward()
         optimizer.step()
         return float(loss)
@@ -394,3 +402,133 @@ class GAEEmbedding(Embedding):
 
     def requires_labels(self):
         return False
+
+
+class GAEEmbedding(GAEEmbeddingBase):
+    def __init__(
+        self,
+        g,
+        d,
+        epochs=500,
+        variational=False,
+        linear=False,
+        deterministic=False,
+        lr=0.01,
+        layer_configuration=(8,),
+        act_fn="relu",
+    ):
+        super().__init__(g, d, epochs, deterministic, variational, linear, lr, layer_configuration, act_fn)
+
+    def calculate_loss(self, z, model, train_pos_edge_index, data, x):
+        return model.recon_loss(z, train_pos_edge_index)
+
+
+class GAEEmbeddingLIDAware(GAEEmbeddingBase):
+    def __init__(
+        self,
+        g,
+        d,
+        epochs=500,
+        variational=False,
+        linear=False,
+        deterministic=False,
+        lr=0.01,
+        layer_configuration=(8,),
+        act_fn="relu",
+        lid_k=20
+    ):
+        super().__init__(g, d, epochs, deterministic, variational, linear, lr, layer_configuration, act_fn)
+        self.lid_k = lid_k
+
+    def calculate_loss(self, z, model, train_pos_edge_index, data, x):
+        loss_1 = model.recon_loss(z, train_pos_edge_index)
+        emb = {}
+        encoded = model.encode(x, train_pos_edge_index).cpu().detach().numpy()
+        for i in range(data.num_nodes):
+            emb[i] = encoded[i, :]
+        tlid = EmbLIDMLEEstimatorTorch(self._g, emb, self.lid_k)
+        tlid.estimate_lids()
+        total_lid = tlid.get_total_lid()
+        loss_2 = F.mse_loss(total_lid, torch.tensor(self.lid_k, dtype=torch.float))
+        loss = loss_1 + loss_2
+        return loss
+
+
+class GAEEmbeddingHubAware(GAEEmbeddingBase):
+    def __init__(
+        self,
+        g,
+        d,
+        epochs=500,
+        variational=False,
+        linear=False,
+        deterministic=False,
+        lr=0.01,
+        layer_configuration=(8,),
+        act_fn="relu",
+        hub_fn='identity',
+        hub_combine='add'
+    ):
+        super().__init__(g, d, epochs, deterministic, variational, linear, lr, layer_configuration, act_fn)
+        hubness_vector = torch.Tensor(list(self._g.get_hubness().values())) + 1e-5
+        if hub_fn == 'identity':
+            pass
+        elif hub_fn == 'inverse':
+            hubness_vector = 1 / hubness_vector
+        elif hub_fn == 'log':
+            hubness_vector = torch.log(hubness_vector)
+        elif hub_fn == 'log_inverse':
+            hubness_vector = 1 / torch.log(hubness_vector)
+        else:
+            raise Exception('{} is not supported as a hub_fn parameter. Currently implemented options are '
+                            'identity, inverse, log, and log_inverse'.format(hub_fn))
+        hubness_vector = hubness_vector / hubness_vector.norm()
+        self.hubness_vector = hubness_vector.to(DEVICE)
+        self.hub_combine = hub_combine
+
+    def calculate_loss(self, z, model, train_pos_edge_index, data, x):
+        loss = model.recon_loss(
+            z,
+            train_pos_edge_index,
+            hub_vector=self.hubness_vector,
+            hub_aware=True,
+            combine_fn=self.hub_combine)
+        return loss
+
+
+class GAEEmbeddingNCLIDAware(GAEEmbeddingBase):
+    def __init__(
+        self,
+        g,
+        d,
+        epochs=500,
+        variational=False,
+        linear=False,
+        deterministic=False,
+        lr=0.01,
+        layer_configuration=(8,),
+        act_fn="relu",
+        nclid_combine='add',
+        alpha=1,
+        dataset_name=None
+    ):
+        super().__init__(g, d, epochs, deterministic, variational, linear, lr, layer_configuration, act_fn)
+        self.nclid_combine = nclid_combine
+        path = f'/home/stamenkovicd/nclids/{dataset_name}_nclids_tensor.pkl'
+        if os.path.exists(path):
+            with open(path, 'rb') as file:
+                nclids = pickle.load(file)
+                self.nclids = nclids.to(DEVICE)
+        else:
+            nclid = NCLIDEstimator(g, alpha=alpha)
+            nclid.estimate_lids()
+            self.nclids = torch.Tensor([nclid.get_lid(node[0]) for node in self._g.nodes()]).to(DEVICE)
+
+    def calculate_loss(self, z, model, train_pos_edge_index, data, x):
+        loss = model.recon_loss(
+            z,
+            train_pos_edge_index,
+            nclid_aware=True,
+            nclid_vector=self.nclids,
+            combine_fn=self.nclid_combine)
+        return loss
