@@ -1,5 +1,5 @@
 from common.dataset_pool import DatasetPool
-from embeddings.embedding_gae import GAEEmbedding
+from embeddings.embedding_gae import GAEEmbedding, GAEEmbeddingNCLIDAware
 from evaluation.lid_eval import EmbLIDMLEEstimatorTorch
 
 g = DatasetPool.load("karate_club_graph")
@@ -42,7 +42,7 @@ def test_gae_variational():
 
 
 def test_gae_normal_linear():
-    gae_embedding = GAEEmbedding(
+    gae_embedding = GAEEmbeddingNCLIDAware(
         g,
         d=25,
         epochs=1,
