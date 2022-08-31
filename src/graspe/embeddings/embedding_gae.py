@@ -41,35 +41,30 @@ class GAE(torch.nn.Module):
 
     def recon_loss(self, z, pos_edge_index, neg_edge_index=None,
                    hub_vector=None, hub_aware=False, nclid_vector=None,
-                   nclid_aware=False, combine_fn='add'):
+                   nclid_aware=False, badness_aware=False, badness_vector=None, combine_fn='add'):
+
+        reweight_vector = None
+        if hub_aware:
+            reweight_vector = hub_vector
+        elif nclid_aware:
+            reweight_vector = nclid_vector
+        elif badness_aware:
+            reweight_vector = badness_vector
 
         # Recon loss is comprised of positive loss and negative loss.
         # Positive loss
-        if hub_aware:  # Hub Aware block
-            hub_vector_pos = hub_vector[pos_edge_index]
+        if reweight_vector:  # Hub Aware block
+            reweight_vector = reweight_vector[pos_edge_index]
             if combine_fn == 'add':
-                hub_vector_pos = hub_vector_pos.sum(axis=0)
+                reweight_vector = reweight_vector.sum(axis=0)
             elif combine_fn == 'mult':
-                hub_vector_pos = hub_vector_pos[0] * hub_vector_pos[1]
+                reweight_vector = reweight_vector[0] * reweight_vector[1]
             else:
                 raise Exception('{} is not supported as a hub_combine parameter. Currently implemented options are '
                                 'add and mult'.format(combine_fn))
-            hub_vector_pos /= hub_vector_pos.norm()
+            reweight_vector /= reweight_vector.norm()
             pos_loss = -torch.log(self.decoder(z, pos_edge_index, sigmoid=True) + EPS)
-            pos_loss = torch.mul(pos_loss, hub_vector_pos).mean()
-
-        elif nclid_aware:  # NCLID Aware block
-            nclid_vector_pos = nclid_vector[pos_edge_index]
-            if combine_fn == 'add':
-                nclid_vector_pos = nclid_vector_pos.sum(axis=0)
-            elif combine_fn == 'mult':
-                nclid_vector_pos = nclid_vector_pos[0] * nclid_vector_pos[1]
-            else:
-                raise Exception('{} is not supported as a hub_combine parameter. Currently implemented options are '
-                                'add and mult'.format(combine_fn))
-            nclid_vector_pos /= nclid_vector_pos.norm()
-            pos_loss = -torch.log(self.decoder(z, pos_edge_index, sigmoid=True) + EPS).mean()
-            pos_loss = torch.mul(pos_loss, nclid_vector_pos).mean()
+            pos_loss = torch.mul(pos_loss, reweight_vector).mean()
         else:
             pos_loss = -torch.log(self.decoder(z, pos_edge_index, sigmoid=True) + EPS).mean()
 
@@ -79,30 +74,18 @@ class GAE(torch.nn.Module):
         pos_edge_index, _ = add_self_loops(pos_edge_index)
         if neg_edge_index is None:
             neg_edge_index = negative_sampling(pos_edge_index, z.size(0))
-        if hub_aware:  # Hub Aware block
-            hub_vector_neg = hub_vector[neg_edge_index]
+        if reweight_vector is not None:  # Hub Aware block
+            reweight_vector_neg = reweight_vector[neg_edge_index]
             if combine_fn == 'add':
-                hub_vector_neg = hub_vector_neg.sum(axis=0)
+                reweight_vector_neg = reweight_vector_neg.sum(axis=0)
             elif combine_fn == 'mult':
-                hub_vector_neg = hub_vector_neg[0] * hub_vector_neg[1]
+                reweight_vector_neg = reweight_vector_neg[0] * reweight_vector_neg[1]
             else:
                 raise Exception('{} is not supported as a hub_combine parameter. Currently implemented options are '
                                 'add and mult'.format(combine_fn))
-            hub_vector_neg /= hub_vector_neg.norm()
+            reweight_vector_neg /= reweight_vector_neg.norm()
             neg_loss = -torch.log(1 - self.decoder(z, neg_edge_index, sigmoid=True) + EPS)
-            neg_loss = torch.mul(neg_loss, hub_vector_neg).mean()
-        elif nclid_aware:  # NCLID Aware block
-            nclid_vector_neg = nclid_vector[neg_edge_index]
-            if combine_fn == 'add':
-                nclid_vector_neg = nclid_vector_neg.sum(axis=0)
-            elif combine_fn == 'mult':
-                nclid_vector_neg = nclid_vector_neg[0] * nclid_vector_neg[1]
-            else:
-                raise Exception('{} is not supported as a hub_combine parameter. Currently implemented options are '
-                                'add and mult'.format(combine_fn))
-            nclid_vector_neg /= nclid_vector_neg.norm()
-            neg_loss = -torch.log(1 - self.decoder(z, neg_edge_index, sigmoid=True) + EPS)
-            neg_loss = torch.mul(neg_loss, nclid_vector_neg).mean()
+            neg_loss = torch.mul(neg_loss, reweight_vector_neg).mean()
         else:
             neg_loss = -torch.log(1 - self.decoder(z, neg_edge_index, sigmoid=True) + EPS).mean()
 
@@ -362,15 +345,6 @@ class GAEEmbeddingBase(Embedding):
         loss = -1
         for epoch in range(1, self.epochs + 1):
             loss = self._train(model, optimizer, train_pos_edge_index, data, x)
-            # auc, ap = self._test(
-            #     data.test_pos_edge_index,
-            #     data.test_neg_edge_index,
-            #     model,
-            #     x,
-            #     train_pos_edge_index,
-            # )
-            # print("Epoch: {:03d}, AUC: {:.4f}, AP: {:.4f}".format(epoch, auc, ap))
-        # print("loss:", loss)
 
         with torch.no_grad():
             self._embedding = {}
@@ -472,6 +446,32 @@ class GAEEmbeddingHubAware(GAEEmbeddingBase):
             hub_aware=True,
             combine_fn=self.hub_combine)
         return loss
+
+
+class GAEEmbeddingBadAware(GAEEmbeddingBase):
+    def __init__(
+        self,
+        g,
+        d,
+        epochs=500,
+        variational=False,
+        linear=False,
+        deterministic=False,
+        lr=0.01,
+        layer_configuration=(8,),
+        act_fn="relu",
+        badness_alpha=1
+    ):
+        super().__init__(g, d, epochs, deterministic, variational, linear, lr, layer_configuration, act_fn)
+        badness_vector = (torch.Tensor(self._g.get_badness()) + 1) ** badness_alpha
+        badness_vector = badness_vector / badness_vector.norm()
+        self.badness_vector = badness_vector.to(DEVICE)
+
+    def compute_loss(self, logits, labels, train_nid):
+        loss = F.cross_entropy(logits[train_nid], labels[train_nid])
+        loss = torch.mul(loss, self.badness_vector[train_nid]).mean()
+        return loss
+
 
 
 class GAEEmbeddingNCLIDAware(GAEEmbeddingBase):
