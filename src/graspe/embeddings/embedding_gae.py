@@ -309,9 +309,9 @@ class GAEEmbeddingBase(Embedding):
 
         # TODO: this seems like extra work to me, since pytorch_geometric already has
         # TODO: datasets ready to use...
-        digraph = self._g.to_networkx()
+        digraph = self._g.to_dgl().to_networkx()
         print(type(digraph))
-        print(digraph.nodes)
+        print(digraph)
         data = tg.utils.from_networkx(digraph.nodes)
 
         out_channels = self._d
