@@ -1,7 +1,7 @@
 import sys
 import itertools
 import pickle
-import os
+import statistics
 import pandas as pd
 from collections import namedtuple
 from common.dataset_pool import DatasetPool
@@ -15,10 +15,10 @@ MODELS = [
     Model('GAE NCLID', GAEEmbeddingNCLIDAware)
 
 ]
-DATASETS = ['pubmed', 'citeseer', 'cora_ml', 'cora', 'dblp', 'karate_club_graph',
-            'amazon_electronics_computers', 'amazon_electronics_photo']
+
 FILE_PATH = '/home/stamenkovicd/gs_comparison/'
-Model = namedtuple('Model', ['name', 'algo'])
+DATASETS = ['pubmed', 'citeseer', 'cora_ml', 'cora', 'dblp', 'karate_club_graph']
+# DATASETS = ['amazon_electronics_computers', 'amazon_electronics_photo']
 
 
 def produce_configs():
@@ -39,9 +39,11 @@ if __name__ == '__main__':
 
     for dataset in DATASETS:
 
-        cols = ['dataset', 'algo', 'dim', 'layer_config', 'epochs', 'act_fn', 'lr', 'acc', 'prec', 'rec', 'f1']
+        cols = ['dataset', 'algo', 'dim', 'layer_config', 'epochs', 'act_fn', 'lr', 'map', 'recall', 'f1']
         final_res = pd.DataFrame(columns=cols)
         g = DatasetPool.load(dataset)
+        g_undirected = g.to_undirected()
+        g_undirected.remove_selfloop_edges()
 
         for model in MODELS:
             for config in configs:
@@ -64,11 +66,35 @@ if __name__ == '__main__':
                         act_fn=config[0],
                         dataset_name=dataset
                     )
-                acc, prec, rec, f1 = e.embed()
+                e.embed()
+                recg = e.reconstruct(g_undirected.edges_cnt())
+                avg_map, maps = g_undirected.map_value(recg)
+                avg_recall, recalls = g_undirected.recall(recg)
+                f1 = [
+                    (
+                        (2 * maps[node] * recalls[node]) / (maps[node] + recalls[node])
+                        if maps[node] + recalls[node] != 0
+                        else 0
+                    )
+                    for node in maps
+                ]
+                avg_f1 = statistics.mean(f1)
+
                 current_res = pd.DataFrame(
-                    [[dataset, model.name, config[4], config[3], config[2], config[0], config[1], acc, prec, rec, f1]],
+                    [[
+                        dataset,        # dataset
+                        model.name,     # algo
+                        config[4],      # dim
+                        config[3],      # layer_config
+                        config[2],      # epochs
+                        config[0],      # act_fn
+                        config[1],      # lr
+                        avg_map,        # map
+                        avg_recall,     # recall
+                        avg_f1          # f1
+                    ]],
                     columns=cols
                 )
                 final_res = pd.concat([final_res, current_res], axis=0)
-        with open('/home/stamenkovicd/gcn_tuning_res_{}.pkl'.format(dataset), 'wb') as f:
+        with open('/home/stamendu/gae_tuning_res/gae_tuning_res_{}.pkl'.format(dataset), 'wb') as f:
             pickle.dump(final_res, f)
