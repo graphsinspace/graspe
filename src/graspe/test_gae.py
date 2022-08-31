@@ -51,9 +51,6 @@ def test_gae_normal_linear():
         lr=0.01,
         layer_configuration=(8,),
         act_fn="relu",
-        hub_aware=True,
-        hub_fn='log_inverse',
-        hub_combine='mult'
     )
     gae_embedding.embed()
     assert gae_embedding._embedding is not None
