@@ -53,7 +53,7 @@ class GAE(torch.nn.Module):
 
         # Recon loss is comprised of positive loss and negative loss.
         # Positive loss
-        if reweight_vector:  # Hub Aware block
+        if reweight_vector is not None:  # Hub Aware block
             reweight_vector = reweight_vector[pos_edge_index]
             if combine_fn == 'add':
                 reweight_vector = reweight_vector.sum(axis=0)
