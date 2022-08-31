@@ -312,7 +312,7 @@ class GAEEmbeddingBase(Embedding):
         digraph = self._g.to_dgl().to_networkx()
         print(type(digraph))
         print(digraph)
-        data = tg.utils.from_networkx(digraph.nodes)
+        data = tg.utils.from_networkx(digraph)
 
         out_channels = self._d
         num_nodes = data.num_nodes
