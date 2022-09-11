@@ -17,7 +17,7 @@ MODELS = [
 ]
 
 FILE_PATH = '/home/stamenkovicd/gs_comparison/'
-DATASETS = ['pubmed', 'citeseer', 'cora_ml', 'cora', 'dblp', 'karate_club_graph']
+DATASETS = ['citeseer', 'cora_ml', 'cora', 'dblp', 'karate_club_graph']
 # DATASETS = ['amazon_electronics_computers', 'amazon_electronics_photo']
 
 
