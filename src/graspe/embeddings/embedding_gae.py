@@ -19,7 +19,8 @@ from torch_geometric.nn.inits import reset
 
 EPS = 1e-15
 MAX_LOGSTD = 10
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+#DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+DEVICE = 'cpu'
 
 
 class GAE(torch.nn.Module):
