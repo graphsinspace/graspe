@@ -63,8 +63,9 @@ class GAE(torch.nn.Module):
             else:
                 raise Exception('{} is not supported as a hub_combine parameter. Currently implemented options are '
                                 'add and mult'.format(combine_fn))
-            reweight_vector /= reweight_vector.norm().to(DEVICE)
-            pos_loss = -torch.log(self.decoder(z, pos_edge_index, sigmoid=True) + EPS)
+            reweight_vector /= reweight_vector.norm()
+            reweight_vector = reweight_vector.to(DEVICE)
+            pos_loss = -torch.log(self.decoder(z, pos_edge_index, sigmoid=True) + EPS).to(DEVICE)
             pos_loss = torch.mul(pos_loss, reweight_vector).mean()
         else:
             pos_loss = -torch.log(self.decoder(z, pos_edge_index, sigmoid=True) + EPS).mean()
